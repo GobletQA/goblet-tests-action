@@ -27,10 +27,12 @@ Result of the Goblet test execution. One of `pass` or `fail`
 
 
 ## Example usage
+
+```yaml
 uses: actions/goblet-tests-action@v1
 with:
   report: ${{ github.sha }}
   goblet-path: './goblet'
   pre-goblet: 'yarn install'
   post-goblet: 'cp curl -d ./goblet/reports/${{ github.sha }}.json https://my.custom.api/tests/reports/json'
-
+```
