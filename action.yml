@@ -1,0 +1,41 @@
+# action.yml
+name: 'Goblet Tests'
+description: 'Run Goblet tests in a github action'
+inputs:
+  goblet-token:
+    required: true
+    description: 'CI token from the goblet platform'
+  report-name:
+    required: false
+    default: '<timestamp>-goblet-report'
+    description: 'Name of the report file generated from the test results'
+  goblet-path:
+    required: false
+    default: 'goblet'
+    description: 'Relative path the goblet tests folder within the repo'
+  pre-goblet:
+    required: false
+    default: ''
+    description: 'Commands to run prior to running the Goblet tests'
+  post-goblet:
+    required: false
+    default: ''
+    description: 'Commands to run after the Goblet tests have finished executing'
+
+outputs:
+  result:
+    description: 'Result of the executed Goblet tests, one of pass or fail'
+  report-path:
+    description: 'Path to the generated test report from the executed tests'
+  artifacts-path:
+    description: 'Path to the generated artifacts from the executed tests'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.goblet-token }}
+    - ${{ inputs.report-name }}
+    - ${{ inputs.goblet-path }}
+    - ${ inputs.pre-goblet }
+    - ${ inputs.post-goblet }
