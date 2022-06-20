@@ -34,5 +34,5 @@ with:
   report: ${{ github.sha }}
   goblet-path: './goblet'
   pre-goblet: 'yarn install'
-  post-goblet: 'cp curl -d ./goblet/reports/${{ github.sha }}.json https://my.custom.api/tests/reports/json'
+  post-goblet: 'curl -d ./goblet/reports/${{ github.sha }}.json https://my.custom.api/tests/reports/json'
 ```
