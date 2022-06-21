@@ -1,0 +1,7 @@
+# Ignore everything:
+/*
+
+# Format the following:
+!/configs
+!/src
+
