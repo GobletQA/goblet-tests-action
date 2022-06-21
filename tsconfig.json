@@ -19,11 +19,8 @@
     "forceConsistentCasingInFileNames": true,
     "paths": {
       "@configs/*": ["./configs/*"],
-      "@constants/*": ["./src/constants/*"],
-      "@constants": ["./src/constants/index.ts"],
       "@goblet/*": ["./src/goblet/*"],
       "@goblet": ["./src/goblet/index.ts"],
-      "@services/*": ["./src/services/*"],
       "@utils/*": ["./src/utils/*"]
     }
   },

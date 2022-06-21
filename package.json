@@ -9,7 +9,7 @@
   },
   "engines": {
     "node": ">=16.15.0",
-    "yarn": ">=1.22.19"
+    "yarn": ">=1.22.x"
   },
   "homepage": "https://github.com/GobletQA/goblet-tests-action",
   "author": "Lance Tipton <lancetipton04@gmail.com>",
@@ -21,6 +21,7 @@
     "clean:full": "yarn clean && yarn clean:nm",
     "dvg": "yarn dev:validate:goblet",
     "dev:validate:goblet": "ts-node -r tsconfig-paths/register src/goblet/validateToken.ts",
+    "docker:build": "/bin/bash scripts/dockerBuild.sh $@",
     "format": "yarn format:pretty && yarn format:lint",
     "format:lint": "yarn lint .",
     "format:pretty": "yarn pretty .",
@@ -32,7 +33,7 @@
     "test:watchAll": "jest --watchAll --coverage --config ./configs/jest.config.js",
     "test:watch": "jest --watch --coverage --config ./configs/jest.config.js",
     "validate": "tsc --noEmit",
-    "validate:goblet": "node -r tsconfig-paths/register dist/goblet/validateToken.js"
+    "validate:goblet": "node -r tsconfig-paths/register /dist/src/goblet/validateToken.js"
   },
   "dependencies": {
     "@keg-hub/cli-utils": "0.6.1",

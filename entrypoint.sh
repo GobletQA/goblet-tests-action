@@ -2,6 +2,7 @@
 
 # Exit when any command fails
 set -e
+set -o pipefail
 
 export GOBLET_TOKEN=$1
 export GOBLET_REPORT_NAME=$2
