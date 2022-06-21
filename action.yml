@@ -24,11 +24,14 @@ inputs:
 
 outputs:
   result:
-    description: 'Result of the executed Goblet tests, one of pass or fail'
+    description: 'Result of the executed Goblet tests, one of `pass` or `fail`'
   report-path:
     description: 'Path to the generated test report from the executed tests'
   artifacts-path:
     description: 'Path to the generated artifacts from the executed tests'
+  error:
+    description: 'Error message output when the action fails for a reason other than test execution'
+
 
 runs:
   using: 'docker'
