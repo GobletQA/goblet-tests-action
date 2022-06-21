@@ -1,10 +1,13 @@
 #!/bin/bash
 
-GOBLET_TOKEN=$1
-GOBLET_REPORT_NAME=$2
-GOBLET_FOLDER_PATH=$3
-GOBLET_PRE_CMDS=$4
-GOBLET_POST_CMDS=$5
+# Exit when any command fails
+set -e
+
+export GOBLET_TOKEN=$1
+export GOBLET_REPORT_NAME=$2
+export GOBLET_FOLDER_PATH=$3
+export GOBLET_PRE_CMDS=$4
+export GOBLET_POST_CMDS=$5
 
 exit_error(){
   echo "::set-output name=error::'$1'"
@@ -17,7 +20,7 @@ exit_error(){
 # TODO: Call goblet API to validate goblet CI token
 [[ -z "$GOBLET_TOKEN" ]] && exit_error "Goblet Token is required."
 
-
+yarn validate:goblet
 
 # Step 1 - Run any pre-test commands
 # TODO: Allow for passing multiple pre-test commands

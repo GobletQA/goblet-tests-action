@@ -1,16 +1,18 @@
 # Goblet Tests Action
 This action executes Goblet tests for a repository within a Github action
 
-
 ## Inputs
 
-### `report`
-* Name of the report file generated from the test results
-* **default** - `<timestamp>-goblet-report` (value of <timestamp> is generated at runtime)
+### `goblet-token`
+* **required** CI token to access the goblet platform
 
 ### `goblet-path`
 * Relative path the goblet tests folder within the repo
 * **default** - `<repo-root-directory>/goblet` (value of <repo-root-directory> determined at runtime)
+
+### `report`
+* Name of the report file generated from the test results
+* **default** - `<timestamp>-goblet-report` (value of <timestamp> is generated at runtime)
 
 ### `pre-goblet`
 * List of bash commands to run prior to running the Goblet tests
@@ -23,16 +25,25 @@ This action executes Goblet tests for a repository within a Github action
 ## Outputs
 
 ### `result`
-Result of the Goblet test execution. One of `pass` or `fail`
+* Result of the Goblet test execution. One of `pass` or `fail`
 
+### `report-path`
+* Path to the generated test report from the executed tests
+
+### artifacts-path
+* Path to any generated artifacts from the executed tests
+
+### error
+* Error message output when the action fails for a reason other than test execution
 
 ## Example usage
 
 ```yaml
 uses: actions/goblet-tests-action@v1
 with:
-  report: ${{ github.sha }}
+  goblet-token: {{ secrets.GOBLET_TOKEN }}
   goblet-path: './goblet'
+  report: ${{ github.sha }}
   pre-goblet: 'yarn install'
   post-goblet: 'curl -d ./goblet/reports/${{ github.sha }}.json https://my.custom.api/tests/reports/json'
 ```

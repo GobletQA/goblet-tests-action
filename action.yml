@@ -5,14 +5,14 @@ inputs:
   goblet-token:
     required: true
     description: 'CI token from the goblet platform'
-  report-name:
-    required: false
-    default: '<timestamp>-goblet-report'
-    description: 'Name of the report file generated from the test results'
   goblet-path:
     required: false
     default: 'goblet'
     description: 'Relative path the goblet tests folder within the repo'
+  report-name:
+    required: false
+    default: '<timestamp>-goblet-report'
+    description: 'Name of the report file generated from the test results'
   pre-goblet:
     required: false
     default: ''
