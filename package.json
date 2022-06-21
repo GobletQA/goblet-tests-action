@@ -24,7 +24,7 @@
     "format:pretty": "yarn pretty .",
     "lint": "eslint --color --cache --fix --quiet --ignore-path .eslintignore --config ./configs/eslintrc.config.js",
     "pretty": "prettier --ignore-path .prettierignore --config ./configs/prettier.config.js -w",
-    "test": "jest --colors --config ./configs/jest.config.js --maxWorkers=2",
+    "test": "jest --colors --config ./configs/jest.config.js --maxWorkers=2 --passWithNoTests",
     "test:ci": "jest --colors --coverage --config ./configs/jest.config.js",
     "test:watchAll": "jest --watchAll --coverage --config ./configs/jest.config.js",
     "test:watch": "jest --watch --coverage --config ./configs/jest.config.js",
