@@ -1,9 +1,17 @@
 {
   "name": "goblet-tests-action",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "Execute goblet tests in a Github action",
   "main": "index.js",
-  "repository": "https://github.com/GobletQA/goblet-tests-action.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GobletQA/goblet-tests-action.git"
+  },
+  "engines": {
+    "node": ">=16.15.0",
+    "yarn": ">=1.22.19"
+  },
+  "homepage": "https://github.com/GobletQA/goblet-tests-action",
   "author": "Lance Tipton <lancetipton04@gmail.com>",
   "license": "MIT",
   "scripts": {
