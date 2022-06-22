@@ -45,7 +45,7 @@ const resolveGitUser = () => {
     GIT_ALT_REPO,
     GIT_ALT_USER,
     GITHUB_REPOSITORY_OWNER,
-    GIT_ALT_EMAIL = `goblet-test-action@noreply.github.action`,
+    GIT_ALT_EMAIL = `goblet-action@users.noreply.github.com`,
   } = process.env
 
   const user = envExists(`GIT_ALT_USER`)

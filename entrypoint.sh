@@ -12,6 +12,24 @@ exitError(){
   exit 1
 }
 
+# TODO: investigate this to properly set the git user creds 
+updateGitCreds(){
+  GIT_GLOBAL=${GIT_GLOBAL:-false}
+  _GIT_GLOBAL_OPTION=''
+  if [ "$GIT_GLOBAL" ] ; then
+    _GIT_GLOBAL_OPTION='--global'
+  fi
+
+  GIT_ALT_EMAIL="${GIT_ALT_EMAIL:-'github-action@users.noreply.github.com'}"
+  GIT_ALT_USER="${GIT_ALT_USER:-'GitHub Action'}"
+  GIT_ALT_USER=${GIT_ALT_USER:-${GITHUB_ACTOR}}
+
+  git config $_GIT_GLOBAL_OPTION user.email "${GIT_ALT_EMAIL}"
+  git config $_GIT_GLOBAL_OPTION user.name "${GIT_ALT_USER}"
+  git config $_GIT_GLOBAL_OPTION user.password ${GOBLET_GIT_TOKEN}
+  echo "GIT_USER=${GIT_ALT_USER}:${GOBLET_GIT_TOKEN}" >> $GITHUB_ENV
+}
+
 # ---- Step 0 - Set ENVs from inputs if they don't already exist
 # Goblet Action specific ENVs
 [ -z "$GIT_TOKEN" ] && export GIT_TOKEN="${1:-$GIT_TOKEN}"
