@@ -30,10 +30,10 @@ This action executes Goblet tests for a repository within a Github action
 ### `report-path`
 * Path to the generated test report from the executed tests
 
-### artifacts-path
+### `artifacts-path`
 * Path to any generated artifacts from the executed tests
 
-### error
+### `error`
 * Error message output when the action fails for a reason other than test execution
 
 ## Example usage

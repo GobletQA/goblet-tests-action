@@ -1,5 +1,3 @@
-
-
 /** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */
 module.exports = {
   rootDir: require('path').join(__dirname, '../'),
