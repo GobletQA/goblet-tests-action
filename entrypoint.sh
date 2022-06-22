@@ -4,11 +4,11 @@
 set -e
 set -o pipefail
 
-export GOBLET_TOKEN=$1
-export GOBLET_REPORT_NAME=$2
-export GOBLET_FOLDER_PATH=$3
-export GOBLET_PRE_CMDS=$4
-export GOBLET_POST_CMDS=$5
+export GOBLET_TOKEN="${1:-$GOBLET_TOKEN}"
+export GOBLET_REPORT_NAME="${2:-$GOBLET_REPORT_NAME}"
+export GOBLET_FOLDER_PATH="${3:-$GOBLET_FOLDER_PATH}"
+export GOBLET_PRE_CMDS="${4:-$GOBLET_PRE_CMDS}"
+export GOBLET_POST_CMDS="${5:-$GOBLET_POST_CMDS}"
 
 exit_error(){
   echo "::set-output name=error::'$1'"
@@ -16,11 +16,11 @@ exit_error(){
   exit 1
 }
 
-
 # Step 0 - Validate the goblet CI token
 # TODO: Call goblet API to validate goblet CI token
 [[ -z "$GOBLET_TOKEN" ]] && exit_error "Goblet Token is required."
 
+cd /goblet-action
 yarn validate:goblet
 
 # Step 1 - Run any pre-test commands
@@ -30,6 +30,7 @@ yarn validate:goblet
 # Check to ensure goblet folder can be found
 [[ ! -d "$GOBLET_FOLDER_PATH" ]] && exit_error "Goblet folder path does not exist."
 
+GITHUB_WORKSPACE
 
 # Step 3 - Execute the tests in the found test folder
 # TODO: Run test command for the found tests ( i.e. yarn goblet ...args )
@@ -43,4 +44,4 @@ yarn validate:goblet
   # echo "::set-output name=report-path::$GOBLET_TESTS_REPORT_PATH"
   # echo "::set-output name=artifacts-path::$GOBLET_TESTS_ARTIFACTS_PATH"
 
-
+exec "$@"
