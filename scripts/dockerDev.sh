@@ -5,17 +5,18 @@ IMAGE_NAME=$npm_package_name
 IMAGE_VERSION=$npm_package_version
 IMAGE_FULL=ghcr.io/gobletqa/$IMAGE_NAME:$IMAGE_VERSION
 
-# ENV set by github
-# GITHUB_WORKSPACE => /home/runner/work/my-repo-name/my-repo-name
-# /keg/repos/ci/current
-
 docker run --rm -it \
+  -e LOCAL_DEV=1 \
   -e GOBLET_TOKEN=123456 \
   -e GOBLET_FOLDER_PATH=herkin \
-  -e GIT_TOKEN=$(keg key print)
-  -e GITHUB_WORKSPACE=/home/runner/work/test-repo/test-repo \
-  -e GITHUB_REPOSITORY=goblet/repo
+  -e GIT_TOKEN=$(keg key print) \
+  -e GITHUB_WORKSPACE=/home/runner/work/goblet/repo \
+  -e GITHUB_REPOSITORY=goblet/repo \
+  -e HERKIN_MOUNT_ROOT=/keg/repos \
+  -e HERKIN_GIT_TOKEN=$(keg key print) \
+  -e GOBLET_GIT_TOKEN=$(keg key print) \
   -v $(pwd):/goblet-action \
-  -v $(keg sgt path):/home/runner/work/test-repo/test-repo \
+  -v $(keg herkin path):/keg/tap \
+  -v $(keg sgt path):/home/runner/work/goblet/repo \
   --entrypoint /bin/bash \
   ghcr.io/gobletqa/$IMAGE_NAME:$IMAGE_VERSION \

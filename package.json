@@ -20,7 +20,8 @@
     "clean:nm": "rm -rf node_modules",
     "clean:full": "yarn clean && yarn clean:nm",
     "dvg": "yarn dev:validate:goblet",
-    "dev:validate:goblet": "ts-node -r tsconfig-paths/register src/goblet/validateToken.ts",
+    "dev:goblet:validate": "ts-node -r tsconfig-paths/register src/goblet/validateToken.ts",
+    "dev:goblet:repo": "ts-node -r tsconfig-paths/register src/git/getRepoDir.ts",
     "docker:build": "/bin/bash scripts/dockerBuild.sh $@",
     "docker:dev": "/bin/bash scripts/dockerDev.sh $@",
     "docker:run": "/bin/bash scripts/dockerRun.sh $@",
@@ -35,7 +36,8 @@
     "test:watchAll": "jest --watchAll --coverage --config configs/jest.config.js",
     "test:watch": "jest --watch --coverage --config configs/jest.config.js",
     "validate": "tsc --noEmit",
-    "validate:goblet": "node -r tsconfig-paths/register src/goblet/validateToken.js"
+    "goblet:validate": "node -r tsconfig-paths/register src/goblet/validateToken.js",
+    "goblet:repo": "node -r tsconfig-paths/register src/git/getRepoDir.js"
   },
   "dependencies": {
     "@keg-hub/cli-utils": "0.6.1",

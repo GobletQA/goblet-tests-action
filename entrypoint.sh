@@ -13,22 +13,30 @@ exitError(){
 }
 
 # TODO: investigate this to properly set the git user creds 
-updateGitCreds(){
-  GIT_GLOBAL=${GIT_GLOBAL:-false}
-  _GIT_GLOBAL_OPTION=''
-  if [ "$GIT_GLOBAL" ] ; then
-    _GIT_GLOBAL_OPTION='--global'
+# updateGitCreds(){
+#   GIT_GLOBAL=${GIT_GLOBAL:-false}
+#   _GIT_GLOBAL_OPTION=''
+#   [ "$GIT_GLOBAL" ] && _GIT_GLOBAL_OPTION='--global'
+
+#   GIT_ALT_EMAIL="${GIT_ALT_EMAIL:-'github-action@users.noreply.github.com'}"
+#   GIT_ALT_USER="${GIT_ALT_USER:-'GitHub Action'}"
+#   GIT_ALT_USER=${GIT_ALT_USER:-${GITHUB_ACTOR}}
+
+#   git config $_GIT_GLOBAL_OPTION user.email "${GIT_ALT_EMAIL}"
+#   git config $_GIT_GLOBAL_OPTION user.name "${GIT_ALT_USER}"
+#   git config $_GIT_GLOBAL_OPTION user.password ${GOBLET_GIT_TOKEN}
+#   echo "GIT_USER=${GIT_ALT_USER}:${GOBLET_GIT_TOKEN}" >> $GITHUB_ENV
+# }
+
+# Runs a yarn command with a prefix when LOCAL_DEV exists
+runYarn(){
+  if [ "$LOCAL_DEV" ]; then
+    yarn dev:$1
+  else
+    yarn $1
   fi
-
-  GIT_ALT_EMAIL="${GIT_ALT_EMAIL:-'github-action@users.noreply.github.com'}"
-  GIT_ALT_USER="${GIT_ALT_USER:-'GitHub Action'}"
-  GIT_ALT_USER=${GIT_ALT_USER:-${GITHUB_ACTOR}}
-
-  git config $_GIT_GLOBAL_OPTION user.email "${GIT_ALT_EMAIL}"
-  git config $_GIT_GLOBAL_OPTION user.name "${GIT_ALT_USER}"
-  git config $_GIT_GLOBAL_OPTION user.password ${GOBLET_GIT_TOKEN}
-  echo "GIT_USER=${GIT_ALT_USER}:${GOBLET_GIT_TOKEN}" >> $GITHUB_ENV
 }
+
 
 # ---- Step 0 - Set ENVs from inputs if they don't already exist
 # Goblet Action specific ENVs
@@ -61,14 +69,15 @@ updateGitCreds(){
 # TODO: Call goblet API to validate goblet CI token
 [ -z "$GOBLET_TOKEN" ] && exitError "Goblet Token is required."
 cd /goblet-action
-yarn validate:goblet
+# runYarn "goblet:validate"
 
 
 # ---- Step 2 - Synmlink the workspace folder to the repos folder
 cd /goblet-action
+runYarn "goblet:repo"
 
-[ ! -d "$GITHUB_WORKSPACE" ] && exitError "The 'GITHUB_WORKSPACE' ENV is not a valid folder path"
-ln -s $GITHUB_WORKSPACE $HERKIN_MOUNT_ROOT/$GITHUB_REPOSITORY
+# [ ! -d "$GITHUB_WORKSPACE" ] && exitError "The 'GITHUB_WORKSPACE' ENV is not a valid folder path"
+# ln -s $GITHUB_WORKSPACE $HERKIN_MOUNT_ROOT/$GITHUB_REPOSITORY
 
 # Step 2 - Run any pre-test commands
 # TODO: Allow for passing multiple pre-test commands
@@ -94,4 +103,4 @@ ln -s $GITHUB_WORKSPACE $HERKIN_MOUNT_ROOT/$GITHUB_REPOSITORY
   # echo "::set-output name=report-path::$GOBLET_TESTS_REPORT_PATH"
   # echo "::set-output name=artifacts-path::$GOBLET_TESTS_ARTIFACTS_PATH"
 
-exec "$@"
+# exec "$@"

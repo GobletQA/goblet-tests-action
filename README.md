@@ -22,6 +22,23 @@ This action executes Goblet tests for a repository within a Github action
 * List of bash commands to run after the Goblet tests have finished executing
 * Allows for handling reports or artifacts generated from tests execution
 
+### `alt-repo`
+* Alternative github repository that contains the tests to be run.
+
+### `alt-branch`
+* Name of the branch to use for the alt repository.
+
+### `alt-user`
+* Github user name or organization with write access to the alt repository.
+
+### `alt-email`
+* Email of user with write access to the alt repository.
+
+### `alt-token`
+* Github Token with write access to the alt repository.
+
+
+
 ## Outputs
 
 ### `result`
