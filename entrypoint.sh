@@ -13,22 +13,6 @@ exitError(){
   exit 1
 }
 
-# TODO: investigate this to properly set the git user creds 
-# updateGitCreds(){
-#   GIT_GLOBAL=${GIT_GLOBAL:-false}
-#   _GIT_GLOBAL_OPTION=''
-#   [ "$GIT_GLOBAL" ] && _GIT_GLOBAL_OPTION='--global'
-
-#   GIT_ALT_EMAIL="${GIT_ALT_EMAIL:-'github-action@users.noreply.github.com'}"
-#   GIT_ALT_USER="${GIT_ALT_USER:-'GitHub Action'}"
-#   GIT_ALT_USER=${GIT_ALT_USER:-${GITHUB_ACTOR}}
-
-#   git config $_GIT_GLOBAL_OPTION user.email "${GIT_ALT_EMAIL}"
-#   git config $_GIT_GLOBAL_OPTION user.name "${GIT_ALT_USER}"
-#   git config $_GIT_GLOBAL_OPTION user.password ${GOBLET_GIT_TOKEN}
-#   echo "GIT_USER=${GIT_ALT_USER}:${GOBLET_GIT_TOKEN}" >> $GITHUB_ENV
-# }
-
 # Runs a yarn command with a prefix when LOCAL_DEV exists
 runYarn(){
   if [ "$LOCAL_DEV" ]; then
@@ -90,7 +74,7 @@ if [ "$LOCAL_DEV" ]; then
 else
   export GOBLET_CONFIG_BASE=$(node -r tsconfig-paths/register dist/src/goblet/cache.js paths.mountTo)
 fi
-echo "[Goblet Action] Repo mount is $GOBLET_CONFIG_BASE"
+echo "[Goblet] Repo mount is $GOBLET_CONFIG_BASE"
 
 # Step 3 - Run any pre-test commands
 # TODO: Allow for passing multiple pre-test commands
