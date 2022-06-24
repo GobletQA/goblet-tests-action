@@ -4,6 +4,7 @@
 set -e
 set -o pipefail
 
+export GOBLET_RUN_FROM_CI=1
 MOUNT_WORK_DIR=$(pwd)
 
 exitError(){
@@ -31,12 +32,14 @@ exitError(){
 # Runs a yarn command with a prefix when LOCAL_DEV exists
 runYarn(){
   if [ "$LOCAL_DEV" ]; then
-    yarn dev:$1
+    yarn dev:$1 $2
   else
-    yarn $1
+    yarn $1 $2
   fi
 }
 
+# This should already exist in the image but it seems the publish image it not up to date
+[ ! -d "$HOME/.node_modules" ] && ln -s /keg/tap/node_modules $HOME/.node_modules
 
 # ---- Step 0 - Set ENVs from inputs if they don't already exist
 # Goblet Action specific ENVs
@@ -59,6 +62,10 @@ runYarn(){
 [ -z "$HERKIN_APP_URL" ] && export HERKIN_APP_URL="$APP_URL"
 [ -z "$HERKIN_MOUNT_ROOT" ] && export HERKIN_MOUNT_ROOT=/keg/repos
 [ -z "$HERKIN_GIT_TOKEN" ] && export HERKIN_GIT_TOKEN=$GOBLET_GIT_TOKEN
+[ -z "$DOC_APP_PATH" ] && export DOC_APP_PATH=/keg/tap
+
+# Goblet test run specific ENVs - customizable
+export HERKIN_HEADLESS=1
 
 # Github Action defined envs
 [ -z "$GITHUB_REPOSITORY" ] && export GITHUB_REPOSITORY=goblet/repo
@@ -73,26 +80,25 @@ cd /goblet-action
 
 
 # ---- Step 2 - Synmlink the workspace folder to the repos folder
+# TODO: this is temp, remember to remove this
+rm -rf /keg/repos/*
+
 cd /goblet-action
 runYarn "goblet:repo"
+if [ "$LOCAL_DEV" ]; then
+  export GOBLET_CONFIG_BASE=$(ts-node -r tsconfig-paths/register src/goblet/cache.ts paths.mountTo)
+else
+  export GOBLET_CONFIG_BASE=$(node -r tsconfig-paths/register dist/src/goblet/cache.js paths.mountTo)
+fi
+echo "[Goblet Action] Repo mount is $GOBLET_CONFIG_BASE"
 
-# [ ! -d "$GITHUB_WORKSPACE" ] && exitError "The 'GITHUB_WORKSPACE' ENV is not a valid folder path"
-# ln -s $GITHUB_WORKSPACE $HERKIN_MOUNT_ROOT/$GITHUB_REPOSITORY
-
-# Step 2 - Run any pre-test commands
+# Step 3 - Run any pre-test commands
 # TODO: Allow for passing multiple pre-test commands
 
+# Step 4 - Run the tests
+cd /keg/tap
+yarn task bdd run --base $GOBLET_CONFIG_BASE
 
-# Step 3 - Ensure the test folder can be found
-# Check to ensure goblet folder can be found
-# [[ ! -d "$GOBLET_REPO_PATH" ]] && exitError "Goblet folder path does not exist."
-
-
-# ENV set by github
-# GITHUB_WORKSPACE => /home/runner/work/my-repo-name/my-repo-name
-
-# Step 4 - Execute the tests in the found test folder
-# TODO: Run test command for the found tests ( i.e. yarn goblet ...args )
 
 # Step 5 - Run any post-test commands
 # TODO: Allow for passing multiple post-test commands

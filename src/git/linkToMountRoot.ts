@@ -21,17 +21,21 @@ export const linkToMountRoot = async (repoLoc: string) => {
 
   ensureDirExists(path.dirname(mountTo))
 
-  const { error: lnErr, exitCode } = await runCmd(`ln`, [`-s`, repoLoc, mountTo], {
+  const { error: lnErr, exitCode } = await runCmd(`cp`, [`-R`, repoLoc, mountTo], {
     exec: true,
   })
-  exitCode && error.throwError(`[Goblet Error] Could not mount repo.\n${lnErr}`)
 
+  // TODO: investigate - Jest follows the sym-link and uses the real path, not the sym-link path :(
+  // const { error: lnErr, exitCode } = await runCmd(`ln`, [ `-F`, repoLoc, mountTo], {
+  //   exec: true,
+  // })
+  exitCode && error.throwError(`[Goblet Error] Could not mount repo.\n${lnErr}`)
   ;(await fileSys.pathExists(mountTo))
     ? Logger.success(`[Goblet] Successfully mounted repo`)
     : error.throwError(`[Goblet Error] Could not mount repo: ${mountTo}`)
 
   Logger.log(`[Goblet] Saving mount location...`)
 
-  await upsertCache(`paths`, mountTo)
+  await upsertCache(`paths`, { repoLoc, mountTo })
   Logger.success(`[Goblet] Successfully saved repo mount location`)
 }
