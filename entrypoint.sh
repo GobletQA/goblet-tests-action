@@ -116,9 +116,11 @@ runTests(){
 # ---- Step 5 - Run any post-test commands
 runPostTests(){
   # Step 3 - Run any pre-test commands
-  [ -z "$GOBLET_POST_CMDS" ] return
+  if [ -z "$GOBLET_POST_CMDS" ]; then
+    return
+  fi
+
   logMsg "TODO - Execute post test actions"
-  
 }
 
 
