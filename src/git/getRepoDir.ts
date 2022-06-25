@@ -8,7 +8,7 @@ export const getRepoDir = async () => {
     ? await cloneAltRepo()
     : await upsertCache(`paths`, { repoLoc: config.paths.workspace })
 
-  Logger.log(`[Logger - Goblet] Updated cache location ${config.paths.cache}`)
+  Logger.log(`[Goblet] Updated cache location ${config.paths.cache}`)
 }
 
 require.main === module && getRepoDir()
