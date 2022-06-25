@@ -1,7 +1,11 @@
-import { envExists } from './envs'
+import path from 'path'
+import { envExists, ensureEnv } from './envs'
 
 export const altRepo = envExists(`GIT_ALT_REPO`)
-export const altCloneLoc = `/goblet-action/alt-clone/repo`
+export const altCloneLoc = path.join(
+  ensureEnv(`GOBLET_MOUNT_ROOT`, `/home/runner/work`),
+  `goblet/alt-repo`
+)
 
 export const resolveGitRepo = () => {
   const {

@@ -1,7 +1,7 @@
 import { git } from './git'
 import { setGitUser } from './setGitUser'
+import { upsertCache } from '../goblet/cache'
 import { config } from '@configs/action.config'
-import { linkToMountRoot } from './linkToMountRoot'
 
 /**
  * Uses git to clone the alt repo then switches to the
@@ -17,5 +17,5 @@ export const cloneAltRepo = async () => {
 
   repo.branch && (await git([`checkout`, repo.branch], { cwd: config.paths.altCloneLoc }))
 
-  return await linkToMountRoot(config.paths.altCloneLoc)
+  await upsertCache(`paths`, { repoLoc: config.paths.altCloneLoc })
 }

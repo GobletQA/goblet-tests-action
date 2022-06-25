@@ -1,4 +1,5 @@
 #!/bin/bash
+# /goblet-action/entrypoint.sh
 
 # Exit when any command fails
 set -e
@@ -22,13 +23,13 @@ runYarn(){
   fi
 }
 
-# This should already exist in the image but it seems the publish image it not up to date
-[ ! -d "$HOME/.node_modules" ] && ln -s /keg/tap/node_modules $HOME/.node_modules
-
 # ---- Step 0 - Set ENVs from inputs if they don't already exist
 # Goblet Action specific ENVs
 [ -z "$GIT_TOKEN" ] && export GIT_TOKEN="${1:-$GIT_TOKEN}"
+
 [ -z "$GOBLET_TOKEN" ] && export GOBLET_TOKEN="${2:-$GOBLET_TOKEN}"
+[ -z "$GOBLET_TOKEN" ] && exitError "Goblet Token is required."
+
 [ -z "$GOBLET_REPORT_NAME" ] && export GOBLET_REPORT_NAME="${3:-$GOBLET_REPORT_NAME}"
 [ -z "$GOBLET_PRE_CMDS" ] && export GOBLET_PRE_CMDS="${4:-$GOBLET_PRE_CMDS}"
 [ -z "$GOBLET_POST_CMDS" ] && export GOBLET_POST_CMDS="${5:-$GOBLET_POST_CMDS}"
@@ -41,48 +42,45 @@ runYarn(){
 [ -z "$GIT_ALT_TOKEN" ] && export GIT_ALT_TOKEN="${10:-$GIT_ALT_TOKEN}"
 
 # Goblet App specific ENVs
+[ -z "$NODE_ENV" ] && export NODE_ENV=test
+[ -z "$DOC_APP_PATH" ] && export DOC_APP_PATH=/home/runner/tap
+[ -z "$GOBLET_APP_URL" ] && export GOBLET_APP_URL="$APP_URL"
+[ -z "$GOBLET_MOUNT_ROOT" ] && export GOBLET_MOUNT_ROOT=/home/runner/work
 [ -z "$GOBLET_GIT_TOKEN" ] && export GOBLET_GIT_TOKEN="${GIT_ALT_TOKEN:-$GIT_TOKEN}"
-[ -z "$NODE_ENV" ] && NODE_ENV=test
-[ -z "$HERKIN_APP_URL" ] && export HERKIN_APP_URL="$APP_URL"
-[ -z "$HERKIN_MOUNT_ROOT" ] && export HERKIN_MOUNT_ROOT=/keg/repos
-[ -z "$HERKIN_GIT_TOKEN" ] && export HERKIN_GIT_TOKEN=$GOBLET_GIT_TOKEN
-[ -z "$DOC_APP_PATH" ] && export DOC_APP_PATH=/keg/tap
 
-# Goblet test run specific ENVs - customizable
-export HERKIN_HEADLESS=1
-
-# Github Action defined envs
-[ -z "$GITHUB_REPOSITORY" ] && export GITHUB_REPOSITORY=goblet/repo
-# [ -z "$GITHUB_ACTION_REPOSITORY" ] && export GITHUB_ACTION_REPOSITORY=/action/repo
-
+[ -z "$GOBLET_HEADLESS" ] && export GOBLET_HEADLESS=true
+unset $GOBLET_DEV_TOOLS
 
 # ---- Step 1 - Validate the goblet CI token
-# TODO: Call goblet API to validate goblet CI token
-[ -z "$GOBLET_TOKEN" ] && exitError "Goblet Token is required."
-cd /goblet-action
+# cd /goblet-action
 # runYarn "goblet:validate"
 
 
 # ---- Step 2 - Synmlink the workspace folder to the repos folder
 # TODO: this is temp, remember to remove this
-rm -rf /keg/repos/*
 
-cd /goblet-action
-runYarn "goblet:repo"
-if [ "$LOCAL_DEV" ]; then
-  export GOBLET_CONFIG_BASE=$(ts-node -r tsconfig-paths/register src/goblet/cache.ts paths.mountTo)
-else
-  export GOBLET_CONFIG_BASE=$(node -r tsconfig-paths/register dist/src/goblet/cache.js paths.mountTo)
-fi
-echo "[Goblet] Repo mount is $GOBLET_CONFIG_BASE"
+# cd /goblet-action
+# runYarn "goblet:repo"
+# if [ "$LOCAL_DEV" ]; then
+#   export GOBLET_CONFIG_BASE=$(ts-node -r tsconfig-paths/register src/goblet/cache.ts paths.repoLoc)
+# else
+#   export GOBLET_CONFIG_BASE=$(node -r tsconfig-paths/register dist/src/goblet/cache.js paths.repoLoc)
+# fi
+# echo "[Goblet] Repo mount is $GOBLET_CONFIG_BASE"
 
 # Step 3 - Run any pre-test commands
 # TODO: Allow for passing multiple pre-test commands
 
 # Step 4 - Run the tests
-cd /keg/tap
-yarn task bdd run --base $GOBLET_CONFIG_BASE
-
+# Goblet test run specific ENVs - customizable
+# Switch to the goblet dir and run the bdd test task
+cd /home/runner/tap
+# yarn task bdd run base=$GOBLET_CONFIG_BASE
+# TODO: run this test => strat-collab-close.feature in the browser
+# Figure out why it's failing, could be related to how the node_modules are being loaded
+# It can't seem to find the core-js modules from goblet
+yarn task bdd run --context strat-collab-close.feature --base /home/runner/work/goblet/repo --env $NODE_ENV
+# yarn task bdd run --base /home/runner/work/goblet/repo --env $NODE_ENV
 
 # Step 5 - Run any post-test commands
 # TODO: Allow for passing multiple post-test commands

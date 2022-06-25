@@ -19,6 +19,6 @@ export const config = {
     altCloneParentDir: ensureDirExists(path.dirname(altCloneLoc)),
     cache: resolveCacheLoc(),
     workspace: ensureEnv(`GITHUB_WORKSPACE`),
-    mountRoot: ensureDirExists(ensureEnv(`HERKIN_MOUNT_ROOT`)),
+    mountRoot: ensureDirExists(ensureEnv(`GOBLET_MOUNT_ROOT`)),
   },
 }
