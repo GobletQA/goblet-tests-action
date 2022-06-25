@@ -3,7 +3,7 @@ import { envExists, ensureEnv } from './envs'
 
 export const altRepo = envExists(`GIT_ALT_REPO`)
 export const altCloneLoc = path.join(
-  ensureEnv(`GOBLET_MOUNT_ROOT`, `/home/runner/work`),
+  ensureEnv(`GOBLET_MOUNT_ROOT`, `/keg/repos`),
   `goblet/alt-repo`
 )
 

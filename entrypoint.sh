@@ -104,7 +104,11 @@ runTests(){
   # yarn task bdd run base=/home/runner/work/goblet/repo context=/home/runner/work/goblet/repo/herkin/bdd/features/strat-props-close-modal.feature slowMo=100
   # node ./tasks/runTask.js bdd run context=/home/runner/work/goblet/repo/herkin/bdd/features/strat-props-close-modal.feature base=/home/runner/work/goblet/repo slowMo=100 env=$NODE_ENV
   
-  node ./tasks/runTask.js bdd run context=herkin/bdd/features/strat-props-close-modal.feature base=/keg/repos/goblet/repo slowMo=100 env=$NODE_ENV
+  yarn task bdd run \
+    slowMo=100 \
+    env=$NODE_ENV \
+    base=/keg/repos/goblet/repo \
+    context=herkin/bdd/features/strat-props-close-modal.feature
 
 }
 
