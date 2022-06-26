@@ -10,6 +10,10 @@ This action executes Goblet tests for a repository within a Github action
 * Relative path the goblet tests folder within the repo
 * **default** - `<repo-root-directory>/goblet` (value of <repo-root-directory> determined at runtime)
 
+### `goblet-test-path:`
+* Path to the tests to run
+* **default** - Runs all tests if not defined
+
 ### `report`
 * Name of the report file generated from the test results
 * **default** - `<timestamp>-goblet-report` (value of <timestamp> is generated at runtime)

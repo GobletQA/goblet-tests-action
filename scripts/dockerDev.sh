@@ -31,11 +31,6 @@ docker run --rm -it \
   -e GITHUB_WORKFLOW=goblet-action-workflow \
   -e GITHUB_REF=refs/heads/run-goblet-action \
   -e GITHUB_WORKSPACE=$REPO_WORK_DIR \
-  -p 5005:5005 \
-  -p 5006:5006 \
-  -p 19006:19006 \
-  -p 26369:26369 \
-  -p 26370:26370 \
   --name goblet-action \
   --entrypoint /bin/bash \
   --workdir $REPO_WORK_DIR \
@@ -43,3 +38,9 @@ docker run --rm -it \
   -v $(keg herkin path):/home/runner/tap \
   -v $(keg sgt path):/home/runner/work/$TEST_REPO_NAME \
   ghcr.io/gobletqa/$IMAGE_NAME:$IMAGE_VERSION
+
+  # -p 5005:5005 \
+  # -p 5006:5006 \
+  # -p 19006:19006 \
+  # -p 26369:26369 \
+  # -p 26370:26370 \

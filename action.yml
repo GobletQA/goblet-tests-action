@@ -8,6 +8,9 @@ inputs:
   goblet-token:
     required: true
     description: 'CI token from the goblet platform'
+  goblet-test-path:
+    required: false
+    description: 'Path or name to the tests to run. Runs all tests if not defined'
   report-name:
     required: false
     default: '<timestamp>-goblet-report'
@@ -52,6 +55,7 @@ runs:
   args:
     - ${{ inputs.git-token }}
     - ${{ inputs.goblet-token }}
+    - ${{ inputs.goblet-test-path }}
     - ${{ inputs.report-name }}
     - ${{ inputs.pre-goblet }}
     - ${{ inputs.post-goblet }}

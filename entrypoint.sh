@@ -7,7 +7,7 @@ set -o pipefail
 
 export DEBUG=pw:api
 export GOBLET_RUN_FROM_CI=1
-export GOBLET_MOUNT_ROOT=/keg/repos
+export GOBLET_MOUNT_ROOT=/home/runner/work
 export GH_WORKSPACE_PARENT_DIR=/home/runner/work
 export GOBLET_ACT_REPO_LOCATION=/goblet-action/repo-location
 
@@ -44,17 +44,18 @@ setRunEnvs(){
 
   [ -z "$GOBLET_TOKEN" ] && export GOBLET_TOKEN="${2:-$GOBLET_TOKEN}"
   [ -z "$GOBLET_TOKEN" ] && exitError "Goblet Token is required."
-
-  [ -z "$GOBLET_REPORT_NAME" ] && export GOBLET_REPORT_NAME="${3:-$GOBLET_REPORT_NAME}"
-  [ -z "$GOBLET_PRE_CMDS" ] && export GOBLET_PRE_CMDS="${4:-$GOBLET_PRE_CMDS}"
-  [ -z "$GOBLET_POST_CMDS" ] && export GOBLET_POST_CMDS="${5:-$GOBLET_POST_CMDS}"
+  
+  [ -z "$GOBLET_TESTS_PATH" ] && export GOBLET_TESTS_PATH="${4:-$GOBLET_TESTS_PATH}"
+  [ -z "$GOBLET_REPORT_NAME" ] && export GOBLET_REPORT_NAME="${4:-$GOBLET_REPORT_NAME}"
+  [ -z "$GOBLET_PRE_CMDS" ] && export GOBLET_PRE_CMDS="${5:-$GOBLET_PRE_CMDS}"
+  [ -z "$GOBLET_POST_CMDS" ] && export GOBLET_POST_CMDS="${6:-$GOBLET_POST_CMDS}"
 
   # Alt Repo ENVs
-  [ -z "$GIT_ALT_REPO" ] && export GIT_ALT_REPO="${6:-$GIT_ALT_REPO}"
-  [ -z "$GIT_ALT_BRANCH" ] && export GIT_ALT_BRANCH="${7:-$GIT_ALT_BRANCH}"
-  [ -z "$GIT_ALT_USER" ] && export GIT_ALT_USER="${8:-$GIT_ALT_USER}"
-  [ -z "$GIT_ALT_EMAIL" ] && export GIT_ALT_EMAIL="${9:-$GIT_ALT_EMAIL}"
-  [ -z "$GIT_ALT_TOKEN" ] && export GIT_ALT_TOKEN="${10:-$GIT_ALT_TOKEN}"
+  [ -z "$GIT_ALT_REPO" ] && export GIT_ALT_REPO="${7:-$GIT_ALT_REPO}"
+  [ -z "$GIT_ALT_BRANCH" ] && export GIT_ALT_BRANCH="${8:-$GIT_ALT_BRANCH}"
+  [ -z "$GIT_ALT_USER" ] && export GIT_ALT_USER="${9:-$GIT_ALT_USER}"
+  [ -z "$GIT_ALT_EMAIL" ] && export GIT_ALT_EMAIL="${10:-$GIT_ALT_EMAIL}"
+  [ -z "$GIT_ALT_TOKEN" ] && export GIT_ALT_TOKEN="${11:-$GIT_ALT_TOKEN}"
 
   # Goblet App specific ENVs
   [ -z "$NODE_ENV" ] && export NODE_ENV=test
@@ -102,21 +103,12 @@ runTests(){
   # Goblet test run specific ENVs - customizable
   # Switch to the goblet dir and run the bdd test task
   cd /home/runner/tap
-  # yarn task bdd run base=$GOBLET_CONFIG_BASE
-  # TODO: run this test => strat-collab-close.feature in the browser
-  # Figure out why it's failing, could be related to how the node_modules are being loaded
-  # It can't seem to find the core-js modules from goblet
-  # yarn task bdd run --context strat-props-close-modal.feature --base /home/runner/work/goblet/repo --env $NODE_ENV
-  
-  # yarn task bdd run base=/home/runner/work/goblet/repo context=/home/runner/work/goblet/repo/herkin/bdd/features/strat-props-close-modal.feature slowMo=100
-  # node ./tasks/runTask.js bdd run context=/home/runner/work/goblet/repo/herkin/bdd/features/strat-props-close-modal.feature base=/home/runner/work/goblet/repo slowMo=100 env=$NODE_ENV
-  
-  yarn task bdd run \
-    slowMo=100 \
-    env=$NODE_ENV \
-    base=/keg/repos/goblet/repo \
-    context=strategy-onboarding.feature
 
+  local BDD_TEST_ARGS="slowMo=100 env=$NODE_ENV"
+  [ "$GOBLET_CONFIG_BASE" ] && BDD_TEST_ARGS="$BDD_TEST_ARGS base=$GOBLET_CONFIG_BASE"
+  [ "$GOBLET_TESTS_PATH" ] && BDD_TEST_ARGS="$BDD_TEST_ARGS context=$GOBLET_TESTS_PATH"
+
+  yarn task bdd run $BDD_TEST_ARGS
 }
 
 
@@ -143,7 +135,7 @@ setActionOutputs(){
 init() {(
   set -e
   setRunEnvs "$@"
-  # gobletValidate "$@"
+  gobletValidate "$@"
   setupWorkspace "$@"
   runPreTests "$@"
   runTests "$@"
