@@ -13,12 +13,17 @@ RUN yarn build
 FROM ghcr.io/keg-hub/keg-herkin:develop as action-runner
 
 # TODO: remove this when finished with development of action
-RUN yarn global add ts-node
+RUN yarn global add ts-node esbuild-runner
 
+# Symlink the parent folder of the github workspace to the repos folder
+# This ensures the correct folder locations exist for goblet
+# We must run Jest from a parent folder of both goblet and the github workspace
 RUN mkdir -p /home/runner && \
     mv /keg/tap /home/runner/tap && \
     rm -rf /keg && \
-    ln -s /home/runner /keg
+    ln -s /home/runner /keg && \
+    mkdir -p /keg/work && \
+    ln -s /keg/work /keg/repos
 
 COPY --from=action-builder /goblet-action/dist /goblet-action
 COPY --from=action-builder /goblet-action/node_modules /goblet-action/node_modules
@@ -26,5 +31,7 @@ COPY --from=action-builder /goblet-action/package.json /goblet-action/package.js
 COPY --from=action-builder /goblet-action/tsconfig.json /goblet-action/tsconfig.json
 COPY --from=action-builder /goblet-action/entrypoint.sh /goblet-action/entrypoint.sh
 
+RUN cd /keg/tap && \
+    npx playwright install --with-deps
 
 ENTRYPOINT ["/goblet-action/entrypoint.sh"]

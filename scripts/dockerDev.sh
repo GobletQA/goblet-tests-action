@@ -10,6 +10,7 @@ GIT_TOKEN=$(keg key print)
 REPO_WORK_DIR=/home/runner/work/$TEST_REPO_NAME
 
 docker run --rm -it \
+  --ipc=host \
   -e CI=true \
   -e LOCAL_DEV=1 \
   -e GIT_TOKEN=$GIT_TOKEN \

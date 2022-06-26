@@ -1,7 +1,7 @@
 import path from 'path'
-import { ensureEnv } from '@utils/envs'
-import { ensureDirExists, resolveCacheLoc } from '@utils/fs'
-import { altRepo, altCloneLoc, resolveGitRepo, resolveGitUser } from '@utils/git'
+import { ensureEnv } from '../src/utils/envs'
+import { ensureDirExists, resolveCacheLoc } from '../src/utils/fs'
+import { altRepo, altCloneLoc, resolveGitRepo, resolveGitUser } from '../src/utils/git'
 
 export const config = {
   goblet: {
@@ -20,5 +20,6 @@ export const config = {
     cache: resolveCacheLoc(),
     workspace: ensureEnv(`GITHUB_WORKSPACE`),
     mountRoot: ensureDirExists(ensureEnv(`GOBLET_MOUNT_ROOT`)),
+    actionRepoLoc: ensureEnv(`GOBLET_ACT_REPO_LOCATION`, `/goblet-action/repo-location`),
   },
 }

@@ -16,13 +16,7 @@
     "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
-    "paths": {
-      "@configs/*": ["./configs/*"],
-      "@goblet/*": ["./src/goblet/*"],
-      "@goblet": ["./src/goblet/index.ts"],
-      "@utils/*": ["./src/utils/*"]
-    }
+    "forceConsistentCasingInFileNames": true
   },
   "include": ["./src/**/*", "./configs/**/*"]
 }

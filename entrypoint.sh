@@ -5,7 +5,12 @@
 set -e
 set -o pipefail
 
+export DEBUG=pw:api
 export GOBLET_RUN_FROM_CI=1
+export GOBLET_MOUNT_ROOT=/keg/repos
+export GH_WORKSPACE_PARENT_DIR=/home/runner/work
+export GOBLET_ACT_REPO_LOCATION=/goblet-action/repo-location
+
 MOUNT_WORK_DIR=$(pwd)
 
 exitError(){
@@ -25,13 +30,15 @@ runYarn(){
 }
 
 logMsg(){
-  echo "[GOBLET] $1"
+  GREEN='\033[0;32m'
+  NC='\033[0m'
+  printf "${GREEN}[Goblet]${NC} $1\n"
 }
 
 # ---- Step 0 - Set ENVs from inputs if they don't already exist
 # Goblet Action specific ENVs
 setRunEnvs(){
-  export DEBUG=pw:api
+
 
   [ -z "$GIT_TOKEN" ] && export GIT_TOKEN="${1:-$GIT_TOKEN}"
 
@@ -53,7 +60,6 @@ setRunEnvs(){
   [ -z "$NODE_ENV" ] && export NODE_ENV=test
   [ -z "$DOC_APP_PATH" ] && export DOC_APP_PATH=/keg/tap
   [ -z "$GOBLET_APP_URL" ] && export GOBLET_APP_URL="$APP_URL"
-  [ -z "$GOBLET_MOUNT_ROOT" ] && export GOBLET_MOUNT_ROOT=/keg/repos
   [ -z "$GOBLET_GIT_TOKEN" ] && export GOBLET_GIT_TOKEN="${GIT_ALT_TOKEN:-$GIT_TOKEN}"
 
   [ -z "$GOBLET_HEADLESS" ] && export GOBLET_HEADLESS=true
@@ -73,11 +79,12 @@ gobletValidate(){
 setupWorkspace(){
   cd /goblet-action
   runYarn "goblet:repo"
-  if [ "$LOCAL_DEV" ]; then
-    export GOBLET_CONFIG_BASE=$(ts-node -r tsconfig-paths/register src/goblet/cache.ts paths.repoLoc)
-  else
-    export GOBLET_CONFIG_BASE=$(node -r tsconfig-paths/register dist/src/goblet/cache.js paths.repoLoc)
-  fi
+
+  cat $GOBLET_ACT_REPO_LOCATION 2>/dev/null
+  local EXIT_STATUS=$?
+  [ ${EXIT_STATUS} -ne 0 ] && exitError "$EXIT_STATUS"
+
+  export GOBLET_CONFIG_BASE=$(cat $GOBLET_ACT_REPO_LOCATION)
   echo "[Goblet] Repo mount is $GOBLET_CONFIG_BASE"
 }
 
@@ -108,7 +115,7 @@ runTests(){
     slowMo=100 \
     env=$NODE_ENV \
     base=/keg/repos/goblet/repo \
-    context=herkin/bdd/features/strat-props-close-modal.feature
+    context=strategy-onboarding.feature
 
 }
 
@@ -136,7 +143,7 @@ setActionOutputs(){
 init() {(
   set -e
   setRunEnvs "$@"
-  gobletValidate "$@"
+  # gobletValidate "$@"
   setupWorkspace "$@"
   runPreTests "$@"
   runTests "$@"

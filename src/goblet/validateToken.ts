@@ -1,6 +1,5 @@
-// import { config } from '@configs/action.config'
 import { writeCache } from './cache'
-import { exitError } from '@utils/exitError'
+import { exitError } from '../utils/exitError'
 
 /**
  * Calls the goblet API to validate the passed in token is valid

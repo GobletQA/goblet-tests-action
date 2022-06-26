@@ -1,4 +1,4 @@
-import { config } from '@configs/action.config'
+import { config } from '../../configs/action.config'
 import { fileSys, error } from '@keg-hub/cli-utils'
 import { set, get, deepMerge } from '@keg-hub/jsutils'
 
