@@ -1,2 +1,2 @@
-export * from './goblet'
+export * from './git'
 export * from './utils'

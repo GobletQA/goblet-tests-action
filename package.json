@@ -20,9 +20,7 @@
     "clean:nm": "rm -rf node_modules",
     "clean:full": "yarn clean && yarn clean:nm",
     "dvg": "yarn dev:validate:goblet",
-    "dev:goblet:cache": "esr src/goblet/cache.ts",
     "dev:goblet:repo": "esr src/git/getRepoDir.ts",
-    "dev:goblet:validate": "esr src/goblet/validateToken.ts",
     "docker:build": "/bin/bash scripts/dockerBuild.sh $@",
     "docker:dev": "/bin/bash scripts/dockerDev.sh $@",
     "docker:run": "/bin/bash scripts/dockerRun.sh $@",
@@ -37,9 +35,7 @@
     "test:watchAll": "jest --watchAll --coverage --config configs/jest.config.js",
     "test:watch": "jest --watch --coverage --config configs/jest.config.js",
     "validate": "tsc --noEmit",
-    "goblet:cache": "node dist/src/goblet/cache.js",
-    "goblet:repo": "node dist/src/git/getRepoDir.js",
-    "goblet:validate": "node dist/src/goblet/validateToken.js"
+    "goblet:repo": "node dist/src/git/getRepoDir.js"
   },
   "dependencies": {
     "@keg-hub/cli-utils": "0.6.1",

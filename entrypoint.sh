@@ -75,14 +75,6 @@ setRunEnvs(){
 
 }
 
-
-# ---- Step 1 - Validate the goblet CI token
-gobletValidate(){
-  cd /goblet-action
-  runYarn "goblet:validate"
-}
-
-
 # ---- Step 2 - Synmlink the workspace folder to the repos folder
 setupWorkspace(){
   cd /goblet-action
@@ -96,14 +88,6 @@ setupWorkspace(){
   echo "[Goblet] Repo mount is $GOBLET_CONFIG_BASE"
 }
 
-
-# ---- Step 3 - Run any pre-test commands
-runPreTests(){
-  # TODO: Allow for passing multiple pre-test commands
-  logMsg "TODO - Execute pre test actions"
-}
-
-
 # ---- Step 4 - Run the tests
 runTests(){
   logMsg "Running Tests..."
@@ -111,22 +95,11 @@ runTests(){
   # Switch to the goblet dir and run the bdd test task
   cd /home/runner/tap
 
-  local BDD_TEST_ARGS="slowMo=100 env=$NODE_ENV"
+  local BDD_TEST_ARGS="slowMo=100 env=$NODE_ENV --tracing"
   [ "$GOBLET_CONFIG_BASE" ] && BDD_TEST_ARGS="$BDD_TEST_ARGS base=$GOBLET_CONFIG_BASE"
   [ "$GOBLET_TESTS_PATH" ] && BDD_TEST_ARGS="$BDD_TEST_ARGS context=$GOBLET_TESTS_PATH"
 
   yarn task bdd run $BDD_TEST_ARGS
-}
-
-
-# ---- Step 5 - Run any post-test commands
-runPostTests(){
-  # Step 3 - Run any pre-test commands
-  if [ -z "$GOBLET_POST_CMDS" ]; then
-    return
-  fi
-
-  logMsg "TODO - Execute post test actions"
 }
 
 
@@ -142,11 +115,8 @@ setActionOutputs(){
 init() {(
   set -e
   setRunEnvs "$@"
-  gobletValidate "$@"
   setupWorkspace "$@"
-  runPreTests "$@"
   runTests "$@"
-  runPostTests "$@"
   setActionOutputs "$@"
 )}
 
