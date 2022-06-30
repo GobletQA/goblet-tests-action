@@ -38,6 +38,18 @@ inputs:
   alt-token:
     required: false
     description: 'Github Token with write access to the alt repository.'
+  test-retry:
+    required: false
+    description: 'Number of times a failed test should be retried'
+  test-tracing:
+    required: false
+    description: 'Enabled test tracing via playwright.'
+  test-record:
+    required: false
+    description: 'Enabled browser video recording via playwright.'
+  test-screenshot:
+    required: false
+    description: 'Enabled browser image snapshots for failed tests. Ignored if "test-tracing" is true'
 
 outputs:
   result:
@@ -55,13 +67,17 @@ runs:
   args:
     - ${{ inputs.goblet-test-context }}
     - ${{ inputs.git-token }}
-    - ${{ inputs.goblet-token }}
+    - ${{ inputs.goblet-token }} #3
     - ${{ inputs.report-name }}
     - ${{ inputs.pre-goblet }}
-    - ${{ inputs.post-goblet }}
+    - ${{ inputs.post-goblet }} #6
     - ${{ inputs.alt-repo }}
     - ${{ inputs.alt-branch }}
-    - ${{ inputs.alt-user }}
+    - ${{ inputs.alt-user }} #9
     - ${{ inputs.alt-email }}
     - ${{ inputs.alt-token }}
+    - ${{ inputs.test-retry }} # 12
+    - ${{ inputs.test-tracing }}
+    - ${{ inputs.test-screenshot }}
+    - ${{ inputs.test-record }} #15
     

@@ -57,6 +57,13 @@ setRunEnvs(){
   [ -z "$GIT_ALT_EMAIL" ] && export GIT_ALT_EMAIL="${10:-$GIT_ALT_EMAIL}"
   [ -z "$GIT_ALT_TOKEN" ] && export GIT_ALT_TOKEN="${11:-$GIT_ALT_TOKEN}"
 
+
+  [ -z "$GOBLET_TEST_RETRY" ] && export GOBLET_TEST_RETRY="${12:-$GOBLET_TEST_RETRY}"
+  [ -z "$GOBLET_TEST_TRACING" ] && export GOBLET_TEST_TRACING="${13:-$GOBLET_TEST_TRACING}"
+  [ -z "$GOBLET_TEST_SCREENSHOT" ] && export GOBLET_TEST_SCREENSHOT="${14:-$GOBLET_TEST_SCREENSHOT}"
+  [ -z "$GOBLET_TEST_VIDEO_RECORD" ] && export GOBLET_TEST_VIDEO_RECORD="${15:-$GOBLET_TEST_VIDEO_RECORD}"
+  
+
   # Goblet App specific ENVs
   [ -z "$NODE_ENV" ] && export NODE_ENV=test
   [ -z "$DOC_APP_PATH" ] && export DOC_APP_PATH=/keg/tap
