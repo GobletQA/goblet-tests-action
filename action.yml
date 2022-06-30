@@ -15,14 +15,6 @@ inputs:
     required: false
     default: '<timestamp>-goblet-report'
     description: 'Name of the report file generated from the test results'
-  pre-goblet:
-    required: false
-    default: ''
-    description: 'Commands to run prior to running the Goblet tests'
-  post-goblet:
-    required: false
-    default: ''
-    description: 'Commands to run after the Goblet tests have finished executing'
   alt-repo:
     required: false
     description: 'Alternative github repository that contains the tests to be run.'
@@ -69,15 +61,13 @@ runs:
     - ${{ inputs.git-token }}
     - ${{ inputs.goblet-token }} #3
     - ${{ inputs.report-name }}
-    - ${{ inputs.pre-goblet }}
-    - ${{ inputs.post-goblet }} #6
     - ${{ inputs.alt-repo }}
-    - ${{ inputs.alt-branch }}
-    - ${{ inputs.alt-user }} #9
+    - ${{ inputs.alt-branch }} #6
+    - ${{ inputs.alt-user }}
     - ${{ inputs.alt-email }}
-    - ${{ inputs.alt-token }}
-    - ${{ inputs.test-retry }} # 12
+    - ${{ inputs.alt-token }} #9
+    - ${{ inputs.test-retry }}
     - ${{ inputs.test-tracing }}
-    - ${{ inputs.test-screenshot }}
-    - ${{ inputs.test-record }} #15
+    - ${{ inputs.test-screenshot }} # 12
+    - ${{ inputs.test-record }}
     

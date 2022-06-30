@@ -40,29 +40,23 @@ logMsg(){
 setRunEnvs(){
 
   [ -z "$GOBLET_TESTS_PATH" ] && export GOBLET_TESTS_PATH="${1:-$GOBLET_TESTS_PATH}"
-
   [ -z "$GIT_TOKEN" ] && export GIT_TOKEN="${2:-$GIT_TOKEN}"
-
   [ -z "$GOBLET_TOKEN" ] && export GOBLET_TOKEN="${3:-$GOBLET_TOKEN}"
   [ -z "$GOBLET_TOKEN" ] && exitError "Goblet Token is required."
-  
   [ -z "$GOBLET_REPORT_NAME" ] && export GOBLET_REPORT_NAME="${4:-$GOBLET_REPORT_NAME}"
-  [ -z "$GOBLET_PRE_CMDS" ] && export GOBLET_PRE_CMDS="${5:-$GOBLET_PRE_CMDS}"
-  [ -z "$GOBLET_POST_CMDS" ] && export GOBLET_POST_CMDS="${6:-$GOBLET_POST_CMDS}"
 
   # Alt Repo ENVs
-  [ -z "$GIT_ALT_REPO" ] && export GIT_ALT_REPO="${7:-$GIT_ALT_REPO}"
-  [ -z "$GIT_ALT_BRANCH" ] && export GIT_ALT_BRANCH="${8:-$GIT_ALT_BRANCH}"
-  [ -z "$GIT_ALT_USER" ] && export GIT_ALT_USER="${9:-$GIT_ALT_USER}"
-  [ -z "$GIT_ALT_EMAIL" ] && export GIT_ALT_EMAIL="${10:-$GIT_ALT_EMAIL}"
-  [ -z "$GIT_ALT_TOKEN" ] && export GIT_ALT_TOKEN="${11:-$GIT_ALT_TOKEN}"
+  [ -z "$GIT_ALT_REPO" ] && export GIT_ALT_REPO="${5:-$GIT_ALT_REPO}"
+  [ -z "$GIT_ALT_BRANCH" ] && export GIT_ALT_BRANCH="${6:-$GIT_ALT_BRANCH}"
+  [ -z "$GIT_ALT_USER" ] && export GIT_ALT_USER="${7:-$GIT_ALT_USER}"
+  [ -z "$GIT_ALT_EMAIL" ] && export GIT_ALT_EMAIL="${8:-$GIT_ALT_EMAIL}"
+  [ -z "$GIT_ALT_TOKEN" ] && export GIT_ALT_TOKEN="${9:-$GIT_ALT_TOKEN}"
 
-
-  [ -z "$GOBLET_TEST_RETRY" ] && export GOBLET_TEST_RETRY="${12:-$GOBLET_TEST_RETRY}"
-  [ -z "$GOBLET_TEST_TRACING" ] && export GOBLET_TEST_TRACING="${13:-$GOBLET_TEST_TRACING}"
-  [ -z "$GOBLET_TEST_SCREENSHOT" ] && export GOBLET_TEST_SCREENSHOT="${14:-$GOBLET_TEST_SCREENSHOT}"
-  [ -z "$GOBLET_TEST_VIDEO_RECORD" ] && export GOBLET_TEST_VIDEO_RECORD="${15:-$GOBLET_TEST_VIDEO_RECORD}"
-  
+  # Goblet Test specific ENVs
+  [ -z "$GOBLET_TEST_RETRY" ] && export GOBLET_TEST_RETRY="${10:-$GOBLET_TEST_RETRY}"
+  [ -z "$GOBLET_TEST_TRACING" ] && export GOBLET_TEST_TRACING="${11:-$GOBLET_TEST_TRACING}"
+  [ -z "$GOBLET_TEST_SCREENSHOT" ] && export GOBLET_TEST_SCREENSHOT="${12:-$GOBLET_TEST_SCREENSHOT}"
+  [ -z "$GOBLET_TEST_VIDEO_RECORD" ] && export GOBLET_TEST_VIDEO_RECORD="${13:-$GOBLET_TEST_VIDEO_RECORD}"
 
   # Goblet App specific ENVs
   [ -z "$NODE_ENV" ] && export NODE_ENV=test
