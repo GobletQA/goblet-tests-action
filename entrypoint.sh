@@ -39,13 +39,13 @@ logMsg(){
 # Goblet Action specific ENVs
 setRunEnvs(){
 
+  [ -z "$GOBLET_TESTS_PATH" ] && export GOBLET_TESTS_PATH="${1:-$GOBLET_TESTS_PATH}"
 
-  [ -z "$GIT_TOKEN" ] && export GIT_TOKEN="${1:-$GIT_TOKEN}"
+  [ -z "$GIT_TOKEN" ] && export GIT_TOKEN="${2:-$GIT_TOKEN}"
 
-  [ -z "$GOBLET_TOKEN" ] && export GOBLET_TOKEN="${2:-$GOBLET_TOKEN}"
+  [ -z "$GOBLET_TOKEN" ] && export GOBLET_TOKEN="${3:-$GOBLET_TOKEN}"
   [ -z "$GOBLET_TOKEN" ] && exitError "Goblet Token is required."
   
-  [ -z "$GOBLET_TESTS_PATH" ] && export GOBLET_TESTS_PATH="${4:-$GOBLET_TESTS_PATH}"
   [ -z "$GOBLET_REPORT_NAME" ] && export GOBLET_REPORT_NAME="${4:-$GOBLET_REPORT_NAME}"
   [ -z "$GOBLET_PRE_CMDS" ] && export GOBLET_PRE_CMDS="${5:-$GOBLET_PRE_CMDS}"
   [ -z "$GOBLET_POST_CMDS" ] && export GOBLET_POST_CMDS="${6:-$GOBLET_POST_CMDS}"

@@ -2,15 +2,15 @@
 name: 'Goblet Tests'
 description: 'Run Goblet tests in a github action'
 inputs:
+  goblet-test-context:
+    required: false
+    description: 'Path or name to the tests to run. Runs all tests if not defined'
   git-token:
     required: true
     description: 'Github Token with write access to the repository'
   goblet-token:
     required: true
     description: 'CI token from the goblet platform'
-  goblet-test-path:
-    required: false
-    description: 'Path or name to the tests to run. Runs all tests if not defined'
   report-name:
     required: false
     default: '<timestamp>-goblet-report'
@@ -53,9 +53,9 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
+    - ${{ inputs.goblet-test-context }}
     - ${{ inputs.git-token }}
     - ${{ inputs.goblet-token }}
-    - ${{ inputs.goblet-test-path }}
     - ${{ inputs.report-name }}
     - ${{ inputs.pre-goblet }}
     - ${{ inputs.post-goblet }}

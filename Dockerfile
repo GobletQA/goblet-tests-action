@@ -27,7 +27,8 @@ RUN mkdir -p /home/runner && \
 
 RUN rm -rf /keg/tap && \
     rm -rf $HOME/.node_modules && \
-    ln -s /home/runner/tap/node_modules $HOME/.node_modules
+    ln -s /home/runner/tap/node_modules $HOME/.node_modules && \
+    ln -s /home/runner/tap/node_modules /home/runner/node_modules
 
 RUN cd /keg/tap && \
     npx playwright install --with-deps

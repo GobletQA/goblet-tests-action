@@ -3,16 +3,15 @@ This action executes Goblet tests for a repository within a Github action
 
 ## Inputs
 
+### `goblet-test-context`
+* Path to the tests to run
+* **default** - Runs all tests if not defined
+
 ### `goblet-token`
 * **required** CI token to access the goblet platform
 
-### `goblet-path`
-* Relative path the goblet tests folder within the repo
-* **default** - `<repo-root-directory>/goblet` (value of <repo-root-directory> determined at runtime)
-
-### `goblet-test-path:`
-* Path to the tests to run
-* **default** - Runs all tests if not defined
+### `git-token`
+* Github Auth Token or Personal Access Token (PAT)
 
 ### `report`
 * Name of the report file generated from the test results
@@ -40,7 +39,6 @@ This action executes Goblet tests for a repository within a Github action
 
 ### `alt-token`
 * Github Token with write access to the alt repository.
-
 
 
 ## Outputs

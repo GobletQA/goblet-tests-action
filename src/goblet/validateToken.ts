@@ -1,11 +1,13 @@
-import { writeCache } from './cache'
-import { exitError } from '../utils/exitError'
+// import { writeCache } from './cache'
+// import { exitError } from '../utils/exitError'
+import { config } from '../../configs/action.config'
 
 /**
  * Calls the goblet API to validate the passed in token is valid
  */
 const callGobletApi = async () => {
-  // const { token, api } = config.goblet
+  const { token } = config.goblet
+  if (!token) throw new Error(`Goblet Auth Token is invalid.`)
 
   // TODO: Add api call to validate the token
   return { valid: true, message: ``, data: {} }
@@ -17,8 +19,9 @@ const callGobletApi = async () => {
  * @throws
  */
 export const validateToken = async () => {
-  const { valid, message, data } = await callGobletApi()
-  valid ? await writeCache(data) : exitError(message)
+  const { valid } = await callGobletApi()
+  return valid
+  // valid ? await writeCache(data) : exitError(message)
 }
 
 require.main === module && validateToken()
