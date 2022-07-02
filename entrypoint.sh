@@ -1,5 +1,5 @@
 #!/bin/bash
-# /goblet-action/entrypoint.sh
+# /goblet-action/entrypoint.sh 
 
 # Exit when any command fails
 set -e
@@ -74,11 +74,12 @@ setupWorkspace(){
   cd /goblet-action
   runYarn "goblet:repo"
 
-  cat $GOBLET_ACT_REPO_LOCATION 2>/dev/null
+  cat $GOBLET_ACT_REPO_LOCATION 2> /dev/null
   local EXIT_STATUS=$?
   [ ${EXIT_STATUS} -ne 0 ] && exitError "$EXIT_STATUS"
 
   export GOBLET_CONFIG_BASE=$(cat $GOBLET_ACT_REPO_LOCATION)
+  echo ""
   echo "[Goblet] Repo mount is $GOBLET_CONFIG_BASE"
 }
 
@@ -89,9 +90,10 @@ runTests(){
   # Switch to the goblet dir and run the bdd test task
   cd /home/runner/tap
 
-  local BDD_TEST_ARGS="slowMo=100 env=$NODE_ENV --tracing"
-  [ "$GOBLET_CONFIG_BASE" ] && BDD_TEST_ARGS="$BDD_TEST_ARGS base=$GOBLET_CONFIG_BASE"
-  [ "$GOBLET_TESTS_PATH" ] && BDD_TEST_ARGS="$BDD_TEST_ARGS context=$GOBLET_TESTS_PATH"
+  # local BDD_TEST_ARGS="--slowMo 100 --env $NODE_ENV --tracing --record"
+  local BDD_TEST_ARGS="--slowMo 100 --env $NODE_ENV"
+  [ "$GOBLET_CONFIG_BASE" ] && BDD_TEST_ARGS="$BDD_TEST_ARGS --base $GOBLET_CONFIG_BASE"
+  [ "$GOBLET_TESTS_PATH" ] && BDD_TEST_ARGS="$BDD_TEST_ARGS --context $GOBLET_TESTS_PATH"
 
   yarn task bdd run $BDD_TEST_ARGS
 }
