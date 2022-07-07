@@ -6,10 +6,13 @@ set -e
 set -o pipefail
 
 export DEBUG=pw:api
-export GOBLET_RUN_FROM_CI=1
 export GOBLET_MOUNT_ROOT=/home/runner/work
 export GH_WORKSPACE_PARENT_DIR=/home/runner/work
 export GOBLET_ACT_REPO_LOCATION=/goblet-action/repo-location
+export GOBLET_CONFIG_BASE="$GITHUB_WORKSPACE"
+
+export GOBLET_RUN_FROM_CI=1
+[ "$GOBLET_TEST_NO_CI" ] && unset GOBLET_RUN_FROM_CI
 
 MOUNT_WORK_DIR=$(pwd)
 
@@ -20,14 +23,6 @@ exitError(){
   exit "${STATUS}"
 }
 
-# Runs a yarn command with a prefix when LOCAL_DEV exists
-runYarn(){
-  if [ "$LOCAL_DEV" ]; then
-    yarn dev:$1 $2
-  else
-    yarn $1 $2
-  fi
-}
 
 logMsg(){
   GREEN='\033[0;32m'
@@ -57,6 +52,19 @@ setRunEnvs(){
   [ -z "$GOBLET_TEST_TRACING" ] && export GOBLET_TEST_TRACING="${11:-$GOBLET_TEST_TRACING}"
   [ -z "$GOBLET_TEST_SCREENSHOT" ] && export GOBLET_TEST_SCREENSHOT="${12:-$GOBLET_TEST_SCREENSHOT}"
   [ -z "$GOBLET_TEST_VIDEO_RECORD" ] && export GOBLET_TEST_VIDEO_RECORD="${13:-$GOBLET_TEST_VIDEO_RECORD}"
+  
+  [ -z "$GOBLET_TEST_TIMEOUT" ] && export GOBLET_TEST_TIMEOUT="${14:-$GOBLET_TEST_TIMEOUT}"  
+  [ -z "$GOBLET_TEST_CACHE" ] && export GOBLET_TEST_CACHE="${15:-$GOBLET_TEST_CACHE}"
+  [ -z "$GOBLET_TEST_COLORS" ] && export GOBLET_TEST_COLORS="${16:-$GOBLET_TEST_COLORS}"
+  [ -z "$GOBLET_TEST_WORKERS" ] && export GOBLET_TEST_WORKERS="${7:-$GOBLET_TEST_WORKERS}"
+  [ -z "$GOBLET_TEST_VERBOSE" ] && export GOBLET_TEST_VERBOSE="${18:-$GOBLET_TEST_VERBOSE}"
+  [ -z "$GOBLET_TEST_OPEN_HANDLES" ] && export GOBLET_TEST_OPEN_HANDLES="${19:-$GOBLET_TEST_OPEN_HANDLES}"
+
+  # TODO: add special method for figuring this out
+  [ -z "$GOBLET_BROWSERS" ] && export GOBLET_BROWSERS="${20:-$GOBLET_BROWSERS}"
+  [ -z "$GOBLET_BROWSER_SPEED" ] && export GOBLET_BROWSER_SPEED="${21:-$GOBLET_BROWSER_SPEED}"
+  [ -z "$GOBLET_BROWSER_CONCURRENT" ] && export GOBLET_BROWSER_CONCURRENT="${22:-$GOBLET_BROWSER_CONCURRENT}"
+  [ -z "$GOBLET_BROWSER_TIMEOUT" ] && export GOBLET_BROWSER_TIMEOUT="${23:-$GOBLET_BROWSER_TIMEOUT}"
 
   # Goblet App specific ENVs
   [ -z "$NODE_ENV" ] && export NODE_ENV=test
@@ -64,23 +72,49 @@ setRunEnvs(){
   [ -z "$GOBLET_APP_URL" ] && export GOBLET_APP_URL="$APP_URL"
   [ -z "$GOBLET_GIT_TOKEN" ] && export GOBLET_GIT_TOKEN="${GIT_ALT_TOKEN:-$GIT_TOKEN}"
 
+  # Force headless mode in CI environment
   [ -z "$GOBLET_HEADLESS" ] && export GOBLET_HEADLESS=true
   unset $GOBLET_DEV_TOOLS
 
 }
 
+# Clones an alternitive repo locally
+cloneAltRepo(){
+  cd $GOBLET_MOUNT_ROOT/goblet
+
+  # If git user and email not set, use the current user from existing the git log
+  [ -z "$GIT_ALT_USER" ] && export GIT_ALT_USER="$(git log --format='%ae' HEAD^!)"
+  [ -z "$GIT_ALT_EMAIL" ] && export GIT_ALT_EMAIL="$(git log --format='%an' HEAD^!)"
+
+  git config --local user.email "$GIT_ALT_USER"
+  git config --local user.name "$GIT_ALT_EMAIL"
+
+  # Clone the repo using the passed in token if it exists
+  local GIT_CLONE_TOKEN="${GIT_ALT_TOKEN:-$GOBLET_GIT_TOKEN}"
+  if [ "$GIT_CLONE_TOKEN" ]; then
+    git clone https://$GIT_CLONE_TOKEN@$GIT_ALT_REPO
+  else
+    git clone https://$GIT_ALT_REPO
+  fi
+
+  # Navigate into the repo so we can get the pull path from (pwd)
+  cd ./alt-repo
+
+  # If using a diff branch from default, fetch then checkout from origin
+  if [ "$GIT_ALT_BRANCH" ]; then
+    git fetch origin
+    git checkout -b $GIT_ALT_BRANCH origin/$GIT_ALT_BRANCH
+  fi
+
+  export GOBLET_CONFIG_BASE="$(pwd)"
+}
+
 # ---- Step 2 - Synmlink the workspace folder to the repos folder
 setupWorkspace(){
-  cd /goblet-action
-  runYarn "goblet:repo"
+  [ "$GIT_ALT_REPO" ] && cloneAltRepo "$@"
 
-  cat $GOBLET_ACT_REPO_LOCATION 2> /dev/null
-  local EXIT_STATUS=$?
-  [ ${EXIT_STATUS} -ne 0 ] && exitError "$EXIT_STATUS"
-
-  export GOBLET_CONFIG_BASE=$(cat $GOBLET_ACT_REPO_LOCATION)
   echo ""
-  echo "[Goblet] Repo mount is $GOBLET_CONFIG_BASE"
+  logMsg "Repo mount is $GOBLET_CONFIG_BASE"
 }
 
 # ---- Step 4 - Run the tests
@@ -90,8 +124,8 @@ runTests(){
   # Switch to the goblet dir and run the bdd test task
   cd /home/runner/tap
 
-  # local BDD_TEST_ARGS="--slowMo 100 --env $NODE_ENV --tracing --record"
-  local BDD_TEST_ARGS="--slowMo 100 --env $NODE_ENV"
+  # local BDD_TEST_ARGS="--env $NODE_ENV --tracing --record"
+  local BDD_TEST_ARGS="--env $NODE_ENV"
   [ "$GOBLET_CONFIG_BASE" ] && BDD_TEST_ARGS="$BDD_TEST_ARGS --base $GOBLET_CONFIG_BASE"
   [ "$GOBLET_TESTS_PATH" ] && BDD_TEST_ARGS="$BDD_TEST_ARGS --context $GOBLET_TESTS_PATH"
 

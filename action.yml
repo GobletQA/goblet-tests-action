@@ -9,7 +9,7 @@ inputs:
     required: true
     description: 'Github Token with write access to the repository'
   goblet-token:
-    required: true
+    required: false
     description: 'CI token from the goblet platform'
   report-name:
     required: false
@@ -42,6 +42,36 @@ inputs:
   test-screenshot:
     required: false
     description: 'Enabled browser image snapshots for failed tests. Ignored if "test-tracing" is true'
+  test-timeout:
+    required: false
+    description: 'Amount of time for a test to wait until it times out and is then marked as failed'
+  test-cache:
+    required: false
+    description: 'Use internal test cache when executing test'
+  test-colors:
+    required: false
+    description: 'Force use of colors even when not a TTY'
+  test-workers:
+    required: false
+    description: 'Number of workers to use when running tests'
+  test-verbose:
+    required: false
+    description: 'Output verbose test results as the tests run'
+  test-open-handles:
+    required: false
+    description: 'Detect handles left open when tests run. Forces tests to run in sync.'
+  browsers:
+    required: false
+    description: 'Comma separated list of Browsers to execute tests against'
+  browser-speed:
+    required: false
+    description: 'Speed of actions executed in the browser while executing tests'
+  browser-concurrent: 
+    required: false
+    description: 'Run the tests in each defined browser at the same time'
+  browser-timeout:
+    required: false
+    description: 'Amount of time for the browser to wait until it times out and the corresponding test fails'
 
 outputs:
   result:
@@ -57,17 +87,26 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-    - ${{ inputs.goblet-test-context }}
-    - ${{ inputs.git-token }}
+    - ${{ inputs.goblet-test-context }} #1
+    - ${{ inputs.git-token }} #2
     - ${{ inputs.goblet-token }} #3
-    - ${{ inputs.report-name }}
-    - ${{ inputs.alt-repo }}
+    - ${{ inputs.report-name }} #4
+    - ${{ inputs.alt-repo }} #5
     - ${{ inputs.alt-branch }} #6
-    - ${{ inputs.alt-user }}
-    - ${{ inputs.alt-email }}
+    - ${{ inputs.alt-user }} #7
+    - ${{ inputs.alt-email }} #8
     - ${{ inputs.alt-token }} #9
-    - ${{ inputs.test-retry }}
-    - ${{ inputs.test-tracing }}
-    - ${{ inputs.test-screenshot }} # 12
-    - ${{ inputs.test-record }}
-    
+    - ${{ inputs.test-retry }} #10
+    - ${{ inputs.test-tracing }} #11
+    - ${{ inputs.test-screenshot }} #12
+    - ${{ inputs.test-record }} #13
+    - ${{ inputs.test-timeout }} #14
+    - ${{ inputs.test-cache }} #15
+    - ${{ inputs.test-colors }} #16
+    - ${{ inputs.test-workers }} #17
+    - ${{ inputs.test-verbose }} #18
+    - ${{ inputs.test-open-handles }} #19
+    - ${{ inputs.browser }} # 20
+    - ${{ inputs.browser-speed }} #21
+    - ${{ inputs.browser-concurrent }} #22
+    - ${{ inputs.browser-timeout }} # 23

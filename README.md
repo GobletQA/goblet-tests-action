@@ -7,8 +7,6 @@ This action executes Goblet tests for a repository within a Github action
 * Path to the tests to run
 * **default** - Runs all tests if not defined
 
-### `goblet-token`
-* **required** CI token to access the goblet platform
 
 ### `git-token`
 * Github Auth Token or Personal Access Token (PAT)
@@ -26,19 +24,25 @@ This action executes Goblet tests for a repository within a Github action
 * Allows for handling reports or artifacts generated from tests execution
 
 ### `alt-repo`
-* Alternative github repository that contains the tests to be run.
+* Alternative repository that contains the tests to be run.
+* Should follow the pattern of `https://<git-token>@domain/owner/repo.git`
+  * For example  `github.com/octokitty/app-tests.git`
 
 ### `alt-branch`
-* Name of the branch to use for the alt repository.
+* Name of the branch to use for the alternative repository.
+* Defaults to the alternative repositories default branch
 
 ### `alt-user`
-* Github user name or organization with write access to the alt repository.
+* Github user name or organization with write access to the alternative repository.
+* Defaults to the current user
 
 ### `alt-email`
-* Email of user with write access to the alt repository.
+* Email of user with write access to the alternative repository.
+* Defaults to the current users email
 
 ### `alt-token`
-* Github Token with write access to the alt repository.
+* Github Token with write access to the alternative repository.
+* Checks the following envs in order `GIT_ALT_TOKEN`, `GOBLET_GIT_TOKEN`, `GIT_TOKEN` 
 
 
 ## Outputs
@@ -57,12 +61,23 @@ This action executes Goblet tests for a repository within a Github action
 
 ## Example usage
 
+### Basic
 ```yaml
 uses: actions/goblet-tests-action@v1
 with:
-  goblet-token: {{ secrets.GOBLET_TOKEN }}
-  goblet-path: './goblet'
   report: ${{ github.sha }}
-  pre-goblet: 'yarn install'
-  post-goblet: 'curl -d ./goblet/reports/${{ github.sha }}.json https://my.custom.api/tests/reports/json'
 ```
+
+
+### Alt repo
+```yaml
+uses: actions/goblet-tests-action@v1
+with:
+  alt-branch: develop # defaults to the repos default branch branch. I.E. main / master
+  alt-repo: github.com/octokitty/app-tests # URI to the repo, EXCLUDING the protocol I.E. github.com/owner/repo.git
+  alt-token: secrets.ALT_TEST_REPO_TOKEN # Must be a OAuth or PAT that has access to the alternative repository
+  alt-user: secrets.ALT_TEST_USER # User related to the git token used for the `alt-token` input
+  alt-email: secrets.ALT_TEST_EMAIL # Email related to the git token used for the `alt-token` input and user
+``` 
+
+
