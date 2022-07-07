@@ -23,7 +23,6 @@ exitError(){
   exit "${STATUS}"
 }
 
-
 logMsg(){
   GREEN='\033[0;32m'
   NC='\033[0m'
@@ -37,7 +36,8 @@ setRunEnvs(){
   [ -z "$GOBLET_TESTS_PATH" ] && export GOBLET_TESTS_PATH="${1:-$GOBLET_TESTS_PATH}"
   [ -z "$GIT_TOKEN" ] && export GIT_TOKEN="${2:-$GIT_TOKEN}"
   [ -z "$GOBLET_TOKEN" ] && export GOBLET_TOKEN="${3:-$GOBLET_TOKEN}"
-  [ -z "$GOBLET_TOKEN" ] && exitError "Goblet Token is required."
+  # TODO: Enable when goblet tokens are setup
+  # [ -z "$GOBLET_TOKEN" ] && exitError "Goblet Token is required."
   [ -z "$GOBLET_REPORT_NAME" ] && export GOBLET_REPORT_NAME="${4:-$GOBLET_REPORT_NAME}"
 
   # Alt Repo ENVs
@@ -60,9 +60,8 @@ setRunEnvs(){
   [ -z "$GOBLET_TEST_VERBOSE" ] && export GOBLET_TEST_VERBOSE="${18:-$GOBLET_TEST_VERBOSE}"
   [ -z "$GOBLET_TEST_OPEN_HANDLES" ] && export GOBLET_TEST_OPEN_HANDLES="${19:-$GOBLET_TEST_OPEN_HANDLES}"
 
-  # TODO: add special method for figuring this out
   [ -z "$GOBLET_BROWSERS" ] && export GOBLET_BROWSERS="${20:-$GOBLET_BROWSERS}"
-  [ -z "$GOBLET_BROWSER_SPEED" ] && export GOBLET_BROWSER_SPEED="${21:-$GOBLET_BROWSER_SPEED}"
+  [ -z "$GOBLET_BROWSER_SLOW_MO" ] && export GOBLET_BROWSER_SLOW_MO="${21:-$GOBLET_BROWSER_SLOW_MO}"
   [ -z "$GOBLET_BROWSER_CONCURRENT" ] && export GOBLET_BROWSER_CONCURRENT="${22:-$GOBLET_BROWSER_CONCURRENT}"
   [ -z "$GOBLET_BROWSER_TIMEOUT" ] && export GOBLET_BROWSER_TIMEOUT="${23:-$GOBLET_BROWSER_TIMEOUT}"
 
@@ -124,10 +123,14 @@ runTests(){
   # Switch to the goblet dir and run the bdd test task
   cd /home/runner/tap
 
-  # local BDD_TEST_ARGS="--env $NODE_ENV --tracing --record"
   local BDD_TEST_ARGS="--env $NODE_ENV"
+
   [ "$GOBLET_CONFIG_BASE" ] && BDD_TEST_ARGS="$BDD_TEST_ARGS --base $GOBLET_CONFIG_BASE"
   [ "$GOBLET_TESTS_PATH" ] && BDD_TEST_ARGS="$BDD_TEST_ARGS --context $GOBLET_TESTS_PATH"
+
+  # Add special handling for setting allBrowsers option when not exists, or set to all 
+  [ -z "$GOBLET_BROWSERS" ] && BDD_TEST_ARGS="$BDD_TEST_ARGS --allBrowsers"
+  [ "$GOBLET_BROWSERS" == "all" ] && BDD_TEST_ARGS="$BDD_TEST_ARGS --allBrowsers"
 
   yarn task bdd run $BDD_TEST_ARGS
 }

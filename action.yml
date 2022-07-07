@@ -63,7 +63,7 @@ inputs:
   browsers:
     required: false
     description: 'Comma separated list of Browsers to execute tests against'
-  browser-speed:
+  browser-slow-mo:
     required: false
     description: 'Speed of actions executed in the browser while executing tests'
   browser-concurrent: 
@@ -107,6 +107,6 @@ runs:
     - ${{ inputs.test-verbose }} #18
     - ${{ inputs.test-open-handles }} #19
     - ${{ inputs.browser }} # 20
-    - ${{ inputs.browser-speed }} #21
+    - ${{ inputs.browser-slow-mo }} #21
     - ${{ inputs.browser-concurrent }} #22
     - ${{ inputs.browser-timeout }} # 23
