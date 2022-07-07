@@ -1,6 +1,5 @@
 FROM ghcr.io/keg-hub/keg-herkin:develop as action-runner
 
-
 # Symlink the parent folder of the github workspace to the repos folder
 # This ensures the correct folder locations exist for goblet
 # We must run Jest from a parent folder of both goblet and the github workspace
@@ -19,6 +18,6 @@ RUN rm -rf /keg/tap && \
 RUN cd /keg/tap && \
     npx playwright install --with-deps
 
-COPY . /goblet-action/entrypoint.sh
+COPY . /goblet-action
 
 ENTRYPOINT ["/goblet-action/entrypoint.sh"]
