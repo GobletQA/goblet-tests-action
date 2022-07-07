@@ -43,6 +43,11 @@ This action executes Goblet tests for a repository within a Github action
 * Github Token with write access to the alternative repository.
 * Checks the following envs in order `GIT_ALT_TOKEN`, `GOBLET_GIT_TOKEN`, `GIT_TOKEN` 
 
+### `test-type`
+* Type of tests to be run that are supported by the Goblet Platform
+* Can be one of `bdd`, `waypoint`, or `unit`
+* Default to `bdd`
+
 ### `test-retry`
 * As ENV - `GOBLET_TEST_RETRY`
 * Number of times a failed test should be retried

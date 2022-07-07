@@ -29,6 +29,12 @@ logMsg(){
   printf "${GREEN}[Goblet]${NC} $1\n"
 }
 
+logErr(){
+  RED='\033[0;31m'
+  NC='\033[0m'
+  printf "${RED}[Goblet]${NC} $1\n"
+}
+
 # ---- Step 0 - Set ENVs from inputs if they don't already exist
 # Goblet Action specific ENVs
 setRunEnvs(){
@@ -47,23 +53,24 @@ setRunEnvs(){
   [ -z "$GIT_ALT_TOKEN" ] && export GIT_ALT_TOKEN="${8:-$GIT_ALT_TOKEN}"
 
   # Goblet Test specific ENVs
-  [ -z "$GOBLET_TEST_RETRY" ] && export GOBLET_TEST_RETRY="${9:-$GOBLET_TEST_RETRY}"
-  [ -z "$GOBLET_TEST_REPORT_NAME" ] && export GOBLET_TEST_REPORT_NAME="${10:-$GOBLET_TEST_REPORT_NAME}"
-  [ -z "$GOBLET_TEST_TRACING" ] && export GOBLET_TEST_TRACING="${11:-$GOBLET_TEST_TRACING}"
-  [ -z "$GOBLET_TEST_SCREENSHOT" ] && export GOBLET_TEST_SCREENSHOT="${12:-$GOBLET_TEST_SCREENSHOT}"
-  [ -z "$GOBLET_TEST_VIDEO_RECORD" ] && export GOBLET_TEST_VIDEO_RECORD="${13:-$GOBLET_TEST_VIDEO_RECORD}"
+  [ -z "$GOBLET_TEST_TYPE" ] && export GOBLET_TEST_TYPE="${9:-$GOBLET_TEST_TYPE}"
+  [ -z "$GOBLET_TEST_RETRY" ] && export GOBLET_TEST_RETRY="${10:-$GOBLET_TEST_RETRY}"
+  [ -z "$GOBLET_TEST_REPORT_NAME" ] && export GOBLET_TEST_REPORT_NAME="${11:-$GOBLET_TEST_REPORT_NAME}"
+  [ -z "$GOBLET_TEST_TRACING" ] && export GOBLET_TEST_TRACING="${12:-$GOBLET_TEST_TRACING}"
+  [ -z "$GOBLET_TEST_SCREENSHOT" ] && export GOBLET_TEST_SCREENSHOT="${13:-$GOBLET_TEST_SCREENSHOT}"
+  [ -z "$GOBLET_TEST_VIDEO_RECORD" ] && export GOBLET_TEST_VIDEO_RECORD="${14:-$GOBLET_TEST_VIDEO_RECORD}"
   
-  [ -z "$GOBLET_TEST_TIMEOUT" ] && export GOBLET_TEST_TIMEOUT="${14:-$GOBLET_TEST_TIMEOUT}"  
-  [ -z "$GOBLET_TEST_CACHE" ] && export GOBLET_TEST_CACHE="${15:-$GOBLET_TEST_CACHE}"
-  [ -z "$GOBLET_TEST_COLORS" ] && export GOBLET_TEST_COLORS="${16:-$GOBLET_TEST_COLORS}"
-  [ -z "$GOBLET_TEST_WORKERS" ] && export GOBLET_TEST_WORKERS="${7:-$GOBLET_TEST_WORKERS}"
-  [ -z "$GOBLET_TEST_VERBOSE" ] && export GOBLET_TEST_VERBOSE="${18:-$GOBLET_TEST_VERBOSE}"
-  [ -z "$GOBLET_TEST_OPEN_HANDLES" ] && export GOBLET_TEST_OPEN_HANDLES="${19:-$GOBLET_TEST_OPEN_HANDLES}"
+  [ -z "$GOBLET_TEST_TIMEOUT" ] && export GOBLET_TEST_TIMEOUT="${15:-$GOBLET_TEST_TIMEOUT}"  
+  [ -z "$GOBLET_TEST_CACHE" ] && export GOBLET_TEST_CACHE="${16:-$GOBLET_TEST_CACHE}"
+  [ -z "$GOBLET_TEST_COLORS" ] && export GOBLET_TEST_COLORS="${17:-$GOBLET_TEST_COLORS}"
+  [ -z "$GOBLET_TEST_WORKERS" ] && export GOBLET_TEST_WORKERS="${8:-$GOBLET_TEST_WORKERS}"
+  [ -z "$GOBLET_TEST_VERBOSE" ] && export GOBLET_TEST_VERBOSE="${19:-$GOBLET_TEST_VERBOSE}"
+  [ -z "$GOBLET_TEST_OPEN_HANDLES" ] && export GOBLET_TEST_OPEN_HANDLES="${20:-$GOBLET_TEST_OPEN_HANDLES}"
 
-  [ -z "$GOBLET_BROWSERS" ] && export GOBLET_BROWSERS="${20:-$GOBLET_BROWSERS}"
-  [ -z "$GOBLET_BROWSER_SLOW_MO" ] && export GOBLET_BROWSER_SLOW_MO="${21:-$GOBLET_BROWSER_SLOW_MO}"
-  [ -z "$GOBLET_BROWSER_CONCURRENT" ] && export GOBLET_BROWSER_CONCURRENT="${22:-$GOBLET_BROWSER_CONCURRENT}"
-  [ -z "$GOBLET_BROWSER_TIMEOUT" ] && export GOBLET_BROWSER_TIMEOUT="${23:-$GOBLET_BROWSER_TIMEOUT}"
+  [ -z "$GOBLET_BROWSERS" ] && export GOBLET_BROWSERS="${21:-$GOBLET_BROWSERS}"
+  [ -z "$GOBLET_BROWSER_SLOW_MO" ] && export GOBLET_BROWSER_SLOW_MO="${22:-$GOBLET_BROWSER_SLOW_MO}"
+  [ -z "$GOBLET_BROWSER_CONCURRENT" ] && export GOBLET_BROWSER_CONCURRENT="${23:-$GOBLET_BROWSER_CONCURRENT}"
+  [ -z "$GOBLET_BROWSER_TIMEOUT" ] && export GOBLET_BROWSER_TIMEOUT="${24:-$GOBLET_BROWSER_TIMEOUT}"
 
   # Goblet App specific ENVs
   [ -z "$NODE_ENV" ] && export NODE_ENV=test
@@ -123,16 +130,27 @@ runTests(){
   # Switch to the goblet dir and run the bdd test task
   cd /home/runner/tap
 
-  local BDD_TEST_ARGS="--env $NODE_ENV"
 
-  [ "$GOBLET_CONFIG_BASE" ] && BDD_TEST_ARGS="$BDD_TEST_ARGS --base $GOBLET_CONFIG_BASE"
-  [ "$GOBLET_TESTS_PATH" ] && BDD_TEST_ARGS="$BDD_TEST_ARGS --context $GOBLET_TESTS_PATH"
+  local TEST_RUN_ARGS="--env $NODE_ENV"
+  [ -z "$GOBLET_TEST_TYPE" ] && export GOBLET_TEST_TYPE="${GOBLET_TEST_TYPE:-bdd}"
+  
+  if [ "$GOBLET_TEST_TYPE" == "bdd" ]; then
 
-  # Add special handling for setting allBrowsers option when not exists, or set to all 
-  [ -z "$GOBLET_BROWSERS" ] && BDD_TEST_ARGS="$BDD_TEST_ARGS --allBrowsers"
-  [ "$GOBLET_BROWSERS" == "all" ] && BDD_TEST_ARGS="$BDD_TEST_ARGS --allBrowsers"
+    [ "$GOBLET_CONFIG_BASE" ] && TEST_RUN_ARGS="$TEST_RUN_ARGS --base $GOBLET_CONFIG_BASE"
+    [ "$GOBLET_TESTS_PATH" ] && TEST_RUN_ARGS="$TEST_RUN_ARGS --context $GOBLET_TESTS_PATH"
 
-  yarn task bdd run $BDD_TEST_ARGS
+    # Add special handling for setting allBrowsers option when not exists, or set to all 
+    [ -z "$GOBLET_BROWSERS" ] && TEST_RUN_ARGS="$TEST_RUN_ARGS --allBrowsers"
+    [ "$GOBLET_BROWSERS" == "all" ] && TEST_RUN_ARGS="$TEST_RUN_ARGS --allBrowsers"
+
+    yarn task bdd run $TEST_RUN_ARGS
+    logMsg "Finished running tests for $GOBLET_TESTS_PATH"
+
+  else
+    logErr "Test type $GOBLET_TEST_TYPE not yet supported"
+    exitError
+  fi
+
 }
 
 

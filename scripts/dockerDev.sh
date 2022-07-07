@@ -13,7 +13,6 @@ docker run --rm -it \
   --ipc=host \
   -e CI=true \
   -e LOCAL_DEV=1 \
-  -e GIT_TOKEN=$GIT_TOKEN \
   -e GOBLET_TOKEN=123456 \
   -e GITHUB_ACTIONS=true \
   -e GITHUB_HEAD_REF=main \
@@ -37,7 +36,7 @@ docker run --rm -it \
   -v $(pwd):/goblet-action \
   -v $(keg herkin path):/home/runner/tap \
   -v $(keg sgt path):/home/runner/work/$TEST_REPO_NAME \
-  ghcr.io/gobletqa/$IMAGE_NAME:$IMAGE_VERSION
+  $IMAGE_FULL
 
   # -p 5005:5005 \
   # -p 5006:5006 \

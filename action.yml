@@ -26,6 +26,9 @@ inputs:
   alt-token:
     required: false
     description: 'Github Token with write access to the alt repository.'
+  test-type:
+    required: false
+    description: 'Type of tests to be run. Can be one of "bdd", "waypoint", or "unit". Default to "bdd"'
   test-retry:
     required: false
     description: 'Number of times a failed test should be retried'
@@ -95,18 +98,19 @@ runs:
     - ${{ inputs.alt-user }} #6
     - ${{ inputs.alt-email }} #7
     - ${{ inputs.alt-token }} #8
-    - ${{ inputs.test-retry }} #9
-    - ${{ inputs.test-report-name }} #10
-    - ${{ inputs.test-tracing }} #11
-    - ${{ inputs.test-screenshot }} #12
-    - ${{ inputs.test-record }} #13
-    - ${{ inputs.test-timeout }} #14
-    - ${{ inputs.test-cache }} #15
-    - ${{ inputs.test-colors }} #16
-    - ${{ inputs.test-workers }} #17
-    - ${{ inputs.test-verbose }} #18
-    - ${{ inputs.test-open-handles }} #19
-    - ${{ inputs.browser }} # 20
-    - ${{ inputs.browser-slow-mo }} #21
-    - ${{ inputs.browser-concurrent }} #22
-    - ${{ inputs.browser-timeout }} # 23
+    - ${{ inputs.test-type }} #9
+    - ${{ inputs.test-retry }} #10
+    - ${{ inputs.test-report-name }} #11
+    - ${{ inputs.test-tracing }} #12
+    - ${{ inputs.test-screenshot }} #13
+    - ${{ inputs.test-record }} #14
+    - ${{ inputs.test-timeout }} #15
+    - ${{ inputs.test-cache }} #16
+    - ${{ inputs.test-colors }} #17
+    - ${{ inputs.test-workers }} #18
+    - ${{ inputs.test-verbose }} #19
+    - ${{ inputs.test-open-handles }} #20
+    - ${{ inputs.browser }} #21
+    - ${{ inputs.browser-slow-mo }} #22
+    - ${{ inputs.browser-concurrent }} #23
+    - ${{ inputs.browser-timeout }} #24
