@@ -13,7 +13,7 @@ This action executes Goblet tests for a repository within a Github action
 * Github Auth Token or Personal Access Token (PAT)
 
 ### `report`
-* As ENV - `GOBLET_REPORT_NAME`
+* As ENV - `GOBLET_TEST_REPORT_NAME`
 * Name of the report file generated from the test results
 * **default** - `<timestamp>-goblet-report` (value of <timestamp> is generated at runtime)
 

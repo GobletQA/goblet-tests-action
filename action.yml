@@ -11,10 +11,6 @@ inputs:
   goblet-token:
     required: false
     description: 'CI token from the goblet platform'
-  report-name:
-    required: false
-    default: '<timestamp>-goblet-report'
-    description: 'Name of the report file generated from the test results'
   alt-repo:
     required: false
     description: 'Alternative github repository that contains the tests to be run.'
@@ -33,6 +29,10 @@ inputs:
   test-retry:
     required: false
     description: 'Number of times a failed test should be retried'
+  test-report-name:
+    required: false
+    default: '<timestamp>-goblet-report'
+    description: 'Name of the report file generated from the test results'
   test-tracing:
     required: false
     description: 'Enabled test tracing via playwright.'
@@ -90,13 +90,13 @@ runs:
     - ${{ inputs.goblet-test-context }} #1
     - ${{ inputs.git-token }} #2
     - ${{ inputs.goblet-token }} #3
-    - ${{ inputs.report-name }} #4
-    - ${{ inputs.alt-repo }} #5
-    - ${{ inputs.alt-branch }} #6
-    - ${{ inputs.alt-user }} #7
-    - ${{ inputs.alt-email }} #8
-    - ${{ inputs.alt-token }} #9
-    - ${{ inputs.test-retry }} #10
+    - ${{ inputs.alt-repo }} #4
+    - ${{ inputs.alt-branch }} #5
+    - ${{ inputs.alt-user }} #6
+    - ${{ inputs.alt-email }} #7
+    - ${{ inputs.alt-token }} #8
+    - ${{ inputs.test-retry }} #9
+    - ${{ inputs.test-report-name }} #10
     - ${{ inputs.test-tracing }} #11
     - ${{ inputs.test-screenshot }} #12
     - ${{ inputs.test-record }} #13

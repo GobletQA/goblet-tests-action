@@ -38,17 +38,17 @@ setRunEnvs(){
   [ -z "$GOBLET_TOKEN" ] && export GOBLET_TOKEN="${3:-$GOBLET_TOKEN}"
   # TODO: Enable when goblet tokens are setup
   # [ -z "$GOBLET_TOKEN" ] && exitError "Goblet Token is required."
-  [ -z "$GOBLET_REPORT_NAME" ] && export GOBLET_REPORT_NAME="${4:-$GOBLET_REPORT_NAME}"
 
   # Alt Repo ENVs
-  [ -z "$GIT_ALT_REPO" ] && export GIT_ALT_REPO="${5:-$GIT_ALT_REPO}"
-  [ -z "$GIT_ALT_BRANCH" ] && export GIT_ALT_BRANCH="${6:-$GIT_ALT_BRANCH}"
-  [ -z "$GIT_ALT_USER" ] && export GIT_ALT_USER="${7:-$GIT_ALT_USER}"
-  [ -z "$GIT_ALT_EMAIL" ] && export GIT_ALT_EMAIL="${8:-$GIT_ALT_EMAIL}"
-  [ -z "$GIT_ALT_TOKEN" ] && export GIT_ALT_TOKEN="${9:-$GIT_ALT_TOKEN}"
+  [ -z "$GIT_ALT_REPO" ] && export GIT_ALT_REPO="${4:-$GIT_ALT_REPO}"
+  [ -z "$GIT_ALT_BRANCH" ] && export GIT_ALT_BRANCH="${5:-$GIT_ALT_BRANCH}"
+  [ -z "$GIT_ALT_USER" ] && export GIT_ALT_USER="${6:-$GIT_ALT_USER}"
+  [ -z "$GIT_ALT_EMAIL" ] && export GIT_ALT_EMAIL="${7:-$GIT_ALT_EMAIL}"
+  [ -z "$GIT_ALT_TOKEN" ] && export GIT_ALT_TOKEN="${8:-$GIT_ALT_TOKEN}"
 
   # Goblet Test specific ENVs
-  [ -z "$GOBLET_TEST_RETRY" ] && export GOBLET_TEST_RETRY="${10:-$GOBLET_TEST_RETRY}"
+  [ -z "$GOBLET_TEST_RETRY" ] && export GOBLET_TEST_RETRY="${9:-$GOBLET_TEST_RETRY}"
+  [ -z "$GOBLET_TEST_REPORT_NAME" ] && export GOBLET_TEST_REPORT_NAME="${10:-$GOBLET_TEST_REPORT_NAME}"
   [ -z "$GOBLET_TEST_TRACING" ] && export GOBLET_TEST_TRACING="${11:-$GOBLET_TEST_TRACING}"
   [ -z "$GOBLET_TEST_SCREENSHOT" ] && export GOBLET_TEST_SCREENSHOT="${12:-$GOBLET_TEST_SCREENSHOT}"
   [ -z "$GOBLET_TEST_VIDEO_RECORD" ] && export GOBLET_TEST_VIDEO_RECORD="${13:-$GOBLET_TEST_VIDEO_RECORD}"
