@@ -1,5 +1,4 @@
 #!/bin/bash
-# /goblet-action/entrypoint.sh
 
 # Exit when any command fails
 set -e

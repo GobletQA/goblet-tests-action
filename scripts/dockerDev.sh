@@ -35,7 +35,7 @@ docker run --rm -it \
   --entrypoint /bin/bash \
   --workdir $REPO_WORK_DIR \
   -v $(pwd):/goblet-action \
-  -v $(keg herkin path):/home/runner/tap \
+  -v $(keg goblet path):/home/runner/tap \
   -v $(keg sgt path):/home/runner/work/$TEST_REPO_NAME \
   $IMAGE_FULL
 
