@@ -149,9 +149,14 @@ runTests(){
     export GOBLET_TESTS_PATH="${GOBLET_TESTS_PATH:-$GOBLET_CONFIG_BASE}"
     TEST_RUN_ARGS="$TEST_RUN_ARGS --context $GOBLET_TESTS_PATH"
 
-    # Add special handling for setting allBrowsers option when not exists, or set to all 
-    [ -z "$GOBLET_BROWSERS" ] && TEST_RUN_ARGS="$TEST_RUN_ARGS --allBrowsers"
-    [ "$GOBLET_BROWSERS" == "all" ] && TEST_RUN_ARGS="$TEST_RUN_ARGS --allBrowsers"
+    # Add special handling for setting browsers option to auto set ---allBrowsers when not set
+    if [ -z "$GOBLET_BROWSERS" ]; then
+      TEST_RUN_ARGS="$TEST_RUN_ARGS --allBrowsers"
+    elif  [ "$GOBLET_BROWSERS" == "all" ]; then
+      TEST_RUN_ARGS="$TEST_RUN_ARGS --allBrowsers"
+    else
+      TEST_RUN_ARGS="$TEST_RUN_ARGS --browsers $GOBLET_BROWSERS"
+    fi
 
     yarn task bdd run $TEST_RUN_ARGS
     logMsg "Finished running tests for $GOBLET_TESTS_PATH"
