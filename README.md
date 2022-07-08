@@ -71,7 +71,7 @@ This action executes Goblet tests for a repository within a Github action
 ### `test-timeout`
 * As ENV - `GOBLET_TEST_TIMEOUT`
 * Amount of time for a test to wait until it times out and is then marked as failed
-* Defaults to `60000` milliseconds (1 min)
+* Defaults to `30000` milliseconds (30 seconds)
 
 ### `test-cache`
 * As ENV - `GOBLET_TEST_CACHE`
@@ -116,7 +116,7 @@ This action executes Goblet tests for a repository within a Github action
 ### `browser-timeout`
 * As ENV - `GOBLET_BROWSER_TIMEOUT`
 * Amount of time for the browser to wait until it times out and the corresponding test fails
-* Defaults to `45000` milliseconds (45 seconds)
+* Defaults to `15000` milliseconds (15 seconds)
 
 
 ## Outputs

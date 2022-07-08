@@ -6,6 +6,10 @@ set -e
 set -o pipefail
 
 export DEBUG=pw:api
+# Force headless mode in CI environment
+export GOBLET_HEADLESS=true
+# Ensure devtools is not turned on
+unset $GOBLET_DEV_TOOLS
 export GOBLET_MOUNT_ROOT=/home/runner/work
 export GH_WORKSPACE_PARENT_DIR=/home/runner/work
 export GOBLET_ACT_REPO_LOCATION=/goblet-action/repo-location
@@ -35,52 +39,58 @@ logErr(){
   printf "${RED}[Goblet]${NC} $1\n"
 }
 
+getENVValue() {
+  local ENV_NAME="${1}"
+  local FOUND_VAL="${2:-$3}"
+
+  if [ "$FOUND_VAL" ]; then
+    eval "export $ENV_NAME=$FOUND_VAL"
+  fi
+}
+
 # ---- Step 0 - Set ENVs from inputs if they don't already exist
 # Goblet Action specific ENVs
 setRunEnvs(){
 
-  [ -z "$GOBLET_TESTS_PATH" ] && export GOBLET_TESTS_PATH="${1:-$GOBLET_TESTS_PATH}"
-  [ -z "$GIT_TOKEN" ] && export GIT_TOKEN="${2:-$GIT_TOKEN}"
-  [ -z "$GOBLET_TOKEN" ] && export GOBLET_TOKEN="${3:-$GOBLET_TOKEN}"
+  getENVValue "GOBLET_TESTS_PATH" "${1}" "$GOBLET_TESTS_PATH"
+  getENVValue "GIT_TOKEN" "${2}" $GIT_TOKEN
+  getENVValue "GOBLET_TOKEN" "${3}" $GOBLET_TOKEN
   # TODO: Enable when goblet tokens are setup
   # [ -z "$GOBLET_TOKEN" ] && exitError "Goblet Token is required."
 
   # Alt Repo ENVs
-  [ -z "$GIT_ALT_REPO" ] && export GIT_ALT_REPO="${4:-$GIT_ALT_REPO}"
-  [ -z "$GIT_ALT_BRANCH" ] && export GIT_ALT_BRANCH="${5:-$GIT_ALT_BRANCH}"
-  [ -z "$GIT_ALT_USER" ] && export GIT_ALT_USER="${6:-$GIT_ALT_USER}"
-  [ -z "$GIT_ALT_EMAIL" ] && export GIT_ALT_EMAIL="${7:-$GIT_ALT_EMAIL}"
-  [ -z "$GIT_ALT_TOKEN" ] && export GIT_ALT_TOKEN="${8:-$GIT_ALT_TOKEN}"
+  getENVValue "GIT_ALT_REPO" "${4}" "$GIT_ALT_REPO"
+  getENVValue "GIT_ALT_BRANCH" "${5}" "$GIT_ALT_BRANCH"
+  getENVValue "GIT_ALT_USER" "${6}" "$GIT_ALT_USER"
+  getENVValue "GIT_ALT_EMAIL" "${7}" "$GIT_ALT_EMAIL"
+  getENVValue "GIT_ALT_TOKEN" "${8}" "$GIT_ALT_TOKEN"
 
   # Goblet Test specific ENVs
-  [ -z "$GOBLET_TEST_TYPE" ] && export GOBLET_TEST_TYPE="${9:-$GOBLET_TEST_TYPE}"
-  [ -z "$GOBLET_TEST_RETRY" ] && export GOBLET_TEST_RETRY="${10:-$GOBLET_TEST_RETRY}"
-  [ -z "$GOBLET_TEST_REPORT_NAME" ] && export GOBLET_TEST_REPORT_NAME="${11:-$GOBLET_TEST_REPORT_NAME}"
-  [ -z "$GOBLET_TEST_TRACING" ] && export GOBLET_TEST_TRACING="${12:-$GOBLET_TEST_TRACING}"
-  [ -z "$GOBLET_TEST_SCREENSHOT" ] && export GOBLET_TEST_SCREENSHOT="${13:-$GOBLET_TEST_SCREENSHOT}"
-  [ -z "$GOBLET_TEST_VIDEO_RECORD" ] && export GOBLET_TEST_VIDEO_RECORD="${14:-$GOBLET_TEST_VIDEO_RECORD}"
+  getENVValue "GOBLET_TEST_TYPE" "${9}" "$GOBLET_TEST_TYPE"
+  getENVValue "GOBLET_TEST_RETRY" "${10}" "$GOBLET_TEST_RETRY"
+  getENVValue "GOBLET_TEST_REPORT_NAME" "${11}" "$GOBLET_TEST_REPORT_NAME"
+  getENVValue "GOBLET_TEST_TRACING" "${12}" "$GOBLET_TEST_TRACING"
+  getENVValue "GOBLET_TEST_SCREENSHOT" "${13}" "$GOBLET_TEST_SCREENSHOT"
+  getENVValue "GOBLET_TEST_VIDEO_RECORD" "${14}" "$GOBLET_TEST_VIDEO_RECORD"
   
-  [ -z "$GOBLET_TEST_TIMEOUT" ] && export GOBLET_TEST_TIMEOUT="${15:-$GOBLET_TEST_TIMEOUT}"  
-  [ -z "$GOBLET_TEST_CACHE" ] && export GOBLET_TEST_CACHE="${16:-$GOBLET_TEST_CACHE}"
-  [ -z "$GOBLET_TEST_COLORS" ] && export GOBLET_TEST_COLORS="${17:-$GOBLET_TEST_COLORS}"
-  [ -z "$GOBLET_TEST_WORKERS" ] && export GOBLET_TEST_WORKERS="${8:-$GOBLET_TEST_WORKERS}"
-  [ -z "$GOBLET_TEST_VERBOSE" ] && export GOBLET_TEST_VERBOSE="${19:-$GOBLET_TEST_VERBOSE}"
-  [ -z "$GOBLET_TEST_OPEN_HANDLES" ] && export GOBLET_TEST_OPEN_HANDLES="${20:-$GOBLET_TEST_OPEN_HANDLES}"
+  getENVValue "GOBLET_TEST_TIMEOUT" "${15}" "$GOBLET_TEST_TIMEOUT"
+  getENVValue "GOBLET_TEST_CACHE" "${16}" "$GOBLET_TEST_CACHE"
+  getENVValue "GOBLET_TEST_COLORS" "${17}" "$GOBLET_TEST_COLORS"
+  getENVValue "GOBLET_TEST_WORKERS" "${18}" "$GOBLET_TEST_WORKERS"
+  getENVValue "GOBLET_TEST_VERBOSE" "${19}" "$GOBLET_TEST_VERBOSE"
+  getENVValue "GOBLET_TEST_OPEN_HANDLES" "${20}" "$GOBLET_TEST_OPEN_HANDLES"
 
-  [ -z "$GOBLET_BROWSERS" ] && export GOBLET_BROWSERS="${21:-$GOBLET_BROWSERS}"
-  [ -z "$GOBLET_BROWSER_SLOW_MO" ] && export GOBLET_BROWSER_SLOW_MO="${22:-$GOBLET_BROWSER_SLOW_MO}"
-  [ -z "$GOBLET_BROWSER_CONCURRENT" ] && export GOBLET_BROWSER_CONCURRENT="${23:-$GOBLET_BROWSER_CONCURRENT}"
-  [ -z "$GOBLET_BROWSER_TIMEOUT" ] && export GOBLET_BROWSER_TIMEOUT="${24:-$GOBLET_BROWSER_TIMEOUT}"
+  getENVValue "GOBLET_BROWSERS" "${21}" "$GOBLET_BROWSERS"
+  getENVValue "GOBLET_BROWSER_SLOW_MO" "${22}" "$GOBLET_BROWSER_SLOW_MO"
+  getENVValue "GOBLET_BROWSER_CONCURRENT" "${23}" "$GOBLET_BROWSER_CONCURRENT"
+  getENVValue "GOBLET_BROWSER_TIMEOUT" "${24}" "$GOBLET_BROWSER_TIMEOUT"
 
   # Goblet App specific ENVs
   [ -z "$NODE_ENV" ] && export NODE_ENV=test
   [ -z "$DOC_APP_PATH" ] && export DOC_APP_PATH=/keg/tap
   [ -z "$GOBLET_APP_URL" ] && export GOBLET_APP_URL="$APP_URL"
-  [ -z "$GOBLET_GIT_TOKEN" ] && export GOBLET_GIT_TOKEN="${GIT_ALT_TOKEN:-$GIT_TOKEN}"
 
-  # Force headless mode in CI environment
-  [ -z "$GOBLET_HEADLESS" ] && export GOBLET_HEADLESS=true
-  unset $GOBLET_DEV_TOOLS
+  getENVValue "GOBLET_GIT_TOKEN" "$GIT_ALT_TOKEN" "$GIT_TOKEN"
 
 }
 
@@ -131,13 +141,13 @@ runTests(){
   cd /home/runner/tap
 
 
-  local TEST_RUN_ARGS="--env $NODE_ENV"
+  local TEST_RUN_ARGS="--env $NODE_ENV --base $GOBLET_CONFIG_BASE"
   [ -z "$GOBLET_TEST_TYPE" ] && export GOBLET_TEST_TYPE="${GOBLET_TEST_TYPE:-bdd}"
-  
+
   if [ "$GOBLET_TEST_TYPE" == "bdd" ]; then
 
-    [ "$GOBLET_CONFIG_BASE" ] && TEST_RUN_ARGS="$TEST_RUN_ARGS --base $GOBLET_CONFIG_BASE"
-    [ "$GOBLET_TESTS_PATH" ] && TEST_RUN_ARGS="$TEST_RUN_ARGS --context $GOBLET_TESTS_PATH"
+    export GOBLET_TESTS_PATH="${GOBLET_TESTS_PATH:-$GOBLET_CONFIG_BASE}"
+    TEST_RUN_ARGS="$TEST_RUN_ARGS --context $GOBLET_TESTS_PATH"
 
     # Add special handling for setting allBrowsers option when not exists, or set to all 
     [ -z "$GOBLET_BROWSERS" ] && TEST_RUN_ARGS="$TEST_RUN_ARGS --allBrowsers"

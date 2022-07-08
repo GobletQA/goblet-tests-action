@@ -14,6 +14,7 @@ docker run --rm -it \
   -e CI=true \
   -e LOCAL_DEV=1 \
   -e GOBLET_TOKEN=123456 \
+  -e GIT_TOKEN=$GIT_TOKEN \
   -e GITHUB_ACTIONS=true \
   -e GITHUB_HEAD_REF=main \
   -e GITHUB_ENV=/dev/null \
