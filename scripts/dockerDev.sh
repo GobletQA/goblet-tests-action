@@ -1,13 +1,15 @@
 #!/bin/bash
 . ~/keg-hub/repos/keg-cli/keg
 
-IMAGE_NAME=$npm_package_name
+IMAGE_NAME=$npm_package_displayName
 IMAGE_VERSION=$npm_package_version
 IMAGE_FULL=ghcr.io/gobletqa/$IMAGE_NAME:$IMAGE_VERSION
 
 TEST_REPO_NAME=goblet/repo
 GIT_TOKEN=$(keg key print)
 REPO_WORK_DIR=/home/runner/work/$TEST_REPO_NAME
+
+echo "[Goblet] Runing dev container from $IMAGE_FULL"
 
 docker run --rm -it \
   --ipc=host \

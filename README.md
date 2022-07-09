@@ -154,4 +154,16 @@ with:
   alt-email: secrets.ALT_TEST_EMAIL # Email related to the git token used for the `alt-token` input and user
 ``` 
 
+## Local Development
+### Requirements
+* The `keg-cli`, `docker`, and `yarn` must be installed locally
+  * You must also login to the container registry with a user that has access to the GobletQA repo and container registry 
+* A local copy of the core GobletQA repo 
 
+### Setup
+* The `/scripts` folder contains a number of helper scripts to manage the Docker image
+* These scripts should be executed via yarn, as shown below
+  * `yarn docker:run` || `yarn dr` - Runs the built docker image and automatically executes the goblet tests 
+  * `yarn docker:dev` || `yarn dd` - Runs the built docker image and attaches to a `bash` shell
+    * `/goblet-action/entrypoint.sh` - To manually run tests, when connected to the container
+      * Example: `GOBLET_BROWSERS=chrome /goblet-action/entrypoint.sh select-strategy.feature`

@@ -1,22 +1,44 @@
-FROM ghcr.io/keg-hub/keg-herkin:develop as action-runner
+FROM ghcr.io/gobletqa/goblet:develop as action-installer
+WORKDIR /keg/tap
+COPY goblet-core/package.json /keg/tap/package.json
+RUN yarn install --non-interactive --ignore-optional
+COPY goblet-core/. /keg/tap
+
+# Clean up Goblet so it only includes the stuff we need to run tests
+# This will be better handled when the repo is cleaned up
+RUN rm -rf .*ignore && \
+    rm -rf bundle && \
+    ls ./container | grep -v "values" | xargs rm -rf && \
+    rm -rf docs && \
+    rm -rf temp && \
+    rm -rf index.js && \
+    rm -rf tap.js && \
+    rm -rf *.md && \
+    rm -rf scripts && \
+    rm -rf repos/admin && \
+    rm -rf repos/backend && \
+    rm -rf repos/example && \
+    rm -rf repos/tap && \
+    rm -rf repos/workflows
+
+FROM ghcr.io/gobletqa/goblet:develop as action-runner
+
+# Copy over the cleaned up Goblet repo from the previous step
+COPY --from=action-installer /keg/tap /home/runner/tap
+RUN cd /home/runner/tap && \
+    npx playwright install --with-deps
 
 # Symlink the parent folder of the github workspace to the repos folder
 # This ensures the correct folder locations exist for goblet
 # We must run Jest from a parent folder of both goblet and the github workspace
-RUN mkdir -p /home/runner && \
-    mv /keg/tap /home/runner/tap && \
-    rm -rf /keg && \
+RUN rm -rf /keg && \
     ln -s /home/runner /keg && \
     mkdir -p /keg/work && \
-    ln -s /home/runner/work /keg/repos
-
-RUN rm -rf /keg/tap && \
+    ln -s /home/runner/work /keg/repos && \
     rm -rf $HOME/.node_modules && \
     ln -s /home/runner/tap/node_modules $HOME/.node_modules && \
     ln -s /home/runner/tap/node_modules /home/runner/node_modules
 
-RUN cd /keg/tap && \
-    npx playwright install --with-deps
 
 COPY . /goblet-action
 

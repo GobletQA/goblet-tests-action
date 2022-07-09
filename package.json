@@ -1,5 +1,6 @@
 {
-  "name": "goblet-tests-action",
+  "name": "@gobletqa/goblet-tests-action",
+  "displayName": "goblet-tests-action",
   "version": "0.0.0",
   "description": "Execute goblet tests in a Github action",
   "repository": {

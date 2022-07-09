@@ -2,7 +2,7 @@
 
 . ~/keg-hub/repos/keg-cli/keg
 
-IMAGE_NAME=$npm_package_name
+IMAGE_NAME=$npm_package_displayName
 IMAGE_VERSION=$npm_package_version
 IMAGE_FULL=ghcr.io/gobletqa/$IMAGE_NAME:$IMAGE_VERSION
 
@@ -12,6 +12,8 @@ REPO_WORK_DIR=/home/runner/work/$TEST_REPO_NAME
 
 RUNCMD=''
 [ "$1" ] && RUNCMD="$1" || RUNCMD="/home/runner/work/goblet/repo"
+
+echo "[Goblet] Runing container from $IMAGE_FULL"
 
 docker run --rm -it \
   --ipc=host \
