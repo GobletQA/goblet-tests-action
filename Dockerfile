@@ -1,14 +1,19 @@
 FROM ghcr.io/gobletqa/goblet:develop as action-installer
 WORKDIR /keg/tap
+COPY goblet-core/yarn.lock /keg/tap/yarn.lock
 COPY goblet-core/package.json /keg/tap/package.json
 RUN yarn install --non-interactive --ignore-optional
-COPY goblet-core/. /keg/tap
-
 # Clean up Goblet so it only includes the stuff we need to run tests
 # This will be better handled when the repo is cleaned up
 RUN rm -rf .*ignore && \
+    rm -rf firebase.json && \
     rm -rf bundle && \
-    ls ./container | grep -v "values" | xargs rm -rf && \
+    rm -rf configs/eslintrc.config.js && \
+    rm -rf configs/firebase.config.js && \
+    rm -rf configs/lint-staged.config.js && \
+    rm -rf configs/nodemon* && \
+    rm -rf configs/prettier.config.js && \
+    rm -rf container && \
     rm -rf docs && \
     rm -rf temp && \
     rm -rf index.js && \
@@ -20,6 +25,7 @@ RUN rm -rf .*ignore && \
     rm -rf repos/example && \
     rm -rf repos/tap && \
     rm -rf repos/workflows
+COPY goblet-core/. /keg/tap
 
 FROM ghcr.io/gobletqa/goblet:develop as action-runner
 
@@ -38,7 +44,6 @@ RUN rm -rf /keg && \
     rm -rf $HOME/.node_modules && \
     ln -s /home/runner/tap/node_modules $HOME/.node_modules && \
     ln -s /home/runner/tap/node_modules /home/runner/node_modules
-
 
 COPY . /goblet-action
 
