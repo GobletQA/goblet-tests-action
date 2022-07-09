@@ -25,7 +25,7 @@ RUN rm -rf .*ignore && \
     rm -rf repos/example && \
     rm -rf repos/tap && \
     rm -rf repos/workflows
-COPY goblet-core/. /keg/tap
+COPY goblet-core/. /keg/tap/.
 
 FROM ghcr.io/gobletqa/goblet:develop as action-runner
 
