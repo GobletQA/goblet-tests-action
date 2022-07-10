@@ -168,7 +168,6 @@ runTests(){
 
 }
 
-
 # ---- Step 6 - Output the result of the executed tests
 setActionOutputs(){
   # TODO: Implment the defined outputs
