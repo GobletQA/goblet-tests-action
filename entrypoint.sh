@@ -1,8 +1,21 @@
 #!/bin/bash
 
+# 
+# Init script to setup the test environment, then execute the tests based on passed in arguments
+# Is expected to be run inside a docker container
+# Run Tests Examples:
+# * From Repos Root Directory on the Host Machine
+#   * `yarn dr` => Runs all tests
+#   * `GOBLET_BROWSERS=chrome yarn dr select-strategy.feature` => Runs select-strategy feature on chrome
+# * When attached to the running containers shell
+#   * `/goblet-action/entrypoint.sh`
+#   * `GOBLET_BROWSERS=chrome /goblet-action/entrypoint.sh select-strategy.feature`
+# 
+
 # Exit when any command fails
 set -e
 set -o pipefail
+source /goblet-action/scripts/logger.sh
 
 export DEBUG=pw:api
 # Force headless mode in CI environment
@@ -24,18 +37,6 @@ exitError(){
   echo "::set-output name=result::fail"
   local STATUS="${1:-1}"
   exit "${STATUS}"
-}
-
-logMsg(){
-  GREEN='\033[0;32m'
-  NC='\033[0m'
-  printf "${GREEN}[Goblet]${NC} $1\n"
-}
-
-logErr(){
-  RED='\033[0;31m'
-  NC='\033[0m'
-  printf "${RED}[Goblet]${NC} $1\n"
 }
 
 getENVValue() {
@@ -157,7 +158,7 @@ runTests(){
       TEST_RUN_ARGS="$TEST_RUN_ARGS --browsers $GOBLET_BROWSERS"
     fi
 
-    yarn task bdd run $TEST_RUN_ARGS
+    node ./tasks/runTask.js bdd run $TEST_RUN_ARGS
     logMsg "Finished running tests for $GOBLET_TESTS_PATH"
 
   else

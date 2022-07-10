@@ -22,6 +22,9 @@
     "doc:dev": "yarn docker:dev $@",
     "docker:dev": "/bin/bash scripts/dockerDev.sh $@",
     "dr": "yarn docker:run $@",
+    "drc": "GOBLET_BROWSERS=chrome yarn docker:run $@",
+    "drf": "GOBLET_BROWSERS=firefox yarn docker:run $@",
+    "drw": "GOBLET_BROWSERS=webkit yarn docker:run $@",
     "doc:run": "yarn docker:run $@",
     "docker:run": "/bin/bash scripts/dockerRun.sh $@"
   },

@@ -1,6 +1,7 @@
 #!/bin/bash
 
-. ~/keg-hub/repos/keg-cli/keg
+source $KEG_CLI_PATH/keg
+source scripts/logger.sh
 
 IMAGE_NAME=$npm_package_displayName
 IMAGE_VERSION=$npm_package_version
@@ -10,10 +11,8 @@ TEST_REPO_NAME=goblet/repo
 GIT_TOKEN=$(keg key print)
 REPO_WORK_DIR=/home/runner/work/$TEST_REPO_NAME
 
-RUNCMD=''
-[ "$1" ] && RUNCMD="$1" || RUNCMD="/home/runner/work/goblet/repo"
 
-echo "[Goblet] Runing container from $IMAGE_FULL"
+logMsg "Runing container from $IMAGE_FULL"
 
 docker run --rm -it \
   --ipc=host \
@@ -36,9 +35,11 @@ docker run --rm -it \
   -e GITHUB_WORKFLOW=goblet-action-workflow \
   -e GITHUB_REF=refs/heads/run-goblet-action \
   -e GITHUB_WORKSPACE=$REPO_WORK_DIR \
+  -e GOBLET_BROWSERS=${GOBLET_BROWSERS:-all} \
   --name goblet-action \
   --workdir $REPO_WORK_DIR \
   -v $(pwd):/goblet-action \
-  -v $(keg goblet path):/home/runner/tap \
   -v $(keg sgt path):/home/runner/work/$TEST_REPO_NAME \
-  $IMAGE_FULL $RUNCMD
+  $IMAGE_FULL "$@"
+
+  # -v $(keg goblet path):/home/runner/tap \
