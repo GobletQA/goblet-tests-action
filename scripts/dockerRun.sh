@@ -11,7 +11,6 @@ TEST_REPO_NAME=goblet/repo
 GIT_TOKEN=$(keg key print)
 REPO_WORK_DIR=/home/runner/work/$TEST_REPO_NAME
 
-
 logMsg "Runing container from $IMAGE_FULL"
 
 docker run --rm -it \
@@ -39,7 +38,6 @@ docker run --rm -it \
   --name goblet-action \
   --workdir $REPO_WORK_DIR \
   -v $(pwd):/goblet-action \
+  -v $(keg goblet path):/home/runner/tap \
   -v $(keg sgt path):/home/runner/work/$TEST_REPO_NAME \
   $IMAGE_FULL "$@"
-
-  # -v $(keg goblet path):/home/runner/tap \

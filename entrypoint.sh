@@ -179,12 +179,12 @@ setActionOutputs(){
   local GOBLET_TESTS_REPORT_PATH=$(jq -r -M .latest.$GOBLET_TEST_TYPE.report.path /home/runner/tap/temp/testMeta.json)
   echo "::set-output name=report-path::$GOBLET_TESTS_REPORT_PATH"
 
-  local GOBLET_TESTS_VIDEO_PATH=$(jq -r -M .latest.$GOBLET_TEST_TYPE.artifacts.path /home/runner/tap/temp/testMeta.json)
+  # TODO: use jq to loop the the traces.tests and recording.tests and pull all the paths
+  local GOBLET_TESTS_VIDEO_PATH=$(jq -r -M .latest.$GOBLET_TEST_TYPE.recording.tests.$GOBLET_TEST_NAME.path /home/runner/tap/temp/testMeta.json)
   echo "::set-output name=video-path::$GOBLET_TESTS_VIDEO_PATH"
   
-  local GOBLET_TESTS_VIDEO_PATH=$(jq -r -M .latest.$GOBLET_TEST_TYPE.artifacts.path /home/runner/tap/temp/testMeta.json)
+  local GOBLET_TESTS_TRACE_PATH=$(jq -r -M .latest.$GOBLET_TEST_TYPE.traces.tests.$GOBLET_TEST_NAME.path /home/runner/tap/temp/testMeta.json)
   echo "::set-output name=trace-path::$GOBLET_TESTS_TRACE_PATH"
-  
 }
 
 init() {(
