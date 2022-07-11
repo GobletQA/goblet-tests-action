@@ -15,7 +15,6 @@ RUN rm -rf .*ignore && \
     rm -rf configs/prettier.config.js && \
     rm -rf container && \
     rm -rf docs && \
-    rm -rf temp && \
     rm -rf index.js && \
     rm -rf tap.js && \
     rm -rf *.md && \
@@ -31,7 +30,9 @@ FROM ghcr.io/gobletqa/goblet:develop as action-runner
 
 # Copy over the cleaned up Goblet repo from the previous step
 COPY --from=action-installer /keg/tap /home/runner/tap
-RUN cd /home/runner/tap && \
+RUN apt-get install jq -y && \
+    apt-get clean && \
+    cd /home/runner/tap && \
     npx playwright install --with-deps
 
 # Symlink the parent folder of the github workspace to the repos folder

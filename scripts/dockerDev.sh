@@ -39,10 +39,10 @@ docker run --rm -it \
   --entrypoint /bin/bash \
   --workdir $REPO_WORK_DIR \
   -v $(pwd):/goblet-action \
+  -v $(keg goblet path):/home/runner/tap \
   -v $(keg sgt path):/home/runner/work/$TEST_REPO_NAME \
   $IMAGE_FULL
 
-  # -v $(keg goblet path):/home/runner/tap \
   # -p 5005:5005 \
   # -p 5006:5006 \
   # -p 19006:19006 \

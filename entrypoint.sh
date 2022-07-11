@@ -159,22 +159,32 @@ runTests(){
     fi
 
     node ./tasks/runTask.js bdd run $TEST_RUN_ARGS
+    local TEST_EXIT_STATUS=$?
+
+    [ ${TEST_EXIT_STATUS} -ne 0 ] && export GOBLET_TESTS_RESULT="fail" || export GOBLET_TESTS_RESULT="pass"
     logMsg "Finished running tests for $GOBLET_TESTS_PATH"
+
 
   else
     logErr "Test type $GOBLET_TEST_TYPE not yet supported"
-    exitError
+    exitError "1"
   fi
 
 }
 
 # ---- Step 6 - Output the result of the executed tests
 setActionOutputs(){
-  # TODO: Implment the defined outputs
-  echo "TODO - Set envs for github actions outputs"
-  echo "::set-output name=result::$GOBLET_TESTS_RESULTS"
+  echo "::set-output name=result::$GOBLET_TESTS_RESULT"
+
+  local GOBLET_TESTS_REPORT_PATH=$(jq -r -M .latest.$GOBLET_TEST_TYPE.report.path /home/runner/tap/temp/testMeta.json)
   echo "::set-output name=report-path::$GOBLET_TESTS_REPORT_PATH"
-  echo "::set-output name=artifacts-path::$GOBLET_TESTS_ARTIFACTS_PATH"
+
+  local GOBLET_TESTS_VIDEO_PATH=$(jq -r -M .latest.$GOBLET_TEST_TYPE.artifacts.path /home/runner/tap/temp/testMeta.json)
+  echo "::set-output name=video-path::$GOBLET_TESTS_VIDEO_PATH"
+  
+  local GOBLET_TESTS_VIDEO_PATH=$(jq -r -M .latest.$GOBLET_TEST_TYPE.artifacts.path /home/runner/tap/temp/testMeta.json)
+  echo "::set-output name=trace-path::$GOBLET_TESTS_TRACE_PATH"
+  
 }
 
 init() {(
@@ -187,4 +197,5 @@ init() {(
 
 init "$@"
 EXIT_STATUS=$?
+
 [ ${EXIT_STATUS} -ne 0 ] && exitError "$EXIT_STATUS"
