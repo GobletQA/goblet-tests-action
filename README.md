@@ -55,10 +55,11 @@
 
 ### `test-tracing`
 * As ENV - `GOBLET_TEST_TRACING`
-* Enabled test tracing via playwright
+* Enabled test tracing via playwright. See more [here](https://playwright.dev/docs/api/class-tracing)
 * Defaults to `false`
 
 ### `test-screenshot`
+* **IMPORTANT** - Not currently implemented. Use `test-tracing` instead
 * As ENV - `GOBLET_TEST_SCREENSHOT`
 * Enabled browser image snapshots for failed tests. Ignored if `test-tracing` is `true`
 * Defaults to `false`
@@ -127,7 +128,7 @@
 ## Outputs
 * **IMPORTANT** - Because multiple paths can be exported, the outputs are first escaped prior to being set
 * This ensures all paths are included in the ouput.
-* [See here for more information](https://github.community/t/what-is-the-correct-character-escaping-for-workflow-command-values-e-g-echo-xxxx/118465/4)
+* See [here](https://github.community/t/set-output-truncates-multiline-strings/16852) and [here](https://github.community/t/what-is-the-correct-character-escaping-for-workflow-command-values-e-g-echo-xxxx/118465/4) for more information
 
 ### `result`
 * Result of the Goblet test execution. One of `pass` or `fail`

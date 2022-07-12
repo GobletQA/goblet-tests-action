@@ -66,6 +66,7 @@ getENVValue() {
 }
 
 # Pulls the value for an output, escapes it, then sets it as an output
+# See https://github.community/t/set-output-truncates-multiline-strings/16852
 setOutput(){
   local NAME="${1}"
   local JQ="${2}"
