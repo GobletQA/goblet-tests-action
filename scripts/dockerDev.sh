@@ -13,6 +13,9 @@ REPO_WORK_DIR=/home/runner/work/$TEST_REPO_NAME
 
 logMsg "Runing dev container from $IMAGE_FULL"
 
+MOUNTS="-v $(pwd):/goblet-action -v $(keg sgt path):/home/runner/work/$TEST_REPO_NAME"
+[ "$1" == "goblet" ] && MOUNTS="$MOUNTS -v $(keg goblet path):/home/runner/tap"
+
 docker run --rm -it \
   --ipc=host \
   -e CI=true \
@@ -38,13 +41,5 @@ docker run --rm -it \
   --name goblet-action \
   --entrypoint /bin/bash \
   --workdir $REPO_WORK_DIR \
-  -v $(pwd):/goblet-action \
-  -v $(keg sgt path):/home/runner/work/$TEST_REPO_NAME \
+  $MOUNTS \
   $IMAGE_FULL
-
-  # -v $(keg goblet path):/home/runner/tap \
-  # -p 5005:5005 \
-  # -p 5006:5006 \
-  # -p 19006:19006 \
-  # -p 26369:26369 \
-  # -p 26370:26370 \
