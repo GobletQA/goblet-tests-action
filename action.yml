@@ -66,6 +66,9 @@ inputs:
   browsers:
     required: false
     description: 'Comma separated list of Browsers to execute tests against'
+  browser-debug:
+    required: false
+    description: 'Log the debug output of the playwright browser'
   browser-slow-mo:
     required: false
     description: 'Speed of actions executed in the browser while executing tests'
@@ -79,16 +82,18 @@ inputs:
 outputs:
   result:
     description: 'Result of the executed Goblet tests, one of `pass` or `fail`'
-  report-path:
-    description: 'Path to the generated test report from the executed tests'
-  artifacts-path:
-    description: 'Path to the generated artifacts from the executed tests'
+  report-paths:
+    description: 'Paths to the generated html test reports for each browser that ran'
+  trace-paths:
+    description: 'Paths of the generated playwright traces when trace is enabled'
+  video-paths:
+    description: 'Paths to the video recordings of executed tests when video record is enabled'
   error:
     description: 'Error message output when the action fails for a reason other than test execution'
 
 runs:
   using: 'docker'
-  image: 'Dockerfile'
+  image: 'ghcr.io/gobletqa/goblet-tests-action:0.0.0'
   args:
     - ${{ inputs.goblet-test-context }} #1
     - ${{ inputs.git-token }} #2
@@ -111,6 +116,7 @@ runs:
     - ${{ inputs.test-verbose }} #19
     - ${{ inputs.test-open-handles }} #20
     - ${{ inputs.browser }} #21
-    - ${{ inputs.browser-slow-mo }} #22
-    - ${{ inputs.browser-concurrent }} #23
-    - ${{ inputs.browser-timeout }} #24
+    - ${{ inputs.browser-debug }} #22
+    - ${{ inputs.browser-slow-mo }} #23
+    - ${{ inputs.browser-concurrent }} #24
+    - ${{ inputs.browser-timeout }} #25

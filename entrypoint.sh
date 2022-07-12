@@ -6,22 +6,38 @@
 # Run Tests Examples:
 # * From Repos Root Directory on the Host Machine
 #   * `yarn dr` => Runs all tests
-#   * `GOBLET_BROWSERS=chrome yarn dr select-strategy.feature` => Runs select-strategy feature on chrome
+#   * `GOBLET_BROWSERS=chrome yarn dr test.feature` => Runs test feature on chrome
 # * When attached to the running containers shell
 #   * `/goblet-action/entrypoint.sh`
-#   * `GOBLET_BROWSERS=chrome /goblet-action/entrypoint.sh select-strategy.feature`
-# 
+#   * `GOBLET_BROWSERS=chrome /goblet-action/entrypoint.sh test.feature`
+#
+# Only Chrome
+# GOBLET_BROWSERS=chrome /goblet-action/entrypoint.sh test.feature
+#
+# With Video
+# GOBLET_TEST_VIDEO_RECORD=1 GOBLET_BROWSERS=chrome /goblet-action/entrypoint.sh test.feature
+#
+# With Trace
+# GOBLET_TEST_TRACING=1 GOBLET_BROWSERS=chrome /goblet-action/entrypoint.sh test.feature
+#
+# With Video && Trace
+# GOBLET_TEST_VIDEO_RECORD=1 GOBLET_TEST_TRACING=1 /goblet-action/entrypoint.sh test.feature
+
 
 # Exit when any command fails
 set -e
 set -o pipefail
 source /goblet-action/scripts/logger.sh
 
-export DEBUG=pw:api
+
+# Ensure devtools is not turned on
+unset GOBLET_DEV_TOOLS
+# export DEBUG=pw:api
+# Unset the debug ENV so it can be reset via the GOBLET_BROWSER_DEBUG env
+unset DEBUG
+
 # Force headless mode in CI environment
 export GOBLET_HEADLESS=true
-# Ensure devtools is not turned on
-unset $GOBLET_DEV_TOOLS
 export GOBLET_MOUNT_ROOT=/home/runner/work
 export GH_WORKSPACE_PARENT_DIR=/home/runner/work
 export GOBLET_ACT_REPO_LOCATION=/goblet-action/repo-location
@@ -39,6 +55,7 @@ exitError(){
   exit "${STATUS}"
 }
 
+# Finds the value for an ENV and sets it
 getENVValue() {
   local ENV_NAME="${1}"
   local FOUND_VAL="${2:-$3}"
@@ -46,6 +63,50 @@ getENVValue() {
   if [ "$FOUND_VAL" ]; then
     eval "export $ENV_NAME=$FOUND_VAL"
   fi
+}
+
+# Pulls the value for an output, escapes it, then sets it as an output
+setOutput(){
+  local NAME="${1}"
+  local JQ="${2}"
+  local VAL=$(jq -r -M "$JQ" /home/runner/tap/temp/testMeta.json)
+
+  # Escape the paths so all paths can be captured by the output
+  VAL="${VAL//'%'/'%25'}"
+  VAL="${VAL//$'\n'/'%0A'}"
+  VAL="${VAL//$'\r'/'%0D'}"
+  echo "::set-output name=$NAME::$VAL"
+}
+
+# Clones an alternitive repo locally
+cloneAltRepo(){
+  cd $GOBLET_MOUNT_ROOT/goblet
+
+  # If git user and email not set, use the current user from existing the git log
+  [ -z "$GIT_ALT_USER" ] && export GIT_ALT_USER="$(git log --format='%ae' HEAD^!)"
+  [ -z "$GIT_ALT_EMAIL" ] && export GIT_ALT_EMAIL="$(git log --format='%an' HEAD^!)"
+
+  git config --local user.email "$GIT_ALT_USER"
+  git config --local user.name "$GIT_ALT_EMAIL"
+
+  # Clone the repo using the passed in token if it exists
+  local GIT_CLONE_TOKEN="${GIT_ALT_TOKEN:-$GOBLET_GIT_TOKEN}"
+  if [ "$GIT_CLONE_TOKEN" ]; then
+    git clone https://$GIT_CLONE_TOKEN@$GIT_ALT_REPO
+  else
+    git clone https://$GIT_ALT_REPO
+  fi
+
+  # Navigate into the repo so we can get the pull path from (pwd)
+  cd ./alt-repo
+
+  # If using a diff branch from default, fetch then checkout from origin
+  if [ "$GIT_ALT_BRANCH" ]; then
+    git fetch origin
+    git checkout -b $GIT_ALT_BRANCH origin/$GIT_ALT_BRANCH
+  fi
+
+  export GOBLET_CONFIG_BASE="$(pwd)"
 }
 
 # ---- Step 0 - Set ENVs from inputs if they don't already exist
@@ -81,9 +142,10 @@ setRunEnvs(){
   getENVValue "GOBLET_TEST_OPEN_HANDLES" "${20}" "$GOBLET_TEST_OPEN_HANDLES"
 
   getENVValue "GOBLET_BROWSERS" "${21}" "$GOBLET_BROWSERS"
-  getENVValue "GOBLET_BROWSER_SLOW_MO" "${22}" "$GOBLET_BROWSER_SLOW_MO"
-  getENVValue "GOBLET_BROWSER_CONCURRENT" "${23}" "$GOBLET_BROWSER_CONCURRENT"
-  getENVValue "GOBLET_BROWSER_TIMEOUT" "${24}" "$GOBLET_BROWSER_TIMEOUT"
+  getENVValue "GOBLET_BROWSER_DEBUG" "${22}" "$GOBLET_BROWSER_DEBUG"
+  getENVValue "GOBLET_BROWSER_SLOW_MO" "${23}" "$GOBLET_BROWSER_SLOW_MO"
+  getENVValue "GOBLET_BROWSER_CONCURRENT" "${24}" "$GOBLET_BROWSER_CONCURRENT"
+  getENVValue "GOBLET_BROWSER_TIMEOUT" "${25}" "$GOBLET_BROWSER_TIMEOUT"
 
   # Goblet App specific ENVs
   [ -z "$NODE_ENV" ] && export NODE_ENV=test
@@ -92,37 +154,6 @@ setRunEnvs(){
 
   getENVValue "GOBLET_GIT_TOKEN" "$GIT_ALT_TOKEN" "$GIT_TOKEN"
 
-}
-
-# Clones an alternitive repo locally
-cloneAltRepo(){
-  cd $GOBLET_MOUNT_ROOT/goblet
-
-  # If git user and email not set, use the current user from existing the git log
-  [ -z "$GIT_ALT_USER" ] && export GIT_ALT_USER="$(git log --format='%ae' HEAD^!)"
-  [ -z "$GIT_ALT_EMAIL" ] && export GIT_ALT_EMAIL="$(git log --format='%an' HEAD^!)"
-
-  git config --local user.email "$GIT_ALT_USER"
-  git config --local user.name "$GIT_ALT_EMAIL"
-
-  # Clone the repo using the passed in token if it exists
-  local GIT_CLONE_TOKEN="${GIT_ALT_TOKEN:-$GOBLET_GIT_TOKEN}"
-  if [ "$GIT_CLONE_TOKEN" ]; then
-    git clone https://$GIT_CLONE_TOKEN@$GIT_ALT_REPO
-  else
-    git clone https://$GIT_ALT_REPO
-  fi
-
-  # Navigate into the repo so we can get the pull path from (pwd)
-  cd ./alt-repo
-
-  # If using a diff branch from default, fetch then checkout from origin
-  if [ "$GIT_ALT_BRANCH" ]; then
-    git fetch origin
-    git checkout -b $GIT_ALT_BRANCH origin/$GIT_ALT_BRANCH
-  fi
-
-  export GOBLET_CONFIG_BASE="$(pwd)"
 }
 
 # ---- Step 2 - Synmlink the workspace folder to the repos folder
@@ -172,21 +203,33 @@ runTests(){
 
 }
 
-# ---- Step 6 - Output the result of the executed tests
+# ---- Step 5 - Output the result of the executed tests
+# Examples
+# jq -r -M '.latest.bdd.reports | map_values(.path)' /home/runner/tap/temp/testMeta.json
+# jq -r -M ".latest.bdd.recordings | to_entries | .[].value | to_entries | .[].value.path" /home/runner/tap/temp/testMeta.json
 setActionOutputs(){
+  # Set the test result state
   echo "::set-output name=result::$GOBLET_TESTS_RESULT"
+  # Reports always get generated, so no need for conditional
+  setOutput "report-paths" ".latest.$GOBLET_TEST_TYPE.reports | to_entries | .[].value.path"
 
-  local GOBLET_TESTS_REPORT_PATH=$(jq -r -M .latest.$GOBLET_TEST_TYPE.report.path /home/runner/tap/temp/testMeta.json)
-  echo "::set-output name=report-path::$GOBLET_TESTS_REPORT_PATH"
+  # Only set the record paths, if video record is turned on
+  if [ $GOBLET_TEST_VIDEO_RECORD ]; then
+    setOutput "video-paths" ".latest.$GOBLET_TEST_TYPE.recordings | to_entries | .[].value | to_entries | .[].value.path"
+  else
+    echo "::set-output name=video-paths::"
+  fi
 
-  # TODO: use jq to loop the the traces.tests and recording.tests and pull all the paths
-  # local GOBLET_TESTS_VIDEO_PATH=$(jq -r -M .latest.$GOBLET_TEST_TYPE.recording.tests.$GOBLET_TEST_NAME.path /home/runner/tap/temp/testMeta.json)
-  # echo "::set-output name=video-path::$GOBLET_TESTS_VIDEO_PATH"
-  
-  # local GOBLET_TESTS_TRACE_PATH=$(jq -r -M .latest.$GOBLET_TEST_TYPE.traces.tests.$GOBLET_TEST_NAME.path /home/runner/tap/temp/testMeta.json)
-  # echo "::set-output name=trace-path::$GOBLET_TESTS_TRACE_PATH"
+  # Only set the trace paths, if tracing record is turned on
+  if [ $GOBLET_TEST_TRACING ]; then
+    setOutput "trace-paths" ".latest.$GOBLET_TEST_TYPE.traces | to_entries | .[].value | to_entries | .[].value.path"
+  else
+    echo "::set-output name=trace-paths::"
+  fi
+
 }
 
+# Kicks off the test run...
 init() {(
   set -e
   setRunEnvs "$@"
@@ -198,4 +241,9 @@ init() {(
 init "$@"
 EXIT_STATUS=$?
 
+echo "------ EXIT_STATUS -------"
+echo "$EXIT_STATUS"
+
 [ ${EXIT_STATUS} -ne 0 ] && exitError "$EXIT_STATUS"
+
+

@@ -23,7 +23,8 @@ RUN rm -rf .*ignore && \
     rm -rf repos/backend && \
     rm -rf repos/example && \
     rm -rf repos/tap && \
-    rm -rf repos/workflows
+    rm -rf repos/workflows && \
+    mkdir -p temp
 COPY goblet-core/. /keg/tap/.
 
 FROM ghcr.io/gobletqa/goblet:develop as action-runner
