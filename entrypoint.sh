@@ -23,12 +23,10 @@
 # With Video && Trace
 # GOBLET_TEST_VIDEO_RECORD=1 GOBLET_TEST_TRACING=1 /goblet-action/entrypoint.sh test.feature
 
-
 # Exit when any command fails
-set -e
-set -o pipefail
+set -Eeo pipefail
 source /goblet-action/scripts/logger.sh
-
+trap exitError ERR
 
 # Ensure devtools is not turned on
 unset GOBLET_DEV_TOOLS
@@ -47,19 +45,18 @@ export GOBLET_RUN_FROM_CI=1
 [ "$GOBLET_TEST_NO_CI" ] && unset GOBLET_RUN_FROM_CI
 
 MOUNT_WORK_DIR=$(pwd)
+INVALID_TEST_TYPE=0
 
 exitError(){
-  echo "::set-output name=error::'$1'"
+  setActionOutputs
   echo "::set-output name=result::fail"
-  local STATUS="${1:-1}"
-  exit "${STATUS}"
+  exit 1
 }
 
 # Finds the value for an ENV and sets it
 getENVValue() {
   local ENV_NAME="${1}"
   local FOUND_VAL="${2:-$3}"
-
   if [ "$FOUND_VAL" ]; then
     eval "export $ENV_NAME=$FOUND_VAL"
   fi
@@ -118,7 +115,7 @@ setRunEnvs(){
   getENVValue "GIT_TOKEN" "${2}" $GIT_TOKEN
   getENVValue "GOBLET_TOKEN" "${3}" $GOBLET_TOKEN
   # TODO: Enable when goblet tokens are setup
-  # [ -z "$GOBLET_TOKEN" ] && exitError "Goblet Token is required."
+  # [ -z "$GOBLET_TOKEN" ] && Add some exit code here for missing token
 
   # Alt Repo ENVs
   getENVValue "GIT_ALT_REPO" "${4}" "$GIT_ALT_REPO"
@@ -172,7 +169,6 @@ runTests(){
   # Switch to the goblet dir and run the bdd test task
   cd /home/runner/tap
 
-
   local TEST_RUN_ARGS="--env $NODE_ENV --base $GOBLET_CONFIG_BASE"
   [ -z "$GOBLET_TEST_TYPE" ] && export GOBLET_TEST_TYPE="${GOBLET_TEST_TYPE:-bdd}"
 
@@ -196,12 +192,14 @@ runTests(){
     [ ${TEST_EXIT_STATUS} -ne 0 ] && export GOBLET_TESTS_RESULT="fail" || export GOBLET_TESTS_RESULT="pass"
     logMsg "Finished running tests for $GOBLET_TESTS_PATH"
 
-
   else
     logErr "Test type $GOBLET_TEST_TYPE not yet supported"
-    exitError "1"
+    echo "::set-output name=result::fail"
+    echo "::set-output name=video-paths::"
+    echo "::set-output name=trace-paths::"
+    echo "::set-output name=report-paths::"
+    exit 1
   fi
-
 }
 
 # ---- Step 5 - Output the result of the executed tests
@@ -209,8 +207,6 @@ runTests(){
 # jq -r -M '.latest.bdd.reports | map_values(.path)' /home/runner/tap/temp/testMeta.json
 # jq -r -M ".latest.bdd.recordings | to_entries | .[].value | to_entries | .[].value.path" /home/runner/tap/temp/testMeta.json
 setActionOutputs(){
-  # Set the test result state
-  echo "::set-output name=result::$GOBLET_TESTS_RESULT"
   # Reports always get generated, so no need for conditional
   setOutput "report-paths" ".latest.$GOBLET_TEST_TYPE.reports | to_entries | .[].value.path"
 
@@ -227,24 +223,14 @@ setActionOutputs(){
   else
     echo "::set-output name=trace-paths::"
   fi
-
 }
 
-# Kicks off the test run...
-init() {(
-  set -e
-  setRunEnvs "$@"
-  setupWorkspace "$@"
-  runTests "$@"
-  setActionOutputs "$@"
-)}
+# Kick off the test run...
+setRunEnvs "$@"
+setupWorkspace "$@"
+runTests "$@"
+setActionOutputs "$@"
 
-init "$@"
-EXIT_STATUS=$?
-
-echo "------ EXIT_STATUS -------"
-echo "$EXIT_STATUS"
-
-[ ${EXIT_STATUS} -ne 0 ] && exitError "$EXIT_STATUS"
-
+# Set the final result state, which should be pass if we get to this point
+echo "::set-output name=result::$GOBLET_TESTS_RESULT"
 

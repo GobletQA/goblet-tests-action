@@ -2,7 +2,7 @@
 name: 'Goblet Tests'
 description: 'Run Goblet tests in a github action'
 inputs:
-  goblet-test-context:
+  test-context:
     required: false
     description: 'Path or name to the tests to run. Runs all tests if not defined'
   git-token:
@@ -88,14 +88,12 @@ outputs:
     description: 'Paths of the generated playwright traces when trace is enabled'
   video-paths:
     description: 'Paths to the video recordings of executed tests when video record is enabled'
-  error:
-    description: 'Error message output when the action fails for a reason other than test execution'
 
 runs:
   using: 'docker'
   image: 'ghcr.io/gobletqa/goblet-tests-action:0.0.0'
   args:
-    - ${{ inputs.goblet-test-context }} #1
+    - ${{ inputs.test-context }} #1
     - ${{ inputs.git-token }} #2
     - ${{ inputs.goblet-token }} #3
     - ${{ inputs.alt-repo }} #4

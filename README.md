@@ -3,7 +3,7 @@
 
 ## Inputs
 
-### `goblet-test-context`
+### `test-context`
 * As ENV - `GOBLET_TESTS_PATH`
 * Path to the tests to run
 * **default** - Runs all tests if not defined
@@ -197,8 +197,7 @@
       /home/runner/work/goblet/repo/goblet/artifacts/videos/bdd/test/test-webkit-1657592734085.webm
     ```
 
-### `error`
-* Error message output when the action fails for a reason other than test execution
+
 
 ## Example usage
 
