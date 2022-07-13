@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 
+#
 # Init script to setup the test environment, then execute the tests based on passed in arguments
 # Is expected to be run inside a docker container
 # Run Tests Examples:
@@ -22,6 +22,7 @@
 #
 # With Video && Trace
 # GOBLET_TEST_VIDEO_RECORD=1 GOBLET_TEST_TRACING=1 /goblet-action/entrypoint.sh test.feature
+#
 
 # Exit when any command fails
 set -Eeo pipefail

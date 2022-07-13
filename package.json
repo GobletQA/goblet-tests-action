@@ -23,11 +23,13 @@
     "doc:dev": "yarn docker:dev $@",
     "docker:dev": "/bin/bash scripts/dockerDev.sh $@",
     "ddg": "/bin/bash scripts/dockerDev.sh goblet $@",
+    "ddgc": "GOBLET_BROWSERS=chrome /bin/bash scripts/dockerDev.sh goblet $@",
     "dr": "yarn docker:run $@",
     "drg": "/bin/bash scripts/dockerRun.sh goblet $@",
     "drc": "GOBLET_BROWSERS=chrome yarn docker:run $@",
     "drf": "GOBLET_BROWSERS=firefox yarn docker:run $@",
     "drw": "GOBLET_BROWSERS=webkit yarn docker:run $@",
+    "drgc": "GOBLET_BROWSERS=chrome /bin/bash scripts/dockerRun.sh goblet $@",
     "doc:run": "yarn docker:run $@",
     "docker:run": "/bin/bash scripts/dockerRun.sh $@"
   },
