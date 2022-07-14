@@ -208,6 +208,12 @@ runTests(){
 # jq -r -M '.latest.bdd.reports | map_values(.path)' /home/runner/tap/temp/testMeta.json
 # jq -r -M ".latest.bdd.recordings | to_entries | .[].value | to_entries | .[].value.path" /home/runner/tap/temp/testMeta.json
 setActionOutputs(){
+
+  # Only run the outputs when running in CI
+  if [ -z "$GOBLET_RUN_FROM_CI" ]; then
+    return
+  fi
+
   # Reports always get generated, so no need for conditional
   setOutput "report-paths" ".latest.$GOBLET_TEST_TYPE.reports | to_entries | .[].value.path"
 
