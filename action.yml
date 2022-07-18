@@ -1,5 +1,5 @@
 # action.yml
-name: 'Goblet Tests'
+name: 'GobletQA Tests'
 description: 'Run Goblet tests in a github action'
 inputs:
   test-context:
