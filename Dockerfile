@@ -11,7 +11,7 @@ RUN rm -rf .*ignore && \
     rm -rf configs/eslintrc.config.js && \
     rm -rf configs/firebase.config.js && \
     rm -rf configs/lint-staged.config.js && \
-    rm -rf configs/nodemon* && \
+    rm -rf configs/pm2.config.js && \
     rm -rf configs/prettier.config.js && \
     rm -rf container && \
     rm -rf docs && \
@@ -21,7 +21,7 @@ RUN rm -rf .*ignore && \
     rm -rf scripts && \
     rm -rf repos/admin && \
     rm -rf repos/backend && \
-    rm -rf repos/example && \
+    rm -rf repos/conductor && \
     rm -rf repos/tap && \
     rm -rf repos/workflows && \
     mkdir -p temp
