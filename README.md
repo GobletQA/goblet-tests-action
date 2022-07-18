@@ -11,118 +11,145 @@
 ### `git-token`
 * As ENV - `GOBLET_GIT_TOKEN` || `GIT_TOKEN`
 * Github Auth Token or Personal Access Token (PAT)
-
-### `report`
-* As ENV - `GOBLET_TEST_REPORT_NAME`
-* Name of the report file generated from the test results
-* **default** - `<timestamp>-goblet-report` (value of <timestamp> is generated at runtime)
+* **default** - `undefined`
 
 ### `alt-repo`
 * As ENV - `GIT_ALT_REPO`
 * Alternative repository that contains the tests to be run
 * Should follow the pattern of `https://<git-token>@domain/owner/repo.git`
   * For example  `github.com/octokitty/app-tests.git`
+* **default** - `undefined`
 
 ### `alt-branch`
 * As ENV - `GIT_ALT_BRANCH`
 * Name of the branch to use for the alternative repository.
-* Defaults to the alternative repositories default branch
+* **default** - The alternative repositories default branch
 
 ### `alt-user`
 * As ENV - `GIT_ALT_USER`
 * Github user name or organization with write access to the alternative repository.
-* Defaults to the `current git user`
+* **default** - current `git user`
 
 ### `alt-email`
 * As ENV - `GIT_ALT_EMAIL`
 * Email of user with write access to the alternative repository.
-* Defaults to the `current git users email`
+* **default** - current `git users email`
 
 ### `alt-token`
 * As ENV - `GIT_ALT_TOKEN`
 * Github Token with write access to the alternative repository.
 * Checks the following envs in order `GIT_ALT_TOKEN`, `GOBLET_GIT_TOKEN`, `GIT_TOKEN` 
+* **default** - Value of the `git-token` input
 
 ### `test-type`
 * Type of tests to be run that are supported by the Goblet Platform
 * Can be one of `bdd`, `waypoint`, or `unit`
-* Default to `bdd`
+* **default** - `bdd`
 
 ### `test-retry`
 * As ENV - `GOBLET_TEST_RETRY`
 * Number of times a failed test should be retried
-* Defaults to `undefined` - Tests are **NOT** retried
+* **default** - `undefined` - Tests are **NOT** retried
+
+### `test-report`
+* As ENV - `GOBLET_TEST_REPORT`
+* Generate an html formatted test report for all executed tests 
+* Value must be one of `true` | `1` | `failed` | `always` | `never` | `0` | `false`
+  * `failed` - Enable only for test runs that failed
+    * **IMPORTANT** - Both `true` | `1` are synonyms of `failed`
+  * `alway` - Enable regardless of `pass` or `fail` test status
+  * `never` - Disabled regardless of `pass` or `fail` test status
+    * **IMPORTANT** - Both `false` | `0` are synonyms of `never`
+* **default** - `false`
 
 ### `test-tracing`
 * As ENV - `GOBLET_TEST_TRACING`
 * Enabled test tracing via playwright. See more [here](https://playwright.dev/docs/api/class-tracing)
-* Defaults to `false`
+* Value must be one of `true` | `1` | `failed` | `always` | `never` | `0` | `false`
+  * `failed` - Enable only for tests that failed
+    * **IMPORTANT** - Both `true` | `1` are synonyms of `failed`
+  * `alway` - Enable regardless of `pass` or `fail` test status
+  * `never` - Disabled regardless of `pass` or `fail` test status
+    * **IMPORTANT** - Both `false` | `0` are synonyms of `never`
+* **default** - `false`
 
 ### `test-screenshot`
 * **IMPORTANT** - Not currently implemented. Use `test-tracing` instead
 * As ENV - `GOBLET_TEST_SCREENSHOT`
 * Enabled browser image snapshots for failed tests. Ignored if `test-tracing` is `true`
-* Defaults to `false`
+* Value must be one of `true` | `1` | `failed` | `always` | `never` | `0` | `false`
+  * `failed` - Enable only for tests that failed
+    * **IMPORTANT** - Both `true` | `1` are synonyms of `failed`
+  * `alway` - Enable regardless of `pass` or `fail` test status
+  * `never` - Disabled regardless of `pass` or `fail` test status
+    * **IMPORTANT** - Both `false` | `0` are synonyms of `never`
+* **default** - `false`
 
 ### `test-record`
 * As ENV - `GOBLET_TEST_VIDEO_RECORD`
-* Enabled browser video recording via playwright.
-* Defaults to `false`
+* Enabled browser video recording via playwright
+* Value must be one of `true` | `1` | `failed` | `always` | `never` | `0` | `false`
+  * `failed` - Enable only for tests that failed
+    * **IMPORTANT** - Both `true` | `1` are synonyms of `failed`
+  * `alway` - Enable regardless of `pass` or `fail` test status
+  * `never` - Disabled regardless of `pass` or `fail` test status
+    * **IMPORTANT** - Both `false` | `0` are synonyms of `never`
+* **default** - `false`
 
 ### `test-timeout`
 * As ENV - `GOBLET_TEST_TIMEOUT`
 * Amount of time for a test to wait until it times out and is then marked as failed
-* Defaults to `30000` milliseconds (30 seconds)
+* **default** - `30000` milliseconds (30 seconds)
 
 ### `test-cache`
 * As ENV - `GOBLET_TEST_CACHE`
 * Use internal test cache when executing test
-* Defaults to `true`
+* **default** - `true`
 
 ### `test-colors`
 * As ENV - `GOBLET_TEST_COLORS`
 * Force use of colors even when not a TTY
-* Defaults to `true`
+* **default** - `true`
 
 ### `test-workers`
 * As ENV - `GOBLET_TEST_WORKERS`
 * Number of workers to use when running tests
-* Defaults to `50%`
+* **default** - `50%`
 
 ### `test-verbose`
 * As ENV - `GOBLET_TEST_VERBOSE`
 * Output verbose test results as the tests run
-* Defaults to `false`
+* **default** - `false`
 
 ### `test-open-handles`
 * As ENV - `GOBLET_TEST_OPEN_HANDLES`
 * Detect handles left open when tests run, **AND** forces tests to run in sync.
-* Defaults to `false`
+* **default** - `false`
 
 ### `browsers`
 * As ENV - `GOBLET_BROWSERS`
 * Comma separated list of Browsers to execute tests against
-* Defaults to all browsers - `chrome`, `firefox` and `webkit`
+* **default** - all browsers - `chrome`, `firefox` and `webkit`
 
 ### `browser-debug`
 * As ENV - `GOBLET_BROWSER_DEBUG`
 * Log the debug output of the playwright browser
-* Defaults to `false`
+* **default** - `false`
 
 ### `browser-slow-mo`
 * As ENV - `GOBLET_BROWSER_SLOW_MO`
 * Slow down the actions executed with-in a browser while executing tests in milliseconds
-* Defaults to `100` milliseconds
+* **default** - `100` milliseconds
 
 ### `browser-concurrent:`
 * As ENV - `GOBLET_BROWSER_CONCURRENT`
 * Run the tests in each defined browser at the same time
-* Defaults to `false`
+* **default** - `false`
 
 ### `browser-timeout`
 * As ENV - `GOBLET_BROWSER_TIMEOUT`
 * Amount of time for the browser to wait until it times out and the corresponding test fails
-* Defaults to `15000` milliseconds (15 seconds)
+* **default** - `15000` milliseconds (15 seconds)
 
 
 ## Outputs
@@ -134,6 +161,7 @@
 * Result of the Goblet test execution. One of `pass` or `fail`
 
 ### `report-paths`
+* **Important** - The `test-report` input must be set to `true`
 * Paths to the generated html test reports for each browser that ran
 * A single report is created for **ALL** test files that are run
 * Examples
@@ -155,6 +183,7 @@
     ```
 
 ### `trace-paths`
+* **Important** - The `test-tracing` input must be set to `true`
 * Paths of the generated playwright traces when trace is enabled
 * Separate traces are created for **EVERY** test file that is run
 * Examples
@@ -177,6 +206,7 @@
 
 
 ### `video-paths`
+* **Important** - The `test-record` input must be set to `true`
 * Paths to the video recordings of executed tests when video record is enabled
 * Separate videos are recorded for **EVERY** test file that is run
 * Examples
@@ -197,8 +227,6 @@
       /home/runner/work/goblet/repo/goblet/artifacts/videos/bdd/test/test-webkit-1657592734085.webm
     ```
 
-
-
 ## Example usage
 
 ### Basic
@@ -206,7 +234,8 @@
 - name: Run Goblet Tests
   uses: gobletqa/goblet-tests-action@0.0.1
   with:
-    report: ${{ github.sha }}
+    test-context: dashboard # All tests with the word `dashboard` in their title will be run
+    test-report: true
 ```
 
 ### With Tracing and Video Recording
@@ -224,7 +253,7 @@
 - name: Run Goblet Tests
   uses: gobletqa/goblet-tests-action@0.0.1
   with:
-    alt-branch: develop # defaults to the repos default branch branch. I.E. main / master
+    alt-branch: develop # Defaults to the repos default branch branch. I.E. main / master
     alt-repo: github.com/octokitty/app-tests # URI to the repo, EXCLUDING the protocol I.E. github.com/owner/repo.git
     alt-token: secrets.ALT_TEST_REPO_TOKEN # Must be a OAuth or PAT that has access to the alternative repository
     alt-user: secrets.ALT_TEST_USER # User related to the git token used for the `alt-token` input

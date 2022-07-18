@@ -28,7 +28,7 @@ FROM ghcr.io/gobletqa/goblet:develop as action-runner
 
 # Copy over the cleaned up Goblet repo from the previous step
 COPY --from=action-installer /keg/tap /home/runner/tap
-RUN apt-get install jq -y && \
+RUN apt-get install jq -y --no-install-recommends && \
     apt-get clean && \
     cd /home/runner/tap && \
     npx playwright install --with-deps

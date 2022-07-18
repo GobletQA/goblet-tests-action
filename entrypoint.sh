@@ -68,7 +68,12 @@ getENVValue() {
 setOutput(){
   local NAME="${1}"
   local JQ="${2}"
-  local VAL=$(jq -r -M "$JQ" /home/runner/tap/temp/testMeta.json)
+  local VAL=$(jq -r -M "$JQ" /home/runner/tap/temp/testMeta.json 2>/dev/null)
+
+  if [ -z "$VAL" ]; then
+    echo "::set-output name=$NAME::"
+    return
+  fi
 
   # Escape the paths so all paths can be captured by the output
   VAL="${VAL//'%'/'%25'}"
@@ -108,6 +113,30 @@ cloneAltRepo(){
   export GOBLET_CONFIG_BASE="$(pwd)"
 }
 
+# Helper to check if a generated file should exist, and if we should set it to an output
+checkForSaveValue(){
+
+  local ENV_NAME="${1}"
+  local ENV_VAL="${!ENV_NAME}"
+
+  # If the env is set to always, then report should exist
+  if [ "$ENV_VAL" == "always" ]; then
+    setOutput "${2}" "${3}"
+
+  # If the tests failed, and the env is set to failed, true, or 1
+  # Then a test report should exist
+  elif [ "$GOBLET_TESTS_RESULT" == "fail" ]; then
+    if [ "$ENV_VAL" == "failed" ] || [ "$ENV_VAL" == true ] || [ "$ENV_VAL" == 1 ]; then
+      setOutput "${2}" "${3}"
+    fi
+
+  # If no value, or it's disabled then set empty and return
+  else
+    echo "::set-output name=${2}::"
+  fi
+
+}
+
 # ---- Step 0 - Set ENVs from inputs if they don't already exist
 # Goblet Action specific ENVs
 setRunEnvs(){
@@ -128,7 +157,7 @@ setRunEnvs(){
   # Goblet Test specific ENVs
   getENVValue "GOBLET_TEST_TYPE" "${9}" "$GOBLET_TEST_TYPE"
   getENVValue "GOBLET_TEST_RETRY" "${10}" "$GOBLET_TEST_RETRY"
-  getENVValue "GOBLET_TEST_REPORT_NAME" "${11}" "$GOBLET_TEST_REPORT_NAME"
+  getENVValue "GOBLET_TEST_REPORT" "${11}" "$GOBLET_TEST_REPORT"
   getENVValue "GOBLET_TEST_TRACING" "${12}" "$GOBLET_TEST_TRACING"
   getENVValue "GOBLET_TEST_SCREENSHOT" "${13}" "$GOBLET_TEST_SCREENSHOT"
   getENVValue "GOBLET_TEST_VIDEO_RECORD" "${14}" "$GOBLET_TEST_VIDEO_RECORD"
@@ -194,6 +223,7 @@ runTests(){
     logMsg "Finished running tests for $GOBLET_TESTS_PATH"
 
   else
+    export GOBLET_TESTS_RESULT="fail"
     logErr "Test type $GOBLET_TEST_TYPE not yet supported"
     echo "::set-output name=result::fail"
     echo "::set-output name=video-paths::"
@@ -207,6 +237,8 @@ runTests(){
 # Examples
 # jq -r -M '.latest.bdd.reports | map_values(.path)' /home/runner/tap/temp/testMeta.json
 # jq -r -M ".latest.bdd.recordings | to_entries | .[].value | to_entries | .[].value.path" /home/runner/tap/temp/testMeta.json
+# setOutput "report-paths" ".latest.bdd.reports | to_entries | .[].value.path"
+# setOutput "video-paths" ".latest.bdd.recordings | to_entries | .[].value | to_entries | .[].value.path"
 setActionOutputs(){
 
   # Only run the outputs when running in CI
@@ -214,22 +246,21 @@ setActionOutputs(){
     return
   fi
 
-  # Reports always get generated, so no need for conditional
-  setOutput "report-paths" ".latest.$GOBLET_TEST_TYPE.reports | to_entries | .[].value.path"
-
+  # Only set the reports paths, if test reports is turned on
+  checkForSaveValue "GOBLET_TEST_REPORT" \
+    "report-paths" \
+    ".latest.$GOBLET_TEST_TYPE.reports | to_entries | .[].value.path"
+  
   # Only set the record paths, if video record is turned on
-  if [ $GOBLET_TEST_VIDEO_RECORD ]; then
-    setOutput "video-paths" ".latest.$GOBLET_TEST_TYPE.recordings | to_entries | .[].value | to_entries | .[].value.path"
-  else
-    echo "::set-output name=video-paths::"
-  fi
+  checkForSaveValue "GOBLET_TEST_VIDEO_RECORD" \
+    "video-paths" \
+    ".latest.$GOBLET_TEST_TYPE.recordings | to_entries | .[].value | to_entries | .[].value.path"
 
   # Only set the trace paths, if tracing record is turned on
-  if [ $GOBLET_TEST_TRACING ]; then
-    setOutput "trace-paths" ".latest.$GOBLET_TEST_TYPE.traces | to_entries | .[].value | to_entries | .[].value.path"
-  else
-    echo "::set-output name=trace-paths::"
-  fi
+  checkForSaveValue "GOBLET_TEST_TRACING" \
+    "trace-paths" \
+    ".latest.$GOBLET_TEST_TYPE.traces | to_entries | .[].value | to_entries | .[].value.path"
+
 }
 
 # Kick off the test run...
