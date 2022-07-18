@@ -1,8 +1,5 @@
 FROM ghcr.io/gobletqa/goblet:develop as action-installer
 WORKDIR /keg/tap
-COPY goblet-core/yarn.lock /keg/tap/yarn.lock
-COPY goblet-core/package.json /keg/tap/package.json
-RUN yarn install --non-interactive --ignore-optional
 # Clean up Goblet so it only includes the stuff we need to run tests
 # This will be better handled when the repo is cleaned up
 RUN rm -rf .*ignore && \
