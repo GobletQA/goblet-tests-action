@@ -7,8 +7,8 @@ IMAGE_NAME=$npm_package_displayName
 IMAGE_VERSION=$npm_package_version
 IMAGE_FULL=ghcr.io/gobletqa/$IMAGE_NAME:$IMAGE_VERSION
 
-TEST_REPO_NAME=goblet/repo
-REPO_WORK_DIR=/home/runner/work/$TEST_REPO_NAME
+TEST_REPO_NAME=test-repo
+REPO_WORK_DIR=/github/workspace
 MOUNTS="-v $(pwd):/goblet-action"
 
 GIT_TOKEN=$(keg key print)
@@ -23,13 +23,13 @@ while [[ $# -gt 0 ]]; do
   case $1 in
     -g|--goblet)
       logMsg "Mounting goblet repo"
-      MOUNTS="$MOUNTS -v $(keg goblet path):/home/runner/tap"
+      MOUNTS="$MOUNTS -v $(keg goblet path):/github/tap"
       shift
       ;;
     -m|--mount)
       export HAS_WORK_MOUNT_REPO=1
       logMsg "Mounting test repo $1"
-      MOUNTS="$MOUNTS -v $1:/home/runner/work/$TEST_REPO_NAME"
+      MOUNTS="$MOUNTS -v $1:/github/$TEST_REPO_NAME"
     ;;
     -r|--repo)
       export HAS_WORK_MOUNT_REPO=1
@@ -72,7 +72,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # If no mount repo was set, then pass in the default mount repo
-[ -z "$HAS_WORK_MOUNT_REPO" ] && MOUNTS="$MOUNTS -v $(keg sgt path):/home/runner/work/$TEST_REPO_NAME"
+[ -z "$HAS_WORK_MOUNT_REPO" ] && MOUNTS="$MOUNTS -v $(keg sgt path):/github/$TEST_REPO_NAME"
 
 # If mounts are disabled, set the variable to an empty string
 [ "$NO_MOUNTS" ] && MOUNTS=""

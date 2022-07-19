@@ -168,18 +168,18 @@
   * Output with all browsers
     * Escaped Output
     ```sh
-      /home/runner/work/goblet/repo/goblet/reports/feature/test/test-chromium-1657592644482.html%0A/home/runner/work/goblet/repo/goblet/reports/feature/test/test-webkit-1657592644482.html%0A/home/runner/work/goblet/repo/goblet/reports/feature/test/test-firefox-1657592644482.html
+      /github/workspace/goblet/reports/feature/test/test-chromium-1657592644482.html%0A/github/workspace/goblet/reports/feature/test/test-webkit-1657592644482.html%0A/github/workspace/goblet/reports/feature/test/test-firefox-1657592644482.html
     ```
     * Unescaped Output
     ```sh
-      /home/runner/work/goblet/repo/goblet/reports/feature/test/test-chromium-1657592644482.html
-      /home/runner/work/goblet/repo/goblet/reports/feature/test/test-webkit-1657592644482.html
-      /home/runner/work/goblet/repo/goblet/reports/feature/test/test-firefox-1657592644482.html
+      /github/workspace/goblet/reports/feature/test/test-chromium-1657592644482.html
+      /github/workspace/goblet/reports/feature/test/test-webkit-1657592644482.html
+      /github/workspace/goblet/reports/feature/test/test-firefox-1657592644482.html
     ```
   * Output with only Webkit browser
     * Unescaped and Escaped Output is the same
     ```sh
-      /home/runner/work/goblet/repo/goblet/reports/feature/test/test-webkit-1657584807895.html
+      /github/workspace/goblet/reports/feature/test/test-webkit-1657584807895.html
     ```
 
 ### `trace-paths`
@@ -190,18 +190,18 @@
   * Output with all browsers
     * Escaped Output
     ```sh
-      /home/runner/work/goblet/repo/goblet/artifacts/traces/bdd/test/test-chromium-1657592733262.zip%0A/home/runner/work/goblet/repo/goblet/artifacts/traces/bdd/test/test-webkit-1657592734085.zip%0A/home/runner/work/goblet/repo/goblet/reports/traces/bdd/test/test-firefox-1657590811091.zip
+      /github/workspace/goblet/artifacts/traces/bdd/test/test-chromium-1657592733262.zip%0A/github/workspace/goblet/artifacts/traces/bdd/test/test-webkit-1657592734085.zip%0A/github/workspace/goblet/reports/traces/bdd/test/test-firefox-1657590811091.zip
     ```
     * Unescaped Output
     ```sh
-      /home/runner/work/goblet/repo/goblet/artifacts/traces/bdd/test/test-chromium-1657592733262.zip
-      /home/runner/work/goblet/repo/goblet/artifacts/traces/bdd/test/test-webkit-1657592734085.zip
-      /home/runner/work/goblet/repo/goblet/artifacts/traces/bdd/test/test-firefox-1657590811091.zip
+      /github/workspace/goblet/artifacts/traces/bdd/test/test-chromium-1657592733262.zip
+      /github/workspace/goblet/artifacts/traces/bdd/test/test-webkit-1657592734085.zip
+      /github/workspace/goblet/artifacts/traces/bdd/test/test-firefox-1657590811091.zip
     ```
   * Output with only Webkit browser
     * Unescaped and Escaped Output is the same
     ```sh
-      /home/runner/work/goblet/repo/goblet/artifacts/traces/bdd/test/test-webkit-1657592734085.zip
+      /github/workspace/goblet/artifacts/traces/bdd/test/test-webkit-1657592734085.zip
     ```
 
 
@@ -213,18 +213,18 @@
   * Output with all browsers
     * Escaped Output
     ```sh
-      /home/runner/work/goblet/repo/goblet/artifacts/videos/bdd/test/test-webkit-1657592734085.webm%0A/home/runner/work/goblet/repo/goblet/artifacts/videos/bdd/test/test-chromium-1657592733262.webm%0A/home/runner/work/goblet/repo/goblet/artifacts/videos/bdd/test/test-firefox-1657591132585.webm
+      /github/workspace/goblet/artifacts/videos/bdd/test/test-webkit-1657592734085.webm%0A/github/workspace/goblet/artifacts/videos/bdd/test/test-chromium-1657592733262.webm%0A/github/workspace/goblet/artifacts/videos/bdd/test/test-firefox-1657591132585.webm
     ```
     * Unescaped Output
     ```sh
-      /home/runner/work/goblet/repo/goblet/artifacts/videos/bdd/test/test-chromium-1657592733262.webm
-      /home/runner/work/goblet/repo/goblet/artifacts/videos/bdd/test/test-webkit-1657592734085.webm
-      /home/runner/work/goblet/repo/goblet/artifacts/videos/bdd/test/test-firefox-1657591132585.webm
+      /github/workspace/goblet/artifacts/videos/bdd/test/test-chromium-1657592733262.webm
+      /github/workspace/goblet/artifacts/videos/bdd/test/test-webkit-1657592734085.webm
+      /github/workspace/goblet/artifacts/videos/bdd/test/test-firefox-1657591132585.webm
     ```
   * Output with only Webkit browser
     * Unescaped and Escaped Output is the same
     ```sh
-      /home/runner/work/goblet/repo/goblet/artifacts/videos/bdd/test/test-webkit-1657592734085.webm
+      /github/workspace/goblet/artifacts/videos/bdd/test/test-webkit-1657592734085.webm
     ```
 
 ## Example usage

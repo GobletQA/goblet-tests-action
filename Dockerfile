@@ -27,22 +27,22 @@ COPY goblet-core/. /keg/tap/.
 FROM ghcr.io/gobletqa/goblet:develop as action-runner
 
 # Copy over the cleaned up Goblet repo from the previous step
-COPY --from=action-installer /keg/tap /home/runner/tap
+COPY --from=action-installer /keg/tap /github/tap
 RUN apt-get install jq -y --no-install-recommends && \
     apt-get clean && \
-    cd /home/runner/tap && \
+    cd /github/tap && \
     npx playwright install --with-deps
 
 # Symlink the parent folder of the github workspace to the repos folder
 # This ensures the correct folder locations exist for goblet
 # We must run Jest from a parent folder of both goblet and the github workspace
 RUN rm -rf /keg && \
-    ln -s /home/runner /keg && \
+    ln -s /github /keg && \
     mkdir -p /keg/work && \
-    ln -s /home/runner/work /keg/repos && \
+    ln -s /github/work /keg/repos && \
     rm -rf $HOME/.node_modules && \
-    ln -s /home/runner/tap/node_modules $HOME/.node_modules && \
-    ln -s /home/runner/tap/node_modules /home/runner/node_modules
+    ln -s /github/tap/node_modules $HOME/.node_modules && \
+    ln -s /github/tap/node_modules /github/node_modules
 
 COPY . /goblet-action
 

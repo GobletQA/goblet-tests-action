@@ -38,8 +38,7 @@ unset DEBUG
 # Force headless mode in CI environment
 export GOBLET_HEADLESS=true
 export GIT_ALT_REPO_DIR=alt
-export GOBLET_MOUNT_ROOT=/home/runner/work
-export GH_WORKSPACE_PARENT_DIR=/home/runner/work
+export GOBLET_MOUNT_ROOT=/github
 export GOBLET_ACT_REPO_LOCATION=/goblet-action
 export GOBLET_CONFIG_BASE="$GITHUB_WORKSPACE"
 
@@ -69,7 +68,7 @@ getENVValue() {
 setOutput(){
   local NAME="${1}"
   local JQ="${2}"
-  local VAL=$(jq -r -M "$JQ" /home/runner/tap/temp/testMeta.json 2>/dev/null)
+  local VAL=$(jq -r -M "$JQ" /github/tap/temp/testMeta.json 2>/dev/null)
 
   if [ -z "$VAL" ]; then
     echo "::set-output name=$NAME::"
@@ -85,7 +84,7 @@ setOutput(){
 
 # Clones an alternitive repo locally
 cloneAltRepo(){
-  cd $GOBLET_MOUNT_ROOT/goblet
+  cd $GOBLET_MOUNT_ROOT
 
   # TODO: Investigate if setting the user is even needed
   # Typeically only needed to push, which we are not doing here
@@ -202,7 +201,7 @@ runTests(){
   logMsg "Running Tests..."
   # Goblet test run specific ENVs - customizable
   # Switch to the goblet dir and run the bdd test task
-  cd /home/runner/tap
+  cd /github/tap
 
   local TEST_RUN_ARGS="--env $NODE_ENV --base $GOBLET_CONFIG_BASE"
   [ -z "$GOBLET_TEST_TYPE" ] && export GOBLET_TEST_TYPE="${GOBLET_TEST_TYPE:-bdd}"
@@ -240,8 +239,8 @@ runTests(){
 
 # ---- Step 5 - Output the result of the executed tests
 # Examples
-# jq -r -M '.latest.bdd.reports | map_values(.path)' /home/runner/tap/temp/testMeta.json
-# jq -r -M ".latest.bdd.recordings | to_entries | .[].value | to_entries | .[].value.path" /home/runner/tap/temp/testMeta.json
+# jq -r -M '.latest.bdd.reports | map_values(.path)' /github/tap/temp/testMeta.json
+# jq -r -M ".latest.bdd.recordings | to_entries | .[].value | to_entries | .[].value.path" /github/tap/temp/testMeta.json
 # setOutput "report-paths" ".latest.bdd.reports | to_entries | .[].value.path"
 # setOutput "video-paths" ".latest.bdd.recordings | to_entries | .[].value | to_entries | .[].value.path"
 setActionOutputs(){
