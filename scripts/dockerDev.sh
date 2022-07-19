@@ -60,6 +60,36 @@ while [[ $# -gt 0 ]]; do
       export NO_MOUNTS=1
       shift
       ;;
+    -h|--report)
+      export GOBLET_TEST_REPORT="$2"
+      shift
+      shift
+      ;;
+    -t|--tracing)
+      export GOBLET_TEST_TRACING="$2"
+      shift
+      shift
+      ;;
+    -v|--video)
+      export GOBLET_TEST_VIDEO_RECORD="$2"
+      shift
+      shift
+      ;;
+    -c|--chrome)
+      logMsg "Test with browser - chrome"
+      export GOBLET_BROWSERS="chrome"
+      shift
+      ;;
+    -f|--firefox)
+      logMsg "Test with browser - firefox"
+      export GOBLET_BROWSERS="firefox"
+      shift
+      ;;
+    -w|--webkit)
+      logMsg "Test with browser - webkit"
+      export GOBLET_BROWSERS="webkit"
+      shift
+      ;;
     -*|--*)
       logErr "Unknown option $1"
       shift
@@ -105,6 +135,7 @@ docker run --rm -it \
   -e GITHUB_EVENT_NAME=workflow_dispatch \
   -e GITHUB_WORKFLOW=goblet-action-workflow \
   -e GITHUB_REF=refs/heads/run-goblet-action \
+  -e GOBLET_BROWSERS=${GOBLET_BROWSERS:-all} \
   -e GITHUB_WORKSPACE=$REPO_WORK_DIR \
   --name goblet-action \
   --entrypoint /bin/bash \

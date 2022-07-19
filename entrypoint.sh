@@ -48,8 +48,16 @@ MOUNT_WORK_DIR=$(pwd)
 INVALID_TEST_TYPE=0
 
 exitError(){
+
+  echo "----- exitError -----"
+
+  GOBLET_TESTS_RESULT="fail"
+  echo "----- exitError - GOBLET_TESTS_RESULT -----"
+  echo "$GOBLET_TESTS_RESULT"
+  echo "----- exitError - GOBLET_TESTS_RESULT -----"
+  
+  echo "::set-output name=result::$GOBLET_TESTS_RESULT"
   setActionOutputs
-  echo "::set-output name=result::fail"
   exit 1
 }
 
@@ -119,18 +127,29 @@ cloneAltRepo(){
 # Helper to check if a generated file should exist, and if we should set it to an output
 checkForSaveValue(){
 
+  echo "----- checkForSaveValue -----"
+
   local ENV_NAME="${1}"
   local ENV_VAL="${!ENV_NAME}"
+
+  echo "----- ENV_NAME / ENV_VAL ----"
+  echo "$ENV_NAME / $ENV_VAL"
+  echo "----- ENV_NAME / ENV_VAL ----"
 
   # If the env is set to always, then report should exist
   if [ "$ENV_VAL" == "always" ]; then
     setOutput "${2}" "${3}"
+    logMsg "Test Artifacts found for ${2} output:"
+    echo "${3}"
 
   # If the tests failed, and the env is set to failed, true, or 1
   # Then a test report should exist
   elif [ "$GOBLET_TESTS_RESULT" == "fail" ]; then
     if [ "$ENV_VAL" == "failed" ] || [ "$ENV_VAL" == true ] || [ "$ENV_VAL" == 1 ]; then
       setOutput "${2}" "${3}"
+      logMsg "Test Artifacts found for ${2} output:"
+      echo "${3}"
+
     fi
 
   # If no value, or it's disabled then set empty and return
@@ -219,10 +238,19 @@ runTests(){
       TEST_RUN_ARGS="$TEST_RUN_ARGS --browsers $GOBLET_BROWSERS"
     fi
 
+    echo "------- Before Tests ------"
     node ./tasks/runTask.js bdd run $TEST_RUN_ARGS
-    local TEST_EXIT_STATUS=$?
+    TEST_EXIT_STATUS=$?
+    echo "------- After Tests ------"
 
-    [ ${TEST_EXIT_STATUS} -ne 0 ] && export GOBLET_TESTS_RESULT="fail" || export GOBLET_TESTS_RESULT="pass"
+    if [ ${TEST_EXIT_STATUS} -ne 0 ]; then
+      export GOBLET_TESTS_RESULT="fail"
+      logErr "($GOBLET_TESTS_RESULT): One of more of the executed tests failed"
+    else
+      export GOBLET_TESTS_RESULT="pass"
+      logMsg "($GOBLET_TESTS_RESULT): All executed tests passed"
+    fi
+
     logMsg "Finished running tests for $GOBLET_TESTS_PATH"
 
   else
@@ -237,17 +265,13 @@ runTests(){
 }
 
 # ---- Step 5 - Output the result of the executed tests
-# Examples
-# jq -r -M '.latest.bdd.reports | map_values(.path)' /github/tap/temp/testMeta.json
-# jq -r -M ".latest.bdd.recordings | to_entries | .[].value | to_entries | .[].value.path" /github/tap/temp/testMeta.json
-# setOutput "report-paths" ".latest.bdd.reports | to_entries | .[].value.path"
-# setOutput "video-paths" ".latest.bdd.recordings | to_entries | .[].value | to_entries | .[].value.path"
 setActionOutputs(){
 
   # Only run the outputs when running in CI
-  if [ -z "$GOBLET_RUN_FROM_CI" ]; then
-    return
-  fi
+  # if [ -z "$GOBLET_RUN_FROM_CI" ]; then
+  #   return
+  # fi
+  logMsg "------ setActionOutputs -----"
 
   # Only set the reports paths, if test reports is turned on
   checkForSaveValue "GOBLET_TEST_REPORT" \
@@ -271,6 +295,11 @@ setRunEnvs "$@"
 setupWorkspace "$@"
 runTests "$@"
 setActionOutputs "$@"
+
+echo "------- /github/tap/temp/testMeta.json ----"
+cat /github/tap/temp/testMeta.json
+echo "------- /github/tap/temp/testMeta.json ----"
+
 
 # Set the final result state, which should be pass if we get to this point
 echo "::set-output name=result::$GOBLET_TESTS_RESULT"

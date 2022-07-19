@@ -62,6 +62,39 @@ while [[ $# -gt 0 ]]; do
       export NO_MOUNTS=1
       shift
       ;;
+    -h|--report)
+      logMsg "Test reports enabled as - $2"
+      export GOBLET_TEST_REPORT="$2"
+      shift
+      shift
+      ;;
+    -t|--tracing)
+      logMsg "Test tracing enabled as - $2"
+      export GOBLET_TEST_TRACING="$2"
+      shift
+      shift
+      ;;
+    -v|--video)
+      logMsg "Test video recording enabled as - $2"
+      export GOBLET_TEST_VIDEO_RECORD="$2"
+      shift
+      shift
+      ;;
+    -c|--chrome)
+      logMsg "Test with browser - chrome"
+      export GOBLET_BROWSERS="chrome"
+      shift
+      ;;
+    -f|--firefox)
+      logMsg "Test with browser - firefox"
+      export GOBLET_BROWSERS="firefox"
+      shift
+      ;;
+    -w|--webkit)
+      logMsg "Test with browser - webkit"
+      export GOBLET_BROWSERS="webkit"
+      shift
+      ;;
     *)
       # Any other args pass on to docker
       DOCKER_ARGS+=("$1")
@@ -105,6 +138,7 @@ docker run --rm -it \
   -e GITHUB_REF=refs/heads/run-goblet-action \
   -e GITHUB_WORKSPACE=$REPO_WORK_DIR \
   -e GOBLET_BROWSERS=${GOBLET_BROWSERS:-all} \
+  -e GOBLET_TEST_REPORT=${GOBLET_TEST_REPORT:-0} \
   -e GOBLET_TEST_TRACING=${GOBLET_TEST_TRACING:-0} \
   -e GOBLET_BROWSER_DEBUG=${GOBLET_BROWSER_DEBUG:-0} \
   -e GOBLET_TEST_VIDEO_RECORD=${GOBLET_TEST_VIDEO_RECORD:-0} \
