@@ -1,7 +1,7 @@
 {
   "name": "@gobletqa/goblet-tests-action",
   "displayName": "goblet-tests-action",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Execute goblet tests in a Github action",
   "repository": {
     "type": "git",
@@ -16,6 +16,7 @@
   "license": "MIT",
   "scripts": {
     "db": "yarn docker:build $@",
+    "dbl": "yarn docker:build --local $@",
     "doc:build": "yarn docker:build $@",
     "docker:build": "/bin/bash scripts/dockerBuild.sh $@",
     "dbp": "/bin/bash scripts/dockerBuild.sh push $@",
