@@ -31,7 +31,6 @@ trap exitError ERR
 
 # Ensure devtools is not turned on
 unset GOBLET_DEV_TOOLS
-# export DEBUG=pw:api
 # Unset the debug ENV so it can be reset via the GOBLET_BROWSER_DEBUG env
 unset DEBUG
 
@@ -146,8 +145,8 @@ checkForSaveValue(){
 setRunEnvs(){
 
   getENVValue "GOBLET_TESTS_PATH" "${1}" "$GOBLET_TESTS_PATH"
-  getENVValue "GIT_TOKEN" "${2}" $GIT_TOKEN
-  getENVValue "GOBLET_TOKEN" "${3}" $GOBLET_TOKEN
+  getENVValue "GIT_TOKEN" "${2}" "$GIT_TOKEN"
+  getENVValue "GOBLET_TOKEN" "${3}" "$GOBLET_TOKEN"
   # TODO: Enable when goblet tokens are setup
   # [ -z "$GOBLET_TOKEN" ] && Add some exit code here for missing token
 
