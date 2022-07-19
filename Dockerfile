@@ -38,8 +38,6 @@ RUN apt-get install jq -y --no-install-recommends && \
 # We must run Jest from a parent folder of both goblet and the github workspace
 RUN rm -rf /keg && \
     ln -s /github /keg && \
-    mkdir -p /keg/work && \
-    ln -s /github/work /keg/repos && \
     rm -rf $HOME/.node_modules && \
     ln -s /github/tap/node_modules $HOME/.node_modules && \
     ln -s /github/tap/node_modules /github/node_modules
