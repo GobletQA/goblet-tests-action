@@ -103,3 +103,5 @@ dist
 # TernJS port file
 .tern-port
 repo-location
+goblet-core/yarn.lock
+goblet-core/package.json
