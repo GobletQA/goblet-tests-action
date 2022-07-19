@@ -56,7 +56,10 @@ exitError(){
   echo "$GOBLET_TESTS_RESULT"
   echo "----- exitError - GOBLET_TESTS_RESULT -----"
   
+  logMsg "Finished running tests for $GOBLET_TESTS_PATH"
   echo "::set-output name=result::$GOBLET_TESTS_RESULT"
+
+  echo "----- exitError - setting action outputs -----"
   setActionOutputs
   exit 1
 }
