@@ -58,6 +58,10 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
+    -n|--no-mount)
+      export NO_MOUNTS=1
+      shift
+      ;;
     *)
       # Any other args pass on to docker
       DOCKER_ARGS+=("$1")
@@ -68,6 +72,9 @@ done
 
 # If no mount repo was set, then pass in the default mount repo
 [ -z "$HAS_WORK_MOUNT_REPO" ] && MOUNTS="$MOUNTS -v $(keg sgt path):/home/runner/work/$TEST_REPO_NAME"
+
+# If mounts are disabled, set the variable to an empty string
+[ "$NO_MOUNTS" ] && MOUNTS=""
 
 logMsg "Runing container from $IMAGE_FULL"
 
