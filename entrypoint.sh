@@ -52,14 +52,18 @@ exitError(){
   echo "----- exitError -----"
 
   GOBLET_TESTS_RESULT="fail"
+
   echo "----- exitError - GOBLET_TESTS_RESULT -----"
   echo "$GOBLET_TESTS_RESULT"
   echo "----- exitError - GOBLET_TESTS_RESULT -----"
-  
-  logMsg "Finished running tests for $GOBLET_TESTS_PATH"
-  echo "::set-output name=result::$GOBLET_TESTS_RESULT"
 
-  echo "----- exitError - setting action outputs -----"
+  echo "------- /github/tap/temp/testMeta.json ----"
+  cat /github/tap/temp/testMeta.json
+  echo "------- /github/tap/temp/testMeta.json ----"
+  
+  echo "::set-output name=result::$GOBLET_TESTS_RESULT"
+  logErr "Finished running tests for $GOBLET_TESTS_PATH"
+
   setActionOutputs
   exit 1
 }
@@ -142,16 +146,14 @@ checkForSaveValue(){
   # If the env is set to always, then report should exist
   if [ "$ENV_VAL" == "always" ]; then
     setOutput "${2}" "${3}"
-    logMsg "Test Artifacts found for ${2} output:"
-    echo "${3}"
+    logMsg "Test Artifacts found for ${2}"
 
   # If the tests failed, and the env is set to failed, true, or 1
   # Then a test report should exist
   elif [ "$GOBLET_TESTS_RESULT" == "fail" ]; then
     if [ "$ENV_VAL" == "failed" ] || [ "$ENV_VAL" == true ] || [ "$ENV_VAL" == 1 ]; then
       setOutput "${2}" "${3}"
-      logMsg "Test Artifacts found for ${2} output:"
-      echo "${3}"
+      logMsg "Test Artifacts found for ${2} output"
 
     fi
 
