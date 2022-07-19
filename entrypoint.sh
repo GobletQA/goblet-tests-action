@@ -37,9 +37,10 @@ unset DEBUG
 
 # Force headless mode in CI environment
 export GOBLET_HEADLESS=true
+export GIT_ALT_REPO_DIR=alt
 export GOBLET_MOUNT_ROOT=/home/runner/work
 export GH_WORKSPACE_PARENT_DIR=/home/runner/work
-export GOBLET_ACT_REPO_LOCATION=/goblet-action/repo-location
+export GOBLET_ACT_REPO_LOCATION=/goblet-action
 export GOBLET_CONFIG_BASE="$GITHUB_WORKSPACE"
 
 export GOBLET_RUN_FROM_CI=1
@@ -86,27 +87,31 @@ setOutput(){
 cloneAltRepo(){
   cd $GOBLET_MOUNT_ROOT/goblet
 
+  # TODO: Investigate if setting the user is even needed
+  # Typeically only needed to push, which we are not doing here
   # If git user and email not set, use the current user from existing the git log
-  [ -z "$GIT_ALT_USER" ] && export GIT_ALT_USER="$(git log --format='%ae' HEAD^!)"
-  [ -z "$GIT_ALT_EMAIL" ] && export GIT_ALT_EMAIL="$(git log --format='%an' HEAD^!)"
-
-  git config --local user.email "$GIT_ALT_USER"
-  git config --local user.name "$GIT_ALT_EMAIL"
+  # [ -z "$GIT_ALT_USER" ] && export GIT_ALT_USER="$(git log --format='%ae' HEAD^!)"
+  # [ -z "$GIT_ALT_EMAIL" ] && export GIT_ALT_EMAIL="$(git log --format='%an' HEAD^!)"
+  [ "$GIT_ALT_USER" ] && git config --global user.email "$GIT_ALT_USER"
+  [ "$GIT_ALT_EMAIL" ] && git config --global user.name "$GIT_ALT_EMAIL"
 
   # Clone the repo using the passed in token if it exists
   local GIT_CLONE_TOKEN="${GIT_ALT_TOKEN:-$GOBLET_GIT_TOKEN}"
+
+  logMsg "Cloning alt repo \"https://$GIT_ALT_REPO\""
   if [ "$GIT_CLONE_TOKEN" ]; then
-    git clone https://$GIT_CLONE_TOKEN@$GIT_ALT_REPO
+    git clone "https://$GIT_CLONE_TOKEN@$GIT_ALT_REPO" "$GIT_ALT_REPO_DIR"
   else
-    git clone https://$GIT_ALT_REPO
+    git clone "https://$GIT_ALT_REPO" "$GIT_ALT_REPO_DIR"
   fi
 
   # Navigate into the repo so we can get the pull path from (pwd)
-  cd ./alt-repo
+  cd ./$GIT_ALT_REPO_DIR
 
   # If using a diff branch from default, fetch then checkout from origin
   if [ "$GIT_ALT_BRANCH" ]; then
     git fetch origin
+    logMsg "Setting alt repo branch to \"$GIT_ALT_BRANCH\""
     git checkout -b $GIT_ALT_BRANCH origin/$GIT_ALT_BRANCH
   fi
 
