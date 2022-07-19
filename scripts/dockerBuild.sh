@@ -34,6 +34,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+
 logMsg "Building image $IMAGE_FULL"
-docker buildx build $BUILD_ARGS -t $IMAGE_FULL .
+docker buildx build $BUILD_ARGS -t $IMAGE_FULL "."
 logMsg "Finished Building image"
