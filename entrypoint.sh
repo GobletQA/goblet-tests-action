@@ -98,13 +98,14 @@ setOutput(){
 cloneAltRepo(){
   cd $GOBLET_MOUNT_ROOT
 
-  # TODO: Investigate if setting the user is even needed
-  # Typeically only needed to push, which we are not doing here
-  # If git user and email not set, use the current user from existing the git log
-  # [ -z "$GIT_ALT_USER" ] && export GIT_ALT_USER="$(git log --format='%ae' HEAD^!)"
-  # [ -z "$GIT_ALT_EMAIL" ] && export GIT_ALT_EMAIL="$(git log --format='%an' HEAD^!)"
-  [ "$GIT_ALT_USER" ] && git config --global user.email "$GIT_ALT_USER"
-  [ "$GIT_ALT_EMAIL" ] && git config --global user.name "$GIT_ALT_EMAIL"
+    # Ensure the user is configured with git
+    # If git user is not set, use the current user from existing the git log
+    [ -z "$GIT_ALT_USER" ] && export GIT_ALT_USER="$(git log --format='%ae' HEAD^!)"
+    [ "$GIT_ALT_USER" ] && git config --global user.email "$GIT_ALT_USER"
+
+    # If git email not set, use the current email from existing the git log
+    [ -z "$GIT_ALT_EMAIL" ] && export GIT_ALT_EMAIL="$(git log --format='%an' HEAD^!)"
+    [ "$GIT_ALT_EMAIL" ] && git config --global user.name "$GIT_ALT_EMAIL"
 
   # Clone the repo using the passed in token if it exists
   local GIT_CLONE_TOKEN="${GIT_ALT_TOKEN:-$GOBLET_GIT_TOKEN}"
@@ -246,7 +247,7 @@ runTests(){
       TEST_RUN_ARGS="$TEST_RUN_ARGS --browsers $GOBLET_BROWSERS"
     fi
 
-    logMsg "Running Tests matching..."
+    logMsg "Running Tests for $(logPurpleU $GOBLET_TESTS_PATH)"
     node ./tasks/runTask.js bdd run $TEST_RUN_ARGS
     TEST_EXIT_STATUS=$?
 

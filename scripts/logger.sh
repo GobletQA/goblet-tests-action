@@ -1,13 +1,18 @@
 #!/bin/bash
 
+__GOBLET_NO_COLOR__='\033[0m'
+
 logMsg(){
   GREEN='\033[0;32m'
-  NC='\033[0m'
-  printf "${GREEN}[Goblet]${NC} $1\n"
+  printf "${GREEN}[Goblet]${__GOBLET_NO_COLOR__} $1\n"
 }
 
 logErr(){
   RED='\033[0;31m'
-  NC='\033[0m'
-  printf "${RED}[Goblet]${NC} $1\n"
+  printf "${RED}[Goblet]${__GOBLET_NO_COLOR__} $1\n"
+}
+
+logPurpleU(){
+  PURPLE='\033[4;35m'
+  printf "${PURPLE}${1}${__GOBLET_NO_COLOR__}"
 }
