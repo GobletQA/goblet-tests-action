@@ -93,7 +93,6 @@ setOutput(){
   echo "::set-output name=$NAME::$VAL"
 }
 
-
 # Clones an alternitive repo locally
 cloneAltRepo(){
   cd $GOBLET_MOUNT_ROOT
@@ -188,14 +187,15 @@ setRunEnvs(){
   getENVValue "GOBLET_TEST_WORKERS" "${18}" "$GOBLET_TEST_WORKERS"
   getENVValue "GOBLET_TEST_VERBOSE" "${19}" "$GOBLET_TEST_VERBOSE"
   getENVValue "GOBLET_TEST_OPEN_HANDLES" "${20}" "$GOBLET_TEST_OPEN_HANDLES"
+  getENVValue "GOBLET_TEST_DEBUG" "${21}" "$GOBLET_TEST_DEBUG"
 
-  getENVValue "GOBLET_BROWSERS" "${21}" "$GOBLET_BROWSERS"
-  getENVValue "GOBLET_BROWSER_DEBUG" "${22}" "$GOBLET_BROWSER_DEBUG"
-  getENVValue "GOBLET_BROWSER_SLOW_MO" "${23}" "$GOBLET_BROWSER_SLOW_MO"
-  getENVValue "GOBLET_BROWSER_CONCURRENT" "${24}" "$GOBLET_BROWSER_CONCURRENT"
-  getENVValue "GOBLET_BROWSER_TIMEOUT" "${25}" "$GOBLET_BROWSER_TIMEOUT"
+  getENVValue "GOBLET_BROWSERS" "${22}" "$GOBLET_BROWSERS"
+  getENVValue "GOBLET_BROWSER_DEBUG" "${23}" "$GOBLET_BROWSER_DEBUG"
+  getENVValue "GOBLET_BROWSER_SLOW_MO" "${24}" "$GOBLET_BROWSER_SLOW_MO"
+  getENVValue "GOBLET_BROWSER_CONCURRENT" "${25}" "$GOBLET_BROWSER_CONCURRENT"
+  getENVValue "GOBLET_BROWSER_TIMEOUT" "${26}" "$GOBLET_BROWSER_TIMEOUT"
 
-  getENVValue "GOBLET_ARTIFACTS_DEBUG" "${26}" "$GOBLET_ARTIFACTS_DEBUG"
+  getENVValue "GOBLET_ARTIFACTS_DEBUG" "${27}" "$GOBLET_ARTIFACTS_DEBUG"
   
   # Goblet App specific ENVs
   [ -z "$NODE_ENV" ] && export NODE_ENV=test
@@ -235,8 +235,8 @@ runTests(){
 
   if [ "$GOBLET_TEST_TYPE" == "bdd" ]; then
 
-    export GOBLET_TESTS_PATH="${GOBLET_TESTS_PATH:-$GOBLET_CONFIG_BASE}"
-    TEST_RUN_ARGS="$TEST_RUN_ARGS --context $GOBLET_TESTS_PATH"
+    # export GOBLET_TESTS_PATH="${GOBLET_TESTS_PATH:-$GOBLET_CONFIG_BASE}"
+    [ "$GOBLET_TESTS_PATH" ] && TEST_RUN_ARGS="$TEST_RUN_ARGS --context $GOBLET_TESTS_PATH"
 
     # Add special handling for setting browsers option to auto set ---allBrowsers when not set
     if [ -z "$GOBLET_BROWSERS" ]; then
@@ -247,7 +247,9 @@ runTests(){
       TEST_RUN_ARGS="$TEST_RUN_ARGS --browsers $GOBLET_BROWSERS"
     fi
 
-    logMsg "Running Tests for $(logPurpleU $GOBLET_TESTS_PATH)"
+    logMsg "Running Tests: $(logPurpleU $GOBLET_TESTS_PATH)"
+    logMsg "Running Tests options: $(logPurpleU $TEST_RUN_ARGS)"
+
     node ./tasks/runTask.js bdd run $TEST_RUN_ARGS
     TEST_EXIT_STATUS=$?
 
