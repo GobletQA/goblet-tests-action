@@ -232,6 +232,30 @@
       /github/workspace/goblet/artifacts/videos/bdd/test/test-webkit-1657592734085.webm
     ```
 
+## Alt-Repo Outputs
+* This Action runs within a docker container
+* It get's access the the underlying repository via a volume mount to `/github/workspace`
+  * I.E. given our repo name is `test-repo` located at `/home/runner/work/test-repo/test-repo`
+  * The repo is by default mounted **(via github)** to `/github/workspace` within the docker container
+  * This unfortunately is not configurable
+  * This can be seen in the docker command that is run, and looks similar to
+    * `-v "/home/runner/work/test-repo/test-repo":"/github/workspace"`
+* When using an alt repo, it is cloned into the docker container at `/github/alt`
+  * While this works well for running tests, it causes issues with the generated **artifacts**
+* Normally the **artifacts** are placed inside the `/github/workspace/goblet/artifacts` folder
+  * Because of how docker volumes work this makes them available from outside the container
+* With an **alt-repo**, the generated **artifacts** are placed at `/github/alt/goblet/artifacts`
+  * This means they are not automatically synced back to the host system outside the container
+* To resolve this, the following steps are taken
+  * A check is made to see if an **alt-repo** is being used
+  * Next, the **alt-repo** `artifacts` folder is copied to `/github/workspace/.goblet-temp`
+    * This creates a new folder called `.goblet-temp` inside the mounted `/github/workspace` volume
+    * Which allows the generated **artifacts** to be accessible after the test have finish running
+  * Finally the action outputs are updated so that the file paths reflect the new location
+    * The paths now look similar to `.goblet-temp/reports/features/<my-reports>`
+    * **IMPORTANT** - The path is relative to the default actions working directory 
+      * In the above example the path would be `/home/runner/work/test-repo/test-repo/.goblet-temp`
+
 ## Example usage
 
 ### Basic
@@ -239,8 +263,13 @@
 - name: Run Goblet Tests
   uses: gobletqa/goblet-tests-action@0.0.1
   with:
-    test-context: dashboard # All tests with the word `dashboard` in their title will be run
-    test-report: true
+    test-context: goblet # All tests with the word `goblet` in their path will be run
+    test-report: failed
+- if: ${{ steps.dashboard-tests.outputs.result }} === 'failed'
+  name: Do something with outputs
+  with:
+    run: |
+      echo ${{ steps.dashboard-tests.outputs.report-paths }}
 ```
 
 ### With Tracing and Video Recording
@@ -249,21 +278,49 @@
   uses: gobletqa/goblet-tests-action@0.0.1
   with:
     git-token: ${{ github.token }}
-    test-tracing: true
-    test-record: true
+    test-tracing: always
+    test-record: always
+- if: always()
+  name: Do something with output
+  with:
+    run: |
+      echo ${{ steps.dashboard-tests.outputs.trace-paths }}
+      echo ${{ steps.dashboard-tests.outputs.video-paths }}
 ```
 
-### Alt repo
+### Alt-Repo
 ```yaml
-- name: Run Goblet Tests
-  uses: gobletqa/goblet-tests-action@0.0.1
-  with:
-    alt-branch: develop # Defaults to the repos default branch branch. I.E. main / master
-    alt-repo: github.com/octokitty/app-tests # URI to the repo, EXCLUDING the protocol I.E. github.com/owner/repo.git
-    alt-token: secrets.ALT_TEST_REPO_TOKEN # Must be a OAuth or PAT that has access to the alternative repository
-    alt-user: secrets.ALT_TEST_USER # User related to the git token used for the `alt-token` input
-    alt-email: secrets.ALT_TEST_EMAIL # Email related to the git token used for the `alt-token` input and user
-``` 
+    steps:
+
+    - name: Run Dashboard Tests
+      id: dashboard-tests
+      uses: gobletqa/goblet-tests-action@0.0.6
+      with:
+        alt-branch: new-feat-branch # Branch that contains the tests to be run
+        alt-repo: github.com/gobletqa/repo-tests
+        alt-branch: develop # Defaults to the repos default branch branch. I.E. main / master
+        alt-repo: github.com/octokitty/app-tests # URI to the repo, EXCLUDING the protocol I.E. github.com/owner/repo.git
+        alt-token: ${{ secrets.ALT_GH_AUTH_PAT }} # Must be a OAuth or PAT that has access to the alternative repository
+        git-token: ${{ secrets.GH_AUTH_PAT }} # Must be a OAuth or PAT for the current repository
+        test-report: failed
+        test-tracing: failed
+        test-record: failed
+
+    - name: Commit SHA
+      if: always()
+      id: commit-sha
+      run: echo "::set-output name=sha::$(git rev-parse --short HEAD)"
+
+    - uses: actions/upload-artifact@v3
+      if: always()
+      name: Upload Failed Tests
+      with:
+        name: repo-tests-${{ steps.commit-sha.outputs.sha }}
+        path: |
+          ${{ steps.dashboard-tests.outputs.report-paths }}
+          ${{ steps.dashboard-tests.outputs.trace-paths }}
+          ${{ steps.dashboard-tests.outputs.video-paths }}
+```
 
 ## Local Development
 ### Requirements

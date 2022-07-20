@@ -113,7 +113,11 @@ while [[ $# -gt 0 ]]; do
 done
 
 # If no mount repo was set, then pass in the default mount repo
-[ -z "$HAS_WORK_MOUNT_REPO" ] && MOUNTS="$MOUNTS -v $(keg sgt path):/github/$TEST_REPO_NAME"
+if [ -z "$HAS_WORK_MOUNT_REPO" ]; then
+  logMsg "Mounting test repo to github/workspace"
+  MOUNTS="$MOUNTS -v $(keg sgt path):/github/$TEST_REPO_NAME"
+fi
+
 
 # If mounts are disabled, set the variable to an empty string
 [ "$NO_MOUNTS" ] && MOUNTS=""
@@ -124,7 +128,7 @@ docker run --rm -it \
   --ipc=host \
   -e CI=true \
   -e LOCAL_DEV=1 \
-  -e LOCAL_SIMULATE_ALT={LOCAL_SIMULATE_ALT:-0} \
+  -e LOCAL_SIMULATE_ALT=$LOCAL_SIMULATE_ALT \
   -e GOBLET_TOKEN=123456 \
   -e GIT_TOKEN=$GIT_TOKEN \
   -e GIT_ALT_TOKEN=$GIT_TOKEN \
@@ -141,18 +145,19 @@ docker run --rm -it \
   -e GITHUB_JOB=goblet-test-action \
   -e GITHUB_ACTION=__goblet-action \
   -e GITHUB_REPOSITORY_OWNER=goblet \
+  -e GITHUB_WORKSPACE=$REPO_WORK_DIR \
   -e GITHUB_BASE_REF=local-dev-branch \
   -e GITHUB_REF_NAME=run-goblet-action \
   -e GITHUB_REPOSITORY=$TEST_REPO_NAME \
   -e GITHUB_EVENT_NAME=workflow_dispatch \
   -e GITHUB_WORKFLOW=goblet-action-workflow \
   -e GITHUB_REF=refs/heads/run-goblet-action \
+  -e GOBLET_BROWSERS=${GOBLET_BROWSERS:-all} \
   -e GOBLET_TEST_REPORT=${GOBLET_TEST_REPORT:-0} \
   -e GOBLET_TEST_TRACING=${GOBLET_TEST_TRACING:-0} \
   -e GOBLET_BROWSER_DEBUG=${GOBLET_BROWSER_DEBUG:-0} \
   -e GOBLET_TEST_VIDEO_RECORD=${GOBLET_TEST_VIDEO_RECORD:-0} \
-  -e GOBLET_BROWSERS=${GOBLET_BROWSERS:-all} \
-  -e GITHUB_WORKSPACE=$REPO_WORK_DIR \
+  -e GOBLET_BROWSER_CONCURRENT=${GOBLET_BROWSER_CONCURRENT:-0} \
   --name goblet-action \
   --entrypoint /bin/bash \
   --workdir $REPO_WORK_DIR \
