@@ -247,8 +247,7 @@ runTests(){
       TEST_RUN_ARGS="$TEST_RUN_ARGS --browsers $GOBLET_BROWSERS"
     fi
 
-    logMsg "Running Tests: $(logPurpleU $GOBLET_TESTS_PATH)"
-    logMsg "Running Tests options: $(logPurpleU $TEST_RUN_ARGS)"
+    logMsg "Running Tests with options: $(logPurpleU "${TEST_RUN_ARGS}")"
 
     node ./tasks/runTask.js bdd run $TEST_RUN_ARGS
     TEST_EXIT_STATUS=$?
