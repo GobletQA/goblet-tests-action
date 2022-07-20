@@ -78,6 +78,9 @@ inputs:
   browser-timeout:
     required: false
     description: 'Amount of time for the browser to wait until it times out and the corresponding test fails'
+  artifacts-debug:
+    required: false
+    description: 'Enable debug logging for all generated artifacts'
 
 outputs:
   result:
@@ -118,3 +121,4 @@ runs:
     - ${{ inputs.browser-slow-mo }} #23
     - ${{ inputs.browser-concurrent }} #24
     - ${{ inputs.browser-timeout }} #25
+    - ${{ inputs.artifacts-debug }} #26

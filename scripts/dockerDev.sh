@@ -7,7 +7,7 @@ IMAGE_NAME=$npm_package_displayName
 IMAGE_VERSION=$npm_package_version
 IMAGE_FULL=ghcr.io/gobletqa/$IMAGE_NAME:$IMAGE_VERSION
 
-TEST_REPO_NAME=test-repo
+TEST_REPO_NAME=workspace
 REPO_WORK_DIR=/github/workspace
 MOUNTS="-v $(pwd):/goblet-action"
 
@@ -38,6 +38,14 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
+    -s|--simulate)
+      logMsg "Simulating alt-repo via mount"
+      export LOCAL_SIMULATE_ALT=1
+      export HAS_WORK_MOUNT_REPO=1
+      MOUNTS="$MOUNTS -v $(echo $HOME)/goblet/repos/test-action-repo:/github/$TEST_REPO_NAME"
+      MOUNTS="$MOUNTS -v $(keg sgt path):/github/alt"
+      shift
+      ;;
     -b|--branch)
       logMsg "Adding alt branch name - $2"
       export GIT_ALT_BRANCH="$2"
@@ -60,17 +68,20 @@ while [[ $# -gt 0 ]]; do
       export NO_MOUNTS=1
       shift
       ;;
-    -h|--report)
+    -p|--report)
+      logMsg "Setting ENV \"GOBLET_TEST_REPORT\" to \"$2\""
       export GOBLET_TEST_REPORT="$2"
       shift
       shift
       ;;
     -t|--tracing)
+      logMsg "Setting ENV \"GOBLET_TEST_TRACING\" to \"$2\""
       export GOBLET_TEST_TRACING="$2"
       shift
       shift
       ;;
     -v|--video)
+      logMsg "Setting ENV \"GOBLET_TEST_VIDEO_RECORD\" to \"$2\""
       export GOBLET_TEST_VIDEO_RECORD="$2"
       shift
       shift
@@ -113,6 +124,7 @@ docker run --rm -it \
   --ipc=host \
   -e CI=true \
   -e LOCAL_DEV=1 \
+  -e LOCAL_SIMULATE_ALT={LOCAL_SIMULATE_ALT:-0} \
   -e GOBLET_TOKEN=123456 \
   -e GIT_TOKEN=$GIT_TOKEN \
   -e GIT_ALT_TOKEN=$GIT_TOKEN \
@@ -135,6 +147,10 @@ docker run --rm -it \
   -e GITHUB_EVENT_NAME=workflow_dispatch \
   -e GITHUB_WORKFLOW=goblet-action-workflow \
   -e GITHUB_REF=refs/heads/run-goblet-action \
+  -e GOBLET_TEST_REPORT=${GOBLET_TEST_REPORT:-0} \
+  -e GOBLET_TEST_TRACING=${GOBLET_TEST_TRACING:-0} \
+  -e GOBLET_BROWSER_DEBUG=${GOBLET_BROWSER_DEBUG:-0} \
+  -e GOBLET_TEST_VIDEO_RECORD=${GOBLET_TEST_VIDEO_RECORD:-0} \
   -e GOBLET_BROWSERS=${GOBLET_BROWSERS:-all} \
   -e GITHUB_WORKSPACE=$REPO_WORK_DIR \
   --name goblet-action \

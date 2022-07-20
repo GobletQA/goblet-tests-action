@@ -151,6 +151,11 @@
 * Amount of time for the browser to wait until it times out and the corresponding test fails
 * **default** - `15000` milliseconds (15 seconds)
 
+### `artifacts-debug`
+* As ENV - `GOBLET_ARTIFACTS_DEBUG`
+* Enable debug logging for all generated artifacts
+* **default** - `false`
+
 
 ## Outputs
 * **IMPORTANT** - Because multiple paths can be exported, the outputs are first escaped prior to being set

@@ -40,27 +40,18 @@ export GIT_ALT_REPO_DIR=alt
 export GOBLET_MOUNT_ROOT=/github
 export GOBLET_ACT_REPO_LOCATION=/goblet-action
 export GOBLET_CONFIG_BASE="$GITHUB_WORKSPACE"
+export GOBLET_TEMP_META_LOC="/github/tap/temp/testMeta.json"
 
 export GOBLET_RUN_FROM_CI=1
 [ "$GOBLET_TEST_NO_CI" ] && unset GOBLET_RUN_FROM_CI
 
 MOUNT_WORK_DIR=$(pwd)
+MOUNT_TEMP_DIR=".goblet-temp"
 INVALID_TEST_TYPE=0
 
 exitError(){
+  export GOBLET_TESTS_RESULT="fail"
 
-  echo "----- exitError -----"
-
-  GOBLET_TESTS_RESULT="fail"
-
-  echo "----- exitError - GOBLET_TESTS_RESULT -----"
-  echo "$GOBLET_TESTS_RESULT"
-  echo "----- exitError - GOBLET_TESTS_RESULT -----"
-
-  echo "------- /github/tap/temp/testMeta.json ----"
-  cat /github/tap/temp/testMeta.json
-  echo "------- /github/tap/temp/testMeta.json ----"
-  
   echo "::set-output name=result::$GOBLET_TESTS_RESULT"
   logErr "Finished running tests for $GOBLET_TESTS_PATH"
 
@@ -82,11 +73,17 @@ getENVValue() {
 setOutput(){
   local NAME="${1}"
   local JQ="${2}"
-  local VAL=$(jq -r -M "$JQ" /github/tap/temp/testMeta.json 2>/dev/null)
+  local VAL=$(jq -r -M "$JQ" "$GOBLET_TEMP_META_LOC" 2>/dev/null)
 
   if [ -z "$VAL" ]; then
     echo "::set-output name=$NAME::"
     return
+  fi
+
+  # If using an alt repo
+  # Then rewrite the location to the mounted folder
+  if [ "$GIT_ALT_REPO" ]; then
+    VAL="${VAL/$ARTIFACTS_DIR/$MOUNT_TEMP_DIR}"
   fi
 
   # Escape the paths so all paths can be captured by the output
@@ -95,6 +92,7 @@ setOutput(){
   VAL="${VAL//$'\r'/'%0D'}"
   echo "::set-output name=$NAME::$VAL"
 }
+
 
 # Clones an alternitive repo locally
 cloneAltRepo(){
@@ -134,14 +132,8 @@ cloneAltRepo(){
 # Helper to check if a generated file should exist, and if we should set it to an output
 checkForSaveValue(){
 
-  echo "----- checkForSaveValue -----"
-
   local ENV_NAME="${1}"
   local ENV_VAL="${!ENV_NAME}"
-
-  echo "----- ENV_NAME / ENV_VAL ----"
-  echo "$ENV_NAME / $ENV_VAL"
-  echo "----- ENV_NAME / ENV_VAL ----"
 
   # If the env is set to always, then report should exist
   if [ "$ENV_VAL" == "always" ]; then
@@ -202,6 +194,8 @@ setRunEnvs(){
   getENVValue "GOBLET_BROWSER_CONCURRENT" "${24}" "$GOBLET_BROWSER_CONCURRENT"
   getENVValue "GOBLET_BROWSER_TIMEOUT" "${25}" "$GOBLET_BROWSER_TIMEOUT"
 
+  getENVValue "GOBLET_ARTIFACTS_DEBUG" "${26}" "$GOBLET_ARTIFACTS_DEBUG"
+  
   # Goblet App specific ENVs
   [ -z "$NODE_ENV" ] && export NODE_ENV=test
   [ -z "$DOC_APP_PATH" ] && export DOC_APP_PATH=/keg/tap
@@ -213,7 +207,17 @@ setRunEnvs(){
 
 # ---- Step 2 - Synmlink the workspace folder to the repos folder
 setupWorkspace(){
-  [ "$GIT_ALT_REPO" ] && cloneAltRepo "$@"
+  if [ "$LOCAL_SIMULATE_ALT" ] && [ "$LOCAL_DEV" ]; then
+    export GIT_ALT_REPO=github.com/local/simulate.git
+    # Navigate into the repo so we can get the pull path from (pwd)
+    cd $GOBLET_MOUNT_ROOT/$GIT_ALT_REPO_DIR
+    export GOBLET_CONFIG_BASE="$(pwd)"
+
+  # Check if we should clone down the alt repo and use it
+  elif [ "$GIT_ALT_REPO" ]; then
+    cloneAltRepo "$@"
+
+  fi
 
   echo ""
   logMsg "Repo mount is $GOBLET_CONFIG_BASE"
@@ -221,7 +225,6 @@ setupWorkspace(){
 
 # ---- Step 4 - Run the tests
 runTests(){
-  logMsg "Running Tests..."
   # Goblet test run specific ENVs - customizable
   # Switch to the goblet dir and run the bdd test task
   cd /github/tap
@@ -243,10 +246,9 @@ runTests(){
       TEST_RUN_ARGS="$TEST_RUN_ARGS --browsers $GOBLET_BROWSERS"
     fi
 
-    echo "------- Before Tests ------"
+    logMsg "Running Tests matching..."
     node ./tasks/runTask.js bdd run $TEST_RUN_ARGS
     TEST_EXIT_STATUS=$?
-    echo "------- After Tests ------"
 
     if [ ${TEST_EXIT_STATUS} -ne 0 ]; then
       export GOBLET_TESTS_RESULT="fail"
@@ -272,11 +274,11 @@ runTests(){
 # ---- Step 5 - Output the result of the executed tests
 setActionOutputs(){
 
-  # Only run the outputs when running in CI
-  # if [ -z "$GOBLET_RUN_FROM_CI" ]; then
-  #   return
-  # fi
-  logMsg "------ setActionOutputs -----"
+  # If using an alt repo, copy over the artifacts dir to the workspace mounted volume
+  if [ "$GIT_ALT_REPO" ]; then
+    ARTIFACTS_DIR="$(jq -r -M ".latest.rootDir" "$GOBLET_TEMP_META_LOC" 2>/dev/null)"
+    cp -r "$ARTIFACTS_DIR" "$MOUNT_WORK_DIR/$MOUNT_TEMP_DIR"
+  fi
 
   # Only set the reports paths, if test reports is turned on
   checkForSaveValue "GOBLET_TEST_REPORT" \
@@ -300,11 +302,6 @@ setRunEnvs "$@"
 setupWorkspace "$@"
 runTests "$@"
 setActionOutputs "$@"
-
-echo "------- /github/tap/temp/testMeta.json ----"
-cat /github/tap/temp/testMeta.json
-echo "------- /github/tap/temp/testMeta.json ----"
-
 
 # Set the final result state, which should be pass if we get to this point
 echo "::set-output name=result::$GOBLET_TESTS_RESULT"

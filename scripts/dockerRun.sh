@@ -62,20 +62,20 @@ while [[ $# -gt 0 ]]; do
       export NO_MOUNTS=1
       shift
       ;;
-    -h|--report)
-      logMsg "Test reports enabled as - $2"
+    -p|--report)
+      logMsg "Setting ENV \"GOBLET_TEST_REPORT\" to \"$2\""
       export GOBLET_TEST_REPORT="$2"
       shift
       shift
       ;;
     -t|--tracing)
-      logMsg "Test tracing enabled as - $2"
+      logMsg "Setting ENV \"GOBLET_TEST_TRACING\" to \"$2\""
       export GOBLET_TEST_TRACING="$2"
       shift
       shift
       ;;
     -v|--video)
-      logMsg "Test video recording enabled as - $2"
+      logMsg "Setting ENV \"GOBLET_TEST_VIDEO_RECORD\" to \"$2\""
       export GOBLET_TEST_VIDEO_RECORD="$2"
       shift
       shift
@@ -93,6 +93,12 @@ while [[ $# -gt 0 ]]; do
     -w|--webkit)
       logMsg "Test with browser - webkit"
       export GOBLET_BROWSERS="webkit"
+      shift
+      ;;
+    -s|--simulate)
+      export LOCAL_SIMULATE_ALT=1
+      logMsg "Simulating alt-repo via mount"
+      MOUNTS="$MOUNTS -v $(echo $HOME)/goblet/repos/test-action-repo:/github/alt"
       shift
       ;;
     *)
@@ -115,6 +121,7 @@ docker run --rm -it \
   --ipc=host \
   -e CI=true \
   -e LOCAL_DEV=1 \
+  -e LOCAL_SIMULATE_ALT={LOCAL_SIMULATE_ALT:-0} \
   -e GIT_TOKEN=$GIT_TOKEN \
   -e GIT_ALT_TOKEN=$GIT_TOKEN \
   -e GIT_ALT_USER="$GIT_USER" \
