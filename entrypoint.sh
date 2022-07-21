@@ -81,9 +81,9 @@ setOutput(){
   # When mounted in the docker container, the path is different
   # So we use a relative path for accessing the artifacts
   if [ "$GIT_ALT_REPO" ]; then
-    VAL="${VAL/$GOBLET_ALT_REPO_DIR\//}"
+    VAL="${VAL//$GOBLET_ALT_REPO_DIR\//}"
   else
-    VAL="${VAL/$GITHUB_WORKSPACE\//}"
+    VAL="${VAL//$GITHUB_WORKSPACE\//}"
   fi
 
   # Log the found artifacts to be uploaded for reference pre-escaping
@@ -287,13 +287,23 @@ setActionOutputs(){
   # If using an alt repo, copy over the artifacts from the alt repo into the workspace folder
   # This ensure the artifacts can be accessed outside the container in future steps
     export ARTIFACTS_DIR="$(jq -r -M ".latest.artifactsDir" "$GOBLET_TEMP_META_LOC" 2>/dev/null)"
-    echo "::set-output name=artifacts-path::$ARTIFACTS_DIR"
+    
+    if [ -z "$ARTIFACTS_DIR" ]; then
+      logErr "Test Artifacts directory could not be found!"
+      echo "::set-output name=artifacts-path::"
+    else
+      logMsg "Checking for artifacts in $ARTIFACTS_DIR"
+      echo "::set-output name=artifacts-path::$ARTIFACTS_DIR"
+    fi
 
   if [ "$GIT_ALT_REPO" ]; then
     RELATIVE_DIR="${ARTIFACTS_DIR/$GOBLET_ALT_REPO_DIR\//}"
     COPY_TO_DIR="$GITHUB_WORKSPACE/$RELATIVE_DIR"
+    
+    logMsg "Ensuring directory exists at $ARTIFACTS_DIR"
     mkdir -p $COPY_TO_DIR
   
+    logMsg "Copying test artifacts from $ARTIFACTS_DIR to $COPY_TO_DIR"
     cp -r "$ARTIFACTS_DIR" "$COPY_TO_DIR"
   fi
 
