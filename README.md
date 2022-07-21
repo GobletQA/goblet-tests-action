@@ -156,7 +156,6 @@
 * Enable debug logging for all generated artifacts
 * **default** - `false`
 
-
 ## Outputs
 * **IMPORTANT** - Because multiple paths can be exported, the outputs are first escaped prior to being set
   * This ensures all paths are included in the output
@@ -167,6 +166,9 @@
     * The `<repo-name>` should be replace with the name of the repository running the action
 ### `result`
 * Result of the Goblet test execution. One of `pass` or `fail`
+
+### `artifacts-path`
+* Relative path to the generated **artifacts** directory
 
 ### `report-paths`
 * **Important** - The `test-report` input must be set to `true`

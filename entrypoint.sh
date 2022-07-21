@@ -77,6 +77,10 @@ setOutput(){
     return
   fi
 
+  # Log out the found files to be uploaded
+  echo "------ BEFORE ESCAPE ------"
+  echo "${VAL}"
+
   # Update the paths to just be relative paths to the workspace root directory
   # When mounted in the docker container, the path is different
   # So we use a relative path for accessing the artifacts
@@ -91,6 +95,10 @@ setOutput(){
   VAL="${VAL//'%'/'%25'}"
   VAL="${VAL//$'\n'/'%0A'}"
   VAL="${VAL//$'\r'/'%0D'}"
+  
+  echo "------ AFTER ESCAPE ------"
+  echo "$VAL"
+  
   echo "::set-output name=$NAME::$VAL"
 }
 
@@ -138,15 +146,15 @@ checkForSaveValue(){
 
   # If the env is set to always, then report should exist
   if [ "$ENV_VAL" == "always" ]; then
-    setOutput "${2}" "${3}"
     logMsg "Test Artifacts found for ${2} output"
+    setOutput "${2}" "${3}"
 
   # If the tests failed, and the env is set to failed, true, or 1
   # Then a test report should exist
   elif [ "$GOBLET_TESTS_RESULT" == "fail" ]; then
     if [ "$ENV_VAL" == "failed" ] || [ "$ENV_VAL" == true ] || [ "$ENV_VAL" == 1 ]; then
-      setOutput "${2}" "${3}"
       logMsg "Test Artifacts found for ${2} output"
+      setOutput "${2}" "${3}"
 
     fi
 
@@ -283,8 +291,10 @@ setActionOutputs(){
 
   # If using an alt repo, copy over the artifacts from the alt repo into the workspace folder
   # This ensure the artifacts can be accessed outside the container in future steps
-  if [ "$GIT_ALT_REPO" ]; then
     export ARTIFACTS_DIR="$(jq -r -M ".latest.artifactsDir" "$GOBLET_TEMP_META_LOC" 2>/dev/null)"
+    echo "::set-output name=artifacts-path::$ARTIFACTS_DIR"
+
+  if [ "$GIT_ALT_REPO" ]; then
     RELATIVE_DIR="${ARTIFACTS_DIR/$GOBLET_ALT_REPO_DIR\//}"
     COPY_TO_DIR="$GITHUB_WORKSPACE/$RELATIVE_DIR"
     mkdir -p $COPY_TO_DIR
