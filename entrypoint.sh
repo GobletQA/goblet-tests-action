@@ -77,10 +77,6 @@ setOutput(){
     return
   fi
 
-  # Log out the found files to be uploaded
-  echo "------ BEFORE ESCAPE ------"
-  echo "${VAL}"
-
   # Update the paths to just be relative paths to the workspace root directory
   # When mounted in the docker container, the path is different
   # So we use a relative path for accessing the artifacts
@@ -90,14 +86,15 @@ setOutput(){
     VAL="${VAL/$GITHUB_WORKSPACE\//}"
   fi
 
+  # Log the found artifacts to be uploaded for reference pre-escaping
+  logMsg "Test Artifacts found for ${1} output"
+  echo "${VAL}"
 
   # Escape the paths so all paths can be captured by the output
   VAL="${VAL//'%'/'%25'}"
   VAL="${VAL//$'\n'/'%0A'}"
   VAL="${VAL//$'\r'/'%0D'}"
   
-  echo "------ AFTER ESCAPE ------"
-  echo "$VAL"
   
   echo "::set-output name=$NAME::$VAL"
 }
@@ -146,14 +143,12 @@ checkForSaveValue(){
 
   # If the env is set to always, then report should exist
   if [ "$ENV_VAL" == "always" ]; then
-    logMsg "Test Artifacts found for ${2} output"
     setOutput "${2}" "${3}"
 
   # If the tests failed, and the env is set to failed, true, or 1
   # Then a test report should exist
   elif [ "$GOBLET_TESTS_RESULT" == "fail" ]; then
     if [ "$ENV_VAL" == "failed" ] || [ "$ENV_VAL" == true ] || [ "$ENV_VAL" == 1 ]; then
-      logMsg "Test Artifacts found for ${2} output"
       setOutput "${2}" "${3}"
 
     fi
