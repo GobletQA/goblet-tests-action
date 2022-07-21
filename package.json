@@ -16,6 +16,8 @@
   "license": "MIT",
   "scripts": {
     "db": "yarn docker:build",
+    "dgp": "yarn docker:goblet:buildPush",
+    "docker:goblet:buildPush": "/bin/bash scripts/dockerBuildPush.sh",
     "dbl": "yarn docker:build --local",
     "doc:build": "yarn docker:build",
     "docker:build": "/bin/bash scripts/dockerBuild.sh",
