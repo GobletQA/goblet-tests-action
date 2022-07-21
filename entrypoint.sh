@@ -160,6 +160,47 @@ checkForSaveValue(){
 
 }
 
+# Helper ensure the artifacts dir is configured properly
+configureArtifactsDir(){
+
+    # Ensure we are in the workspace folder
+  cd $GITHUB_WORKSPACE
+
+  export ARTIFACTS_DIR="$(jq -r -M ".latest.artifactsDir" "$GOBLET_TEMP_META_LOC" 2>/dev/null)"
+
+  if [ -z "$ARTIFACTS_DIR" ]; then
+    logErr "Test artifacts directory could not be found!"
+    echo "::set-output name=artifacts-path::"
+    return
+  fi
+
+  logMsg "Checking for test artifacts in $(logPurpleU "${ARTIFACTS_DIR}")"
+
+  # If using an alt repo, copy over the artifacts from the alt repo into the workspace folder
+  # This ensure the artifacts can be accessed outside the container in future steps
+  if [ "$GIT_ALT_REPO" ]; then
+  
+    # Build the copy-to path at the current workspace + relative directory
+    RELATIVE_DIR="${ARTIFACTS_DIR/$GOBLET_ALT_REPO_DIR\//}"
+    COPY_TO_DIR="$GITHUB_WORKSPACE/$RELATIVE_DIR"
+
+    # We are in the /github/workspace path
+    # Then we make sure the copy-to directory exists
+    logMsg "Ensuring directory exists at $(logPurpleU "${COPY_TO_DIR}")"
+    mkdir -p $COPY_TO_DIR
+
+    # Finally copy the artifacts from the alt-repos path into the github/workspace path
+    logMsg "Copying test artifacts from $(logPurpleU "${ARTIFACTS_DIR}") to $(logPurpleU "${COPY_TO_DIR}")"
+    cp -r "$ARTIFACTS_DIR" "$COPY_TO_DIR"
+
+    # For alt-repo set artifacts path to copied-to dir
+    echo "::set-output name=artifacts-path::$COPY_TO_DIR"
+  else
+    # By default set artifacts path to the returned $ARTIFACTS_DIR
+    echo "::set-output name=artifacts-path::$ARTIFACTS_DIR"
+  fi
+}
+
 # ---- Step 0 - Set ENVs from inputs if they don't already exist
 # Goblet Action specific ENVs
 setRunEnvs(){
@@ -278,34 +319,14 @@ runTests(){
   fi
 }
 
+
 # ---- Step 5 - Output the result of the executed tests
 setActionOutputs(){
 
   # Ensure we are in the workspace folder
   cd $GITHUB_WORKSPACE
 
-  # If using an alt repo, copy over the artifacts from the alt repo into the workspace folder
-  # This ensure the artifacts can be accessed outside the container in future steps
-    export ARTIFACTS_DIR="$(jq -r -M ".latest.artifactsDir" "$GOBLET_TEMP_META_LOC" 2>/dev/null)"
-    
-    if [ -z "$ARTIFACTS_DIR" ]; then
-      logErr "Test Artifacts directory could not be found!"
-      echo "::set-output name=artifacts-path::"
-    else
-      logMsg "Checking for artifacts in $ARTIFACTS_DIR"
-      echo "::set-output name=artifacts-path::$ARTIFACTS_DIR"
-    fi
-
-  if [ "$GIT_ALT_REPO" ]; then
-    RELATIVE_DIR="${ARTIFACTS_DIR/$GOBLET_ALT_REPO_DIR\//}"
-    COPY_TO_DIR="$GITHUB_WORKSPACE/$RELATIVE_DIR"
-    
-    logMsg "Ensuring directory exists at $ARTIFACTS_DIR"
-    mkdir -p $COPY_TO_DIR
-  
-    logMsg "Copying test artifacts from $ARTIFACTS_DIR to $COPY_TO_DIR"
-    cp -r "$ARTIFACTS_DIR" "$COPY_TO_DIR"
-  fi
+  configureArtifactsDir "$@"
 
   # Only set the reports paths, if test reports is turned on
   checkForSaveValue "GOBLET_TEST_REPORT" \
