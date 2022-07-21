@@ -43,6 +43,7 @@ export GOBLET_TEMP_META_LOC="/github/tap/temp/testMeta.json"
 # Paths used for a cloned alt-repo
 export GIT_ALT_REPO_DIR=alt
 export GOBLET_MOUNT_ROOT=/github
+export GOBLET_TEMP_DIR=".goblet-temp"
 export GOBLET_ALT_REPO_DIR=$GOBLET_MOUNT_ROOT/$GIT_ALT_REPO_DIR
 
 
@@ -81,7 +82,7 @@ setOutput(){
   # When mounted in the docker container, the path is different
   # So we use a relative path for accessing the artifacts
   if [ "$GIT_ALT_REPO" ]; then
-    VAL="${VAL//$GOBLET_ALT_REPO_DIR\//}"
+    VAL="${VAL//$ARTIFACTS_DIR/$GOBLET_TEMP_DIR}"
   else
     VAL="${VAL//$GITHUB_WORKSPACE\//}"
   fi
@@ -179,25 +180,21 @@ configureArtifactsDir(){
   # If using an alt repo, copy over the artifacts from the alt repo into the workspace folder
   # This ensure the artifacts can be accessed outside the container in future steps
   if [ "$GIT_ALT_REPO" ]; then
-  
-    # Build the copy-to path at the current workspace + relative directory
-    RELATIVE_DIR="${ARTIFACTS_DIR/$GOBLET_ALT_REPO_DIR\//}"
-    COPY_TO_DIR="$GITHUB_WORKSPACE/$RELATIVE_DIR"
 
-    # We are in the /github/workspace path
-    # Then we make sure the copy-to directory exists
-    logMsg "Ensuring directory exists at $(logPurpleU "${COPY_TO_DIR}")"
-    mkdir -p $COPY_TO_DIR
-
-    # Finally copy the artifacts from the alt-repos path into the github/workspace path
+    # Finally copy the artifacts from the alt-repos path into the github/workspace - temp path
+    COPY_TO_DIR="$GITHUB_WORKSPACE/$GOBLET_TEMP_DIR"
     logMsg "Copying test artifacts from $(logPurpleU "${ARTIFACTS_DIR}") to $(logPurpleU "${COPY_TO_DIR}")"
-    cp -r "$ARTIFACTS_DIR" "$COPY_TO_DIR"
 
-    # For alt-repo set artifacts path to copied-to dir
-    echo "::set-output name=artifacts-path::$COPY_TO_DIR"
+    # Force copy the files into the directory
+    cp -rf "$ARTIFACTS_DIR" "$COPY_TO_DIR"
+
+    # For alt-repo set artifacts path to the relative path of the copied-to dir
+    echo "::set-output name=artifacts-path::$GOBLET_TEMP_DIR"
   else
-    # By default set artifacts path to the returned $ARTIFACTS_DIR
-    echo "::set-output name=artifacts-path::$ARTIFACTS_DIR"
+
+    # By default set artifacts path to the relative path of the $ARTIFACTS_DIR
+    RELATIVE_DIR="${ARTIFACTS_DIR//$GITHUB_WORKSPACE\//}"
+    echo "::set-output name=artifacts-path::$RELATIVE_DIR"
   fi
 }
 
