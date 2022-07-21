@@ -159,77 +159,80 @@
 
 ## Outputs
 * **IMPORTANT** - Because multiple paths can be exported, the outputs are first escaped prior to being set
-* This ensures all paths are included in the ouput.
-* See [here](https://github.community/t/set-output-truncates-multiline-strings/16852) and [here](https://github.community/t/what-is-the-correct-character-escaping-for-workflow-command-values-e-g-echo-xxxx/118465/4) for more information
-
+  * This ensures all paths are included in the output
+  * See [here](https://github.community/t/set-output-truncates-multiline-strings/16852) and [here](https://github.community/t/what-is-the-correct-character-escaping-for-workflow-command-values-e-g-echo-xxxx/118465/4) for more information
+* **Important** - The output paths are relative to the active workspace
+  * In docker the path output is relative to `/github/workspace`
+  * In an action path output  is relative to `/home/runner/work/<repo-name>/<repo-name>`
+    * The `<repo-name>` should be replace with the name of the repository running the action
 ### `result`
 * Result of the Goblet test execution. One of `pass` or `fail`
 
 ### `report-paths`
 * **Important** - The `test-report` input must be set to `true`
-* Paths to the generated html test reports for each browser that ran
+* Paths to the generated html test reports for each browser relative to the active workspace directory
 * A single report is created for **ALL** test files that are run
 * Examples
   * Output with all browsers
     * Escaped Output
     ```sh
-      /github/workspace/goblet/reports/feature/test/test-chromium-1657592644482.html%0A/github/workspace/goblet/reports/feature/test/test-webkit-1657592644482.html%0A/github/workspace/goblet/reports/feature/test/test-firefox-1657592644482.html
+      goblet/reports/feature/test/test-chromium-1657592644482.html%0Agoblet/reports/feature/test/test-webkit-1657592644482.html%0Agoblet/reports/feature/test/test-firefox-1657592644482.html
     ```
     * Unescaped Output
     ```sh
-      /github/workspace/goblet/reports/feature/test/test-chromium-1657592644482.html
-      /github/workspace/goblet/reports/feature/test/test-webkit-1657592644482.html
-      /github/workspace/goblet/reports/feature/test/test-firefox-1657592644482.html
+      goblet/reports/feature/test/test-chromium-1657592644482.html
+      goblet/reports/feature/test/test-webkit-1657592644482.html
+      goblet/reports/feature/test/test-firefox-1657592644482.html
     ```
   * Output with only Webkit browser
     * Unescaped and Escaped Output is the same
     ```sh
-      /github/workspace/goblet/reports/feature/test/test-webkit-1657584807895.html
+      goblet/reports/feature/test/test-webkit-1657584807895.html
     ```
 
 ### `trace-paths`
 * **Important** - The `test-tracing` input must be set to `true`
-* Paths of the generated playwright traces when trace is enabled
+* Paths of the generated playwright traces of executed tests relative to the active workspace directory
 * Separate traces are created for **EVERY** test file that is run
 * Examples
   * Output with all browsers
     * Escaped Output
     ```sh
-      /github/workspace/goblet/artifacts/traces/bdd/test/test-chromium-1657592733262.zip%0A/github/workspace/goblet/artifacts/traces/bdd/test/test-webkit-1657592734085.zip%0A/github/workspace/goblet/reports/traces/bdd/test/test-firefox-1657590811091.zip
+      goblet/artifacts/traces/bdd/test/test-chromium-1657592733262.zip%0Agoblet/artifacts/traces/bdd/test/test-webkit-1657592734085.zip%0Agoblet/reports/traces/bdd/test/test-firefox-1657590811091.zip
     ```
     * Unescaped Output
     ```sh
-      /github/workspace/goblet/artifacts/traces/bdd/test/test-chromium-1657592733262.zip
-      /github/workspace/goblet/artifacts/traces/bdd/test/test-webkit-1657592734085.zip
-      /github/workspace/goblet/artifacts/traces/bdd/test/test-firefox-1657590811091.zip
+      goblet/artifacts/traces/bdd/test/test-chromium-1657592733262.zip
+      goblet/artifacts/traces/bdd/test/test-webkit-1657592734085.zip
+      goblet/artifacts/traces/bdd/test/test-firefox-1657590811091.zip
     ```
   * Output with only Webkit browser
     * Unescaped and Escaped Output is the same
     ```sh
-      /github/workspace/goblet/artifacts/traces/bdd/test/test-webkit-1657592734085.zip
+      goblet/artifacts/traces/bdd/test/test-webkit-1657592734085.zip
     ```
 
 
 ### `video-paths`
 * **Important** - The `test-record` input must be set to `true`
-* Paths to the video recordings of executed tests when video record is enabled
+* Paths to the video recordings of executed tests relative to the active workspace directory
 * Separate videos are recorded for **EVERY** test file that is run
 * Examples
   * Output with all browsers
     * Escaped Output
     ```sh
-      /github/workspace/goblet/artifacts/videos/bdd/test/test-webkit-1657592734085.webm%0A/github/workspace/goblet/artifacts/videos/bdd/test/test-chromium-1657592733262.webm%0A/github/workspace/goblet/artifacts/videos/bdd/test/test-firefox-1657591132585.webm
+      goblet/artifacts/videos/bdd/test/test-webkit-1657592734085.webm%0Agoblet/artifacts/videos/bdd/test/test-chromium-1657592733262.webm%0Agoblet/artifacts/videos/bdd/test/test-firefox-1657591132585.webm
     ```
     * Unescaped Output
     ```sh
-      /github/workspace/goblet/artifacts/videos/bdd/test/test-chromium-1657592733262.webm
-      /github/workspace/goblet/artifacts/videos/bdd/test/test-webkit-1657592734085.webm
-      /github/workspace/goblet/artifacts/videos/bdd/test/test-firefox-1657591132585.webm
+      goblet/artifacts/videos/bdd/test/test-chromium-1657592733262.webm
+      goblet/artifacts/videos/bdd/test/test-webkit-1657592734085.webm
+      goblet/artifacts/videos/bdd/test/test-firefox-1657591132585.webm
     ```
   * Output with only Webkit browser
     * Unescaped and Escaped Output is the same
     ```sh
-      /github/workspace/goblet/artifacts/videos/bdd/test/test-webkit-1657592734085.webm
+      goblet/artifacts/videos/bdd/test/test-webkit-1657592734085.webm
     ```
 
 ## Alt-Repo Outputs
@@ -240,21 +243,13 @@
   * This unfortunately is not configurable
   * This can be seen in the docker command that is run, and looks similar to
     * `-v "/home/runner/work/test-repo/test-repo":"/github/workspace"`
-* When using an alt repo, it is cloned into the docker container at `/github/alt`
-  * While this works well for running tests, it causes issues with the generated **artifacts**
-* Normally the **artifacts** are placed inside the `/github/workspace/goblet/artifacts` folder
-  * Because of how docker volumes work this makes them available from outside the container
-* With an **alt-repo**, the generated **artifacts** are placed at `/github/alt/goblet/artifacts`
-  * This means they are not automatically synced back to the host system outside the container
-* To resolve this, the following steps are taken
-  * A check is made to see if an **alt-repo** is being used
-  * Next, the **alt-repo** `artifacts` folder is copied to `/github/workspace/.goblet-temp`
-    * This creates a new folder called `.goblet-temp` inside the mounted `/github/workspace` volume
-    * Which allows the generated **artifacts** to be accessible after the test have finish running
-  * Finally the action outputs are updated so that the file paths reflect the new location
-    * The paths now look similar to `.goblet-temp/reports/features/<my-reports>`
-    * **IMPORTANT** - The path is relative to the default actions working directory 
-      * In the above example the path would be `/home/runner/work/test-repo/test-repo/.goblet-temp`
+* When **NOT** using an **Alt-Repo**, generated **artifacts** are saved to `/github/workspace/goblet/artifacts`
+  * Because of how docker volumes work this makes them available to future steps of a workflow
+* When using an **Alt-Repo**, generated **artifacts** are placed at `/github/alt/goblet/artifacts`
+  * They are then copied into the **same** save location at `/github/workspace/goblet/artifacts`
+  * Which allows them to be accessible to future steps of a workflow
+  * **IMPORTANT** - The copy process is a `forced` / `overwrite`
+    * Any existing files with the same name **will** be overwritten
 
 ## Example usage
 

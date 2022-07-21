@@ -34,18 +34,17 @@ unset GOBLET_DEV_TOOLS
 # Unset the debug ENV so it can be reset via the GOBLET_BROWSER_DEBUG env
 unset DEBUG
 
-# Force headless mode in CI environment
+# Force CI and headless mode in the CI environment
 export GOBLET_RUN_FROM_CI=1
 export GOBLET_HEADLESS=true
-export GIT_ALT_REPO_DIR=alt
-export GOBLET_MOUNT_ROOT=/github
-export GOBLET_ACT_REPO_LOCATION=/goblet-action
 export GOBLET_CONFIG_BASE="$GITHUB_WORKSPACE"
 export GOBLET_TEMP_META_LOC="/github/tap/temp/testMeta.json"
 
-MOUNT_WORK_DIR=$(pwd)
-MOUNT_TEMP_DIR=".goblet-temp"
-INVALID_TEST_TYPE=0
+# Paths used for a cloned alt-repo
+export GIT_ALT_REPO_DIR=alt
+export GOBLET_MOUNT_ROOT=/github
+export GOBLET_ALT_REPO_DIR=$GOBLET_MOUNT_ROOT/$GIT_ALT_REPO_DIR
+
 
 exitError(){
   export GOBLET_TESTS_RESULT="fail"
@@ -78,11 +77,15 @@ setOutput(){
     return
   fi
 
-  # If using an alt repo
-  # Then rewrite the location to the mounted folder
+  # Update the paths to just be relative paths to the workspace root directory
+  # When mounted in the docker container, the path is different
+  # So we use a relative path for accessing the artifacts
   if [ "$GIT_ALT_REPO" ]; then
-    VAL="${VAL/$ARTIFACTS_DIR/$MOUNT_TEMP_DIR}"
+    VAL="${VAL/$GOBLET_ALT_REPO_DIR\//}"
+  else
+    VAL="${VAL/$GITHUB_WORKSPACE\//}"
   fi
+
 
   # Escape the paths so all paths can be captured by the output
   VAL="${VAL//'%'/'%25'}"
@@ -136,7 +139,7 @@ checkForSaveValue(){
   # If the env is set to always, then report should exist
   if [ "$ENV_VAL" == "always" ]; then
     setOutput "${2}" "${3}"
-    logMsg "Test Artifacts found for ${2}"
+    logMsg "Test Artifacts found for ${2} output"
 
   # If the tests failed, and the env is set to failed, true, or 1
   # Then a test report should exist
@@ -209,7 +212,7 @@ setupWorkspace(){
   if [ "$LOCAL_SIMULATE_ALT" ] && [ "$LOCAL_DEV" ]; then
     export GIT_ALT_REPO=github.com/local/simulate.git
     # Navigate into the repo so we can get the pull path from (pwd)
-    cd $GOBLET_MOUNT_ROOT/$GIT_ALT_REPO_DIR
+    cd $GOBLET_ALT_REPO_DIR
     export GOBLET_CONFIG_BASE="$(pwd)"
 
   # Check if we should clone down the alt repo and use it
@@ -275,10 +278,18 @@ runTests(){
 # ---- Step 5 - Output the result of the executed tests
 setActionOutputs(){
 
-  # If using an alt repo, copy over the artifacts dir to the workspace mounted volume
+  # Ensure we are in the workspace folder
+  cd $GITHUB_WORKSPACE
+
+  # If using an alt repo, copy over the artifacts from the alt repo into the workspace folder
+  # This ensure the artifacts can be accessed outside the container in future steps
   if [ "$GIT_ALT_REPO" ]; then
-    ARTIFACTS_DIR="$(jq -r -M ".latest.rootDir" "$GOBLET_TEMP_META_LOC" 2>/dev/null)"
-    cp -r "$ARTIFACTS_DIR" "$MOUNT_WORK_DIR/$MOUNT_TEMP_DIR"
+    export ARTIFACTS_DIR="$(jq -r -M ".latest.artifactsDir" "$GOBLET_TEMP_META_LOC" 2>/dev/null)"
+    RELATIVE_DIR="${ARTIFACTS_DIR/$GOBLET_ALT_REPO_DIR\//}"
+    COPY_TO_DIR="$GITHUB_WORKSPACE/$RELATIVE_DIR"
+    mkdir -p $COPY_TO_DIR
+  
+    cp -r "$ARTIFACTS_DIR" "$COPY_TO_DIR"
   fi
 
   # Only set the reports paths, if test reports is turned on
@@ -306,4 +317,3 @@ setActionOutputs "$@"
 
 # Set the final result state, which should be pass if we get to this point
 echo "::set-output name=result::$GOBLET_TESTS_RESULT"
-
