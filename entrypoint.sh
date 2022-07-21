@@ -35,15 +35,13 @@ unset GOBLET_DEV_TOOLS
 unset DEBUG
 
 # Force headless mode in CI environment
+export GOBLET_RUN_FROM_CI=1
 export GOBLET_HEADLESS=true
 export GIT_ALT_REPO_DIR=alt
 export GOBLET_MOUNT_ROOT=/github
 export GOBLET_ACT_REPO_LOCATION=/goblet-action
 export GOBLET_CONFIG_BASE="$GITHUB_WORKSPACE"
 export GOBLET_TEMP_META_LOC="/github/tap/temp/testMeta.json"
-
-export GOBLET_RUN_FROM_CI=1
-[ "$GOBLET_TEST_NO_CI" ] && unset GOBLET_RUN_FROM_CI
 
 MOUNT_WORK_DIR=$(pwd)
 MOUNT_TEMP_DIR=".goblet-temp"
@@ -219,9 +217,6 @@ setupWorkspace(){
     cloneAltRepo "$@"
 
   fi
-
-  echo ""
-  logMsg "Repo mount is $GOBLET_CONFIG_BASE"
 }
 
 # ---- Step 4 - Run the tests
@@ -247,6 +242,8 @@ runTests(){
       TEST_RUN_ARGS="$TEST_RUN_ARGS --browsers $GOBLET_BROWSERS"
     fi
 
+    echo ""
+    logMsg "Repo mount is $GOBLET_CONFIG_BASE"
     logMsg "Running Tests with options: $(logPurpleU "${TEST_RUN_ARGS}")"
 
     node ./tasks/runTask.js bdd run $TEST_RUN_ARGS
