@@ -197,7 +197,7 @@ setRunEnvs(){
   
   # Goblet App specific ENVs
   [ -z "$NODE_ENV" ] && export NODE_ENV=test
-  [ -z "$DOC_APP_PATH" ] && export DOC_APP_PATH=/keg/tap
+  # [ -z "$DOC_APP_PATH" ] && export DOC_APP_PATH=/keg/tap
   [ -z "$GOBLET_APP_URL" ] && export GOBLET_APP_URL="$APP_URL"
 
   getENVValue "GOBLET_GIT_TOKEN" "$GIT_ALT_TOKEN" "$GIT_TOKEN"
@@ -241,6 +241,12 @@ runTests(){
     else
       TEST_RUN_ARGS="$TEST_RUN_ARGS --browsers $GOBLET_BROWSERS"
     fi
+
+    [ "$GOBLET_DEBUG_ARGS" ] && TEST_RUN_ARGS="$TEST_RUN_ARGS $GOBLET_DEBUG_ARGS"
+
+    # TEST-LOGGING -- 
+    unset DOC_APP_PATH
+    export GOBLET_REPO_ROOT="$GOBLET_CONFIG_BASE"
 
     echo ""
     logMsg "Repo mount is $GOBLET_CONFIG_BASE"

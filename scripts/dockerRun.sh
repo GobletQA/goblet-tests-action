@@ -25,7 +25,7 @@ while [[ $# -gt 0 ]]; do
   case $1 in
     -g|--goblet)
       logMsg "Mounting goblet repo"
-      MOUNTS="$MOUNTS -v $(keg goblet path):/github/tap"
+      MOUNTS="$MOUNTS -v $HOME/keg-hub/taps/goblet:/github/tap"
       shift
       ;;
     -m|--mount)
