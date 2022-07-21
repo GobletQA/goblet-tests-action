@@ -185,6 +185,9 @@ configureArtifactsDir(){
     COPY_TO_DIR="$GITHUB_WORKSPACE/$GOBLET_TEMP_DIR"
     logMsg "Copying test artifacts from $(logPurpleU "${ARTIFACTS_DIR}") to $(logPurpleU "${COPY_TO_DIR}")"
 
+    # Ensure the copy to directory exists
+    mkdir -p $COPY_TO_DIR
+
     # Force copy the files into the directory
     cp -rf "$ARTIFACTS_DIR" "$COPY_TO_DIR"
 
