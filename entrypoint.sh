@@ -277,7 +277,7 @@ setActionOutputs(){
 
   # If using an alt repo, copy over the artifacts dir to the workspace mounted volume
   if [ "$GIT_ALT_REPO" ]; then
-    ARTIFACTS_DIR="$(jq -r -M ".latest.rootDir" "$GOBLET_TEMP_META_LOC" 2>/dev/null)"
+    ARTIFACTS_DIR="$(jq -r -M ".latest.artifactsDir" "$GOBLET_TEMP_META_LOC" 2>/dev/null)"
     cp -r "$ARTIFACTS_DIR" "$MOUNT_WORK_DIR/$MOUNT_TEMP_DIR"
   fi
 
