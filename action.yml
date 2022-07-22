@@ -63,9 +63,6 @@ inputs:
   test-open-handles:
     required: false
     description: 'Detect handles left open when tests run. Forces tests to run in sync.'
-  test-debug:
-    required: false
-    description: 'Turn on debugging for the test runner'
   browsers:
     required: false
     description: 'Comma separated list of Browsers to execute tests against'
@@ -119,10 +116,9 @@ runs:
     - ${{ inputs.test-workers }} #18
     - ${{ inputs.test-verbose }} #19
     - ${{ inputs.test-open-handles }} #20
-    - ${{ inputs.test-debug }} #20
-    - ${{ inputs.browser }} #22
-    - ${{ inputs.browser-debug }} #23
-    - ${{ inputs.browser-slow-mo }} #24
-    - ${{ inputs.browser-concurrent }} #25
-    - ${{ inputs.browser-timeout }} #26
-    - ${{ inputs.artifacts-debug }} #27
+    - ${{ inputs.browser }} #21
+    - ${{ inputs.browser-debug }} #22
+    - ${{ inputs.browser-slow-mo }} #23
+    - ${{ inputs.browser-concurrent }} #24
+    - ${{ inputs.browser-timeout }} #25
+    - ${{ inputs.artifacts-debug }} #26

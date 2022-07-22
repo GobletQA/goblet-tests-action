@@ -42,10 +42,9 @@ export GOBLET_TEMP_META_LOC="/github/tap/temp/testMeta.json"
 
 # Paths used for a cloned alt-repo
 export GIT_ALT_REPO_DIR=alt
+export GOBLET_WORK_DIR=$(pwd)
 export GOBLET_MOUNT_ROOT=/github
 export GOBLET_TEMP_DIR=".goblet-temp"
-export GOBLET_ALT_REPO_DIR=$GOBLET_MOUNT_ROOT/$GIT_ALT_REPO_DIR
-
 
 exitError(){
   export GOBLET_TESTS_RESULT="fail"
@@ -164,32 +163,14 @@ checkForSaveValue(){
 # Helper ensure the artifacts dir is configured properly
 configureArtifactsDir(){
 
-    # Ensure we are in the workspace folder
-  cd $GITHUB_WORKSPACE
+  # If using an alt repo, copy over the artifacts dir to the workspace mounted volume
+  ARTIFACTS_DIR="$(jq -r -M ".latest.artifactsDir" "$GOBLET_TEMP_META_LOC" 2>/dev/null)"
 
-  export ARTIFACTS_DIR="$(jq -r -M ".latest.artifactsDir" "$GOBLET_TEMP_META_LOC" 2>/dev/null)"
-
-  if [ -z "$ARTIFACTS_DIR" ]; then
-    logErr "Test artifacts directory could not be found!"
-    echo "::set-output name=artifacts-path::"
-    return
-  fi
-
-  logMsg "Checking for test artifacts in $(logPurpleU "${ARTIFACTS_DIR}")"
-
-  # If using an alt repo, copy over the artifacts from the alt repo into the workspace folder
-  # This ensure the artifacts can be accessed outside the container in future steps
   if [ "$GIT_ALT_REPO" ]; then
 
-    # Finally copy the artifacts from the alt-repos path into the github/workspace - temp path
-    COPY_TO_DIR="$GITHUB_WORKSPACE/$GOBLET_TEMP_DIR"
-    logMsg "Copying test artifacts from $(logPurpleU "${ARTIFACTS_DIR}") to $(logPurpleU "${COPY_TO_DIR}")"
-
-    # Ensure the copy to directory exists
-    mkdir -p $COPY_TO_DIR
-
+    logMsg "Copying test artifacts from $(logPurpleU "${ARTIFACTS_DIR}")"
     # Force copy the files into the directory
-    cp -rf "$ARTIFACTS_DIR" "$COPY_TO_DIR"
+    cp -r "$ARTIFACTS_DIR" "$GOBLET_WORK_DIR/$GOBLET_TEMP_DIR"
 
     # For alt-repo set artifacts path to the relative path of the copied-to dir
     echo "::set-output name=artifacts-path::$GOBLET_TEMP_DIR"
@@ -232,15 +213,14 @@ setRunEnvs(){
   getENVValue "GOBLET_TEST_WORKERS" "${18}" "$GOBLET_TEST_WORKERS"
   getENVValue "GOBLET_TEST_VERBOSE" "${19}" "$GOBLET_TEST_VERBOSE"
   getENVValue "GOBLET_TEST_OPEN_HANDLES" "${20}" "$GOBLET_TEST_OPEN_HANDLES"
-  getENVValue "GOBLET_TEST_DEBUG" "${21}" "$GOBLET_TEST_DEBUG"
 
-  getENVValue "GOBLET_BROWSERS" "${22}" "$GOBLET_BROWSERS"
-  getENVValue "GOBLET_BROWSER_DEBUG" "${23}" "$GOBLET_BROWSER_DEBUG"
-  getENVValue "GOBLET_BROWSER_SLOW_MO" "${24}" "$GOBLET_BROWSER_SLOW_MO"
-  getENVValue "GOBLET_BROWSER_CONCURRENT" "${25}" "$GOBLET_BROWSER_CONCURRENT"
-  getENVValue "GOBLET_BROWSER_TIMEOUT" "${26}" "$GOBLET_BROWSER_TIMEOUT"
+  getENVValue "GOBLET_BROWSERS" "${21}" "$GOBLET_BROWSERS"
+  getENVValue "GOBLET_BROWSER_DEBUG" "${22}" "$GOBLET_BROWSER_DEBUG"
+  getENVValue "GOBLET_BROWSER_SLOW_MO" "${23}" "$GOBLET_BROWSER_SLOW_MO"
+  getENVValue "GOBLET_BROWSER_CONCURRENT" "${24}" "$GOBLET_BROWSER_CONCURRENT"
+  getENVValue "GOBLET_BROWSER_TIMEOUT" "${25}" "$GOBLET_BROWSER_TIMEOUT"
 
-  getENVValue "GOBLET_ARTIFACTS_DEBUG" "${27}" "$GOBLET_ARTIFACTS_DEBUG"
+  getENVValue "GOBLET_ARTIFACTS_DEBUG" "${26}" "$GOBLET_ARTIFACTS_DEBUG"
   
   # Goblet App specific ENVs
   [ -z "$NODE_ENV" ] && export NODE_ENV=test
@@ -256,7 +236,7 @@ setupWorkspace(){
   if [ "$LOCAL_SIMULATE_ALT" ] && [ "$LOCAL_DEV" ]; then
     export GIT_ALT_REPO=github.com/local/simulate.git
     # Navigate into the repo so we can get the pull path from (pwd)
-    cd $GOBLET_ALT_REPO_DIR
+    cd $GOBLET_MOUNT_ROOT/$GIT_ALT_REPO_DIR
     export GOBLET_CONFIG_BASE="$(pwd)"
 
   # Check if we should clone down the alt repo and use it
@@ -264,6 +244,9 @@ setupWorkspace(){
     cloneAltRepo "$@"
 
   fi
+
+  echo ""
+  logMsg "Repo mount is $(logPurpleU "${GOBLET_CONFIG_BASE}")"
 }
 
 # ---- Step 4 - Run the tests
@@ -277,7 +260,6 @@ runTests(){
 
   if [ "$GOBLET_TEST_TYPE" == "bdd" ]; then
 
-    # export GOBLET_TESTS_PATH="${GOBLET_TESTS_PATH:-$GOBLET_CONFIG_BASE}"
     [ "$GOBLET_TESTS_PATH" ] && TEST_RUN_ARGS="$TEST_RUN_ARGS --context $GOBLET_TESTS_PATH"
 
     # Add special handling for setting browsers option to auto set ---allBrowsers when not set
@@ -288,8 +270,6 @@ runTests(){
     else
       TEST_RUN_ARGS="$TEST_RUN_ARGS --browsers $GOBLET_BROWSERS"
     fi
-
-    [ "$GOBLET_DEBUG_ARGS" ] && TEST_RUN_ARGS="$TEST_RUN_ARGS $GOBLET_DEBUG_ARGS"
 
     echo ""
     logMsg "Repo mount is $GOBLET_CONFIG_BASE"
@@ -319,12 +299,8 @@ runTests(){
   fi
 }
 
-
 # ---- Step 5 - Output the result of the executed tests
 setActionOutputs(){
-
-  # Ensure we are in the workspace folder
-  cd $GITHUB_WORKSPACE
 
   configureArtifactsDir "$@"
 
