@@ -94,7 +94,7 @@ outputs:
 
 runs:
   using: 'docker'
-  image: 'docker://ghcr.io/gobletqa/goblet-tests-action:0.0.19'
+  image: 'docker://ghcr.io/gobletqa/goblet-tests-action:0.0.20'
   args:
     - ${{ inputs.test-context }} #1
     - ${{ inputs.git-token }} #2
