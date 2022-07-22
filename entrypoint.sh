@@ -35,6 +35,7 @@ unset GOBLET_DEV_TOOLS
 unset DEBUG
 
 # Force headless mode in CI environment
+export GOBLET_RUN_FROM_CI=1
 export GOBLET_HEADLESS=true
 export GIT_ALT_REPO_DIR=alt
 export GOBLET_MOUNT_ROOT=/github
@@ -42,19 +43,15 @@ export GOBLET_ACT_REPO_LOCATION=/goblet-action
 export GOBLET_CONFIG_BASE="$GITHUB_WORKSPACE"
 export GOBLET_TEMP_META_LOC="/github/tap/temp/testMeta.json"
 
-export GOBLET_RUN_FROM_CI=1
-[ "$GOBLET_TEST_NO_CI" ] && unset GOBLET_RUN_FROM_CI
-
 MOUNT_WORK_DIR=$(pwd)
 MOUNT_TEMP_DIR=".goblet-temp"
-INVALID_TEST_TYPE=0
 
 exitError(){
   export GOBLET_TESTS_RESULT="fail"
 
   echo "::set-output name=result::$GOBLET_TESTS_RESULT"
   logErr "Finished running tests for $GOBLET_TESTS_PATH"
-
+  ensureArtifactsDir
   setActionOutputs
   exit 1
 }
@@ -80,11 +77,17 @@ setOutput(){
     return
   fi
 
-  # If using an alt repo
-  # Then rewrite the location to the mounted folder
+  # Update the paths to just be relative paths to the workspace root directory
+  # If using an alt repo, rewrite the location to the mounted folder
   if [ "$GIT_ALT_REPO" ]; then
-    VAL="${VAL/$ARTIFACTS_DIR/$MOUNT_TEMP_DIR}"
+    VAL="${VAL//$ARTIFACTS_DIR/$MOUNT_TEMP_DIR}"
+  else
+    VAL="${VAL//$GITHUB_WORKSPACE\//}"
   fi
+
+  # Log the found artifacts to be uploaded for reference pre-escaping
+  logMsg "Test Artifacts found for ${1} output"
+  echo "${VAL}"
 
   # Escape the paths so all paths can be captured by the output
   VAL="${VAL//'%'/'%25'}"
@@ -272,14 +275,27 @@ runTests(){
   fi
 }
 
-# ---- Step 5 - Output the result of the executed tests
-setActionOutputs(){
+# ---- Step 5 - Ensure the artifacts dir is configured properly
+ensureArtifactsDir(){
+
+  ARTIFACTS_DIR="$(jq -r -M ".latest.artifactsDir" "$GOBLET_TEMP_META_LOC" 2>/dev/null)"
 
   # If using an alt repo, copy over the artifacts dir to the workspace mounted volume
   if [ "$GIT_ALT_REPO" ]; then
-    ARTIFACTS_DIR="$(jq -r -M ".latest.artifactsDir" "$GOBLET_TEMP_META_LOC" 2>/dev/null)"
     cp -r "$ARTIFACTS_DIR" "$MOUNT_WORK_DIR/$MOUNT_TEMP_DIR"
+
+    # For alt-repo set artifacts path to the relative path of the copied-to dir
+    echo "::set-output name=artifacts-path::$MOUNT_TEMP_DIR"
+  else
+    # By default set artifacts path to the relative path of the $ARTIFACTS_DIR
+    RELATIVE_DIR="${ARTIFACTS_DIR//$GITHUB_WORKSPACE\//}"
+
+    echo "::set-output name=artifacts-path::$RELATIVE_DIR"
   fi
+}
+
+# ---- Step 6 - Output the result of the executed tests
+setActionOutputs(){
 
   # Only set the reports paths, if test reports is turned on
   checkForSaveValue "GOBLET_TEST_REPORT" \
@@ -302,7 +318,8 @@ setActionOutputs(){
 setRunEnvs "$@"
 setupWorkspace "$@"
 runTests "$@"
-setActionOutputs "$@"
+ensureArtifactsDir
+setActionOutputs
 
 # Set the final result state, which should be pass if we get to this point
 echo "::set-output name=result::$GOBLET_TESTS_RESULT"
