@@ -34,17 +34,20 @@ unset GOBLET_DEV_TOOLS
 # Unset the debug ENV so it can be reset via the GOBLET_BROWSER_DEBUG env
 unset DEBUG
 
-# Force CI and headless mode in the CI environment
-export GOBLET_RUN_FROM_CI=1
+# Force headless mode in CI environment
 export GOBLET_HEADLESS=true
+export GIT_ALT_REPO_DIR=alt
+export GOBLET_MOUNT_ROOT=/github
+export GOBLET_ACT_REPO_LOCATION=/goblet-action
 export GOBLET_CONFIG_BASE="$GITHUB_WORKSPACE"
 export GOBLET_TEMP_META_LOC="/github/tap/temp/testMeta.json"
 
-# Paths used for a cloned alt-repo
-export GIT_ALT_REPO_DIR=alt
-export GOBLET_WORK_DIR=$(pwd)
-export GOBLET_MOUNT_ROOT=/github
-export GOBLET_TEMP_DIR=".goblet-temp"
+export GOBLET_RUN_FROM_CI=1
+[ "$GOBLET_TEST_NO_CI" ] && unset GOBLET_RUN_FROM_CI
+
+MOUNT_WORK_DIR=$(pwd)
+MOUNT_TEMP_DIR=".goblet-temp"
+INVALID_TEST_TYPE=0
 
 exitError(){
   export GOBLET_TESTS_RESULT="fail"
@@ -77,27 +80,19 @@ setOutput(){
     return
   fi
 
-  # Update the paths to just be relative paths to the workspace root directory
-  # When mounted in the docker container, the path is different
-  # So we use a relative path for accessing the artifacts
+  # If using an alt repo
+  # Then rewrite the location to the mounted folder
   if [ "$GIT_ALT_REPO" ]; then
-    VAL="${VAL//$ARTIFACTS_DIR/$GOBLET_TEMP_DIR}"
-  else
-    VAL="${VAL//$GITHUB_WORKSPACE\//}"
+    VAL="${VAL/$ARTIFACTS_DIR/$MOUNT_TEMP_DIR}"
   fi
-
-  # Log the found artifacts to be uploaded for reference pre-escaping
-  logMsg "Test Artifacts found for ${1} output"
-  echo "${VAL}"
 
   # Escape the paths so all paths can be captured by the output
   VAL="${VAL//'%'/'%25'}"
   VAL="${VAL//$'\n'/'%0A'}"
   VAL="${VAL//$'\r'/'%0D'}"
-  
-  
   echo "::set-output name=$NAME::$VAL"
 }
+
 
 # Clones an alternitive repo locally
 cloneAltRepo(){
@@ -144,12 +139,14 @@ checkForSaveValue(){
   # If the env is set to always, then report should exist
   if [ "$ENV_VAL" == "always" ]; then
     setOutput "${2}" "${3}"
+    logMsg "Test Artifacts found for ${2}"
 
   # If the tests failed, and the env is set to failed, true, or 1
   # Then a test report should exist
   elif [ "$GOBLET_TESTS_RESULT" == "fail" ]; then
     if [ "$ENV_VAL" == "failed" ] || [ "$ENV_VAL" == true ] || [ "$ENV_VAL" == 1 ]; then
       setOutput "${2}" "${3}"
+      logMsg "Test Artifacts found for ${2} output"
 
     fi
 
@@ -158,28 +155,6 @@ checkForSaveValue(){
     echo "::set-output name=${2}::"
   fi
 
-}
-
-# Helper ensure the artifacts dir is configured properly
-configureArtifactsDir(){
-
-  # If using an alt repo, copy over the artifacts dir to the workspace mounted volume
-  ARTIFACTS_DIR="$(jq -r -M ".latest.artifactsDir" "$GOBLET_TEMP_META_LOC" 2>/dev/null)"
-
-  if [ "$GIT_ALT_REPO" ]; then
-
-    logMsg "Copying test artifacts from $(logPurpleU "${ARTIFACTS_DIR}")"
-    # Force copy the files into the directory
-    cp -r "$ARTIFACTS_DIR" "$GOBLET_WORK_DIR/$GOBLET_TEMP_DIR"
-
-    # For alt-repo set artifacts path to the relative path of the copied-to dir
-    echo "::set-output name=artifacts-path::$GOBLET_TEMP_DIR"
-  else
-
-    # By default set artifacts path to the relative path of the $ARTIFACTS_DIR
-    RELATIVE_DIR="${ARTIFACTS_DIR//$GITHUB_WORKSPACE\//}"
-    echo "::set-output name=artifacts-path::$RELATIVE_DIR"
-  fi
 }
 
 # ---- Step 0 - Set ENVs from inputs if they don't already exist
@@ -246,7 +221,7 @@ setupWorkspace(){
   fi
 
   echo ""
-  logMsg "Repo mount is $(logPurpleU "${GOBLET_CONFIG_BASE}")"
+  logMsg "Repo mount is $GOBLET_CONFIG_BASE"
 }
 
 # ---- Step 4 - Run the tests
@@ -260,7 +235,8 @@ runTests(){
 
   if [ "$GOBLET_TEST_TYPE" == "bdd" ]; then
 
-    [ "$GOBLET_TESTS_PATH" ] && TEST_RUN_ARGS="$TEST_RUN_ARGS --context $GOBLET_TESTS_PATH"
+    export GOBLET_TESTS_PATH="${GOBLET_TESTS_PATH:-$GOBLET_CONFIG_BASE}"
+    TEST_RUN_ARGS="$TEST_RUN_ARGS --context $GOBLET_TESTS_PATH"
 
     # Add special handling for setting browsers option to auto set ---allBrowsers when not set
     if [ -z "$GOBLET_BROWSERS" ]; then
@@ -271,10 +247,7 @@ runTests(){
       TEST_RUN_ARGS="$TEST_RUN_ARGS --browsers $GOBLET_BROWSERS"
     fi
 
-    echo ""
-    logMsg "Repo mount is $GOBLET_CONFIG_BASE"
-    logMsg "Running Tests with options: $(logPurpleU "${TEST_RUN_ARGS}")"
-
+    logMsg "Running Tests for $(logPurpleU $GOBLET_TESTS_PATH)"
     node ./tasks/runTask.js bdd run $TEST_RUN_ARGS
     TEST_EXIT_STATUS=$?
 
@@ -302,7 +275,11 @@ runTests(){
 # ---- Step 5 - Output the result of the executed tests
 setActionOutputs(){
 
-  configureArtifactsDir "$@"
+  # If using an alt repo, copy over the artifacts dir to the workspace mounted volume
+  if [ "$GIT_ALT_REPO" ]; then
+    ARTIFACTS_DIR="$(jq -r -M ".latest.rootDir" "$GOBLET_TEMP_META_LOC" 2>/dev/null)"
+    cp -r "$ARTIFACTS_DIR" "$MOUNT_WORK_DIR/$MOUNT_TEMP_DIR"
+  fi
 
   # Only set the reports paths, if test reports is turned on
   checkForSaveValue "GOBLET_TEST_REPORT" \
