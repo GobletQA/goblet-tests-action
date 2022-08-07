@@ -4,7 +4,9 @@ source $KEG_CLI_PATH/keg
 source scripts/logger.sh
 
 # Build goblet first
-keg goblet build --push
+# keg goblet
+# yarn doc build --context bs --push
+# yarn doc build --push
 
 # TODO: update version
 # node scripts/updateVersion.js

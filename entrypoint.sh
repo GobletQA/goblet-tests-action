@@ -41,7 +41,7 @@ export GIT_ALT_REPO_DIR=alt
 export GOBLET_MOUNT_ROOT=/github
 export GOBLET_ACT_REPO_LOCATION=/goblet-action
 export GOBLET_CONFIG_BASE="$GITHUB_WORKSPACE"
-export GOBLET_TEMP_META_LOC="/github/tap/temp/testMeta.json"
+export GOBLET_TEMP_META_LOC="/github/app/temp/testMeta.json"
 
 MOUNT_WORK_DIR=$(pwd)
 MOUNT_TEMP_DIR=".goblet-temp"
@@ -202,7 +202,6 @@ setRunEnvs(){
   
   # Goblet App specific ENVs
   [ -z "$NODE_ENV" ] && export NODE_ENV=test
-  [ -z "$DOC_APP_PATH" ] && export DOC_APP_PATH=/keg/tap
   [ -z "$GOBLET_APP_URL" ] && export GOBLET_APP_URL="$APP_URL"
 
   getENVValue "GOBLET_GIT_TOKEN" "$GIT_ALT_TOKEN" "$GIT_TOKEN"
@@ -231,7 +230,7 @@ setupWorkspace(){
 runTests(){
   # Goblet test run specific ENVs - customizable
   # Switch to the goblet dir and run the bdd test task
-  cd /github/tap
+  cd /github/app
 
   local TEST_RUN_ARGS="--env $NODE_ENV --base $GOBLET_CONFIG_BASE"
   [ -z "$GOBLET_TEST_TYPE" ] && export GOBLET_TEST_TYPE="${GOBLET_TEST_TYPE:-bdd}"
