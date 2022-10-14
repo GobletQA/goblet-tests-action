@@ -250,7 +250,7 @@ runTests(){
     fi
 
     logMsg "Running Tests for $(logPurpleU $GOBLET_TESTS_PATH)"
-    node ./tasks/runTask.js bdd run $TEST_RUN_ARGS
+    node tasks/entry.js bdd run $TEST_RUN_ARGS
     TEST_EXIT_STATUS=$?
 
     if [ ${TEST_EXIT_STATUS} -ne 0 ]; then
