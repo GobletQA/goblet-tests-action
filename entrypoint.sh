@@ -49,7 +49,7 @@ MOUNT_TEMP_DIR=".goblet-temp"
 exitError(){
   export GOBLET_TESTS_RESULT="fail"
 
-  echo "::set-output name=result::$GOBLET_TESTS_RESULT"
+  echo "result=$GOBLET_TESTS_RESULT" >> $GITHUB_OUTPUT
   logErr "Finished running tests for $GOBLET_TESTS_PATH"
   ensureArtifactsDir
   setActionOutputs
@@ -66,14 +66,13 @@ getENVValue() {
 }
 
 # Pulls the value for an output, escapes it, then sets it as an output
-# See https://github.community/t/set-output-truncates-multiline-strings/16852
 setOutput(){
   local NAME="${1}"
   local JQ="${2}"
   local VAL=$(jq -r -M "$JQ" "$GOBLET_TEMP_META_LOC" 2>/dev/null)
 
   if [ -z "$VAL" ]; then
-    echo "::set-output name=$NAME::"
+    echo "$NAME=" >> $GITHUB_OUTPUT
     return
   fi
 
@@ -93,7 +92,8 @@ setOutput(){
   VAL="${VAL//'%'/'%25'}"
   VAL="${VAL//$'\n'/'%0A'}"
   VAL="${VAL//$'\r'/'%0D'}"
-  echo "::set-output name=$NAME::$VAL"
+  # Multi-Line string convert to single-line with escaped paths
+  echo "$NAME=$VAL" >> $GITHUB_OUTPUT
 }
 
 
@@ -155,7 +155,7 @@ checkForSaveValue(){
 
   # If no value, or it's disabled then set empty and return
   else
-    echo "::set-output name=${2}::"
+    echo "${2}=" >> $GITHUB_OUTPUT
   fi
 
 }
@@ -266,10 +266,10 @@ runTests(){
   else
     export GOBLET_TESTS_RESULT="fail"
     logErr "Test type $GOBLET_TEST_TYPE not yet supported"
-    echo "::set-output name=result::fail"
-    echo "::set-output name=video-paths::"
-    echo "::set-output name=trace-paths::"
-    echo "::set-output name=report-paths::"
+    echo "result=fail" >> $GITHUB_OUTPUT
+    echo "video-paths=" >> $GITHUB_OUTPUT
+    echo "trace-paths=" >> $GITHUB_OUTPUT
+    echo "report-paths=" >> $GITHUB_OUTPUT
     exit 1
   fi
 }
@@ -284,12 +284,12 @@ ensureArtifactsDir(){
     cp -r "$ARTIFACTS_DIR" "$MOUNT_WORK_DIR/$MOUNT_TEMP_DIR"
 
     # For alt-repo set artifacts path to the relative path of the copied-to dir
-    echo "::set-output name=artifacts-path::$MOUNT_TEMP_DIR"
+    echo "artifacts-path=$MOUNT_TEMP_DIR" >> $GITHUB_OUTPUT
   else
     # By default set artifacts path to the relative path of the $ARTIFACTS_DIR
     RELATIVE_DIR="${ARTIFACTS_DIR//$GITHUB_WORKSPACE\//}"
 
-    echo "::set-output name=artifacts-path::$RELATIVE_DIR"
+    echo "artifacts-path=$RELATIVE_DIR" >> $GITHUB_OUTPUT
   fi
 }
 
@@ -321,4 +321,4 @@ ensureArtifactsDir
 setActionOutputs
 
 # Set the final result state, which should be pass if we get to this point
-echo "::set-output name=result::$GOBLET_TESTS_RESULT"
+echo "result=$GOBLET_TESTS_RESULT" >> $GITHUB_OUTPUT
