@@ -38,11 +38,11 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@commitlint/cli": "16.1.0",
-    "@commitlint/config-conventional": "16.0.0",
-    "commitizen": "4.2.4",
+    "@commitlint/cli": "17.1.2",
+    "@commitlint/config-conventional": "17.1.0",
+    "commitizen": "4.2.5",
     "cz-conventional-changelog": "3.3.0",
-    "husky": "7.0.4"
+    "husky": "8.0.1"
   },
   "config": {
     "commitizen": {
