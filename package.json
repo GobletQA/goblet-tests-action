@@ -17,12 +17,10 @@
   "scripts": {
     "bump": "node scripts/updateVersion.js",
     "db": "yarn docker:build",
-    "dgp": "yarn docker:goblet:buildPush",
-    "docker:goblet:buildPush": "/bin/bash scripts/dockerBuildPush.sh",
     "dbl": "yarn docker:build --local",
     "doc:build": "yarn docker:build",
     "docker:build": "/bin/bash scripts/dockerBuild.sh",
-    "dbp": "/bin/bash scripts/dockerBuild.sh push",
+    "dbp": "/bin/bash scripts/dockerBuild.sh --push",
     "dd": "yarn docker:dev",
     "doc:dev": "yarn docker:dev",
     "docker:dev": "/bin/bash scripts/dockerDev.sh",
@@ -34,6 +32,7 @@
     "drf": "GOBLET_BROWSERS=firefox yarn docker:run",
     "drw": "GOBLET_BROWSERS=webkit yarn docker:run",
     "drgc": "GOBLET_BROWSERS=chrome /bin/bash scripts/dockerRun.sh goblet",
+    "dvp": "yarn bump && yarn dbp",
     "doc:run": "yarn docker:run",
     "docker:run": "/bin/bash scripts/dockerRun.sh"
   },
