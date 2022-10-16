@@ -45,6 +45,7 @@
     "commitizen": "4.2.5",
     "cz-conventional-changelog": "3.3.0",
     "husky": "8.0.1",
+    "js-yaml": "3.14.1",
     "semver": "7.3.8"
   },
   "config": {

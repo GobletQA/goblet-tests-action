@@ -1,10 +1,11 @@
 const path = require('path')
+const yaml = require('js-yaml')
 const semver = require('semver')
-const { writeFileSync } = require('fs')
-const { loadYmlSync, writeYml } = require('@keg-hub/parse-config')
+const { readFileSync, writeFileSync } = require('fs')
+const { writeYml } = require('@keg-hub/parse-config')
 
 const actionYmlLoc = path.join(__dirname, `../action.yml`)
-const actionYml = loadYmlSync(actionYmlLoc)
+const actionYml = yaml.safeLoad(readFileSync(actionYmlLoc).toString())
 
 const packConfLoc = path.join(__dirname, `../package.json`)
 const packConf = require(packConfLoc)
@@ -26,7 +27,7 @@ const invalidVersionErr = (version) => {
 
 const updatePackageVersion = async (version) => {
   packConf.version = version
-  writeFileSync(packConfLoc, JSON.stringify(packConf, null, 2))
+  writeFileSync(packConfLoc, `${JSON.stringify(packConf, null, 2)}\n`)
 }
 
 const updateActionImageTag = async (version) => {
