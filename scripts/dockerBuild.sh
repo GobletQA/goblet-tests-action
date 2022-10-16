@@ -8,12 +8,14 @@ IMAGE_VERSION=$npm_package_version
 IMAGES_URI=ghcr.io/gobletqa/$IMAGE_NAME
 IMAGE_FULL=$IMAGES_URI:$IMAGE_VERSION
 
+logMsg "Building image version $IMAGE_VERSION"
+
 BUILD_ARGS="--load"
 
 while [[ $# -gt 0 ]]; do
   case $1 in
     -p|--push)
-      logMsg "Add platforms arguments to push image"
+      logMsg "Pushing image after build"
       BUILD_ARGS="--platform linux/amd64,linux/arm64 --push"
       shift
     ;;

@@ -70,11 +70,11 @@ const updateVersion = (oldVersion, newVersion) => {
 
   const version = updateVersion(oldVersion, newVersion)
 
-  console.log(`Updating version to ${version} ...`)
+  console.log(`Updating version to ${version}\n`)
 
   await updatePackageVersion(version)
   await updateActionImageTag(version)
 
-  console.log(`Version was updated to ${version}`)
+  console.log(`Version was updated to ${version}\n`)
 
 })()
