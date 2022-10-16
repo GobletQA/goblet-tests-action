@@ -1,100 +1,100 @@
 # action.yml
-name: 'GobletQA Tests'
-description: 'Run Goblet tests in a github action'
+name: GobletQA Tests
+description: Run Goblet tests in a github action
 inputs:
   test-context:
     required: false
-    description: 'Path or name to the tests to run. Runs all tests if not defined'
+    description: Path or name to the tests to run. Runs all tests if not defined
   git-token:
     required: true
-    description: 'Github Token with write access to the repository'
+    description: Github Token with write access to the repository
   goblet-token:
     required: false
-    default: 'IGNORED'
-    description: 'CI token from the goblet platform'
+    default: IGNORED
+    description: CI token from the goblet platform
   alt-repo:
     required: false
-    description: 'Alternative github repository that contains the tests to be run.'
+    description: Alternative github repository that contains the tests to be run.
   alt-branch:
     required: false
-    description: 'Name of the branch to use for the alt repository.'
+    description: Name of the branch to use for the alt repository.
   alt-user:
     required: false
-    description: 'Github user name or organization with write access to the alt repository.'
+    description: Github user name or organization with write access to the alt repository.
   alt-email:
     required: false
-    description: 'Email of user with write access to the alt repository.'
+    description: Email of user with write access to the alt repository.
   alt-token:
     required: false
-    description: 'Github Token with write access to the alt repository.'
+    description: Github Token with write access to the alt repository.
   test-type:
     required: false
-    description: 'Type of tests to be run. Can be one of "bdd", "waypoint", or "unit". Default to "bdd"'
+    default: bdd
+    description: Test type to run, one of "bdd", "waypoint", or "unit"
   test-retry:
     required: false
-    description: 'Number of times a failed test should be retried'
+    description: Number of times a failed test should be retried
   test-report:
     required: false
-    description: 'Generate an html formatted test report for all executed tests'
+    description: Generate an html formatted test report for all executed tests
   test-tracing:
     required: false
-    description: 'Enabled test tracing via playwright.'
+    description: Enable test tracing via playwright.
   test-record:
     required: false
-    description: 'Enabled browser video recording via playwright.'
+    description: Enable browser video recording via playwright.
   test-screenshot:
     required: false
-    description: 'Enabled browser image snapshots for failed tests. Ignored if "test-tracing" is true'
+    description: Enable browser snapshots on failed tests. Ignored if "test-tracing=true"
   test-timeout:
     required: false
-    description: 'Amount of time for a test to wait until it times out and is then marked as failed'
+    description: Amount of time until a test times out and is marked as fail
   test-cache:
     required: false
-    description: 'Use internal test cache when executing test'
+    description: Use internal test cache when executing test
   test-colors:
     required: false
-    description: 'Force use of colors even when not a TTY'
+    description: Force use of colors even when not a TTY
   test-workers:
     required: false
-    description: 'Number of workers to use when running tests'
+    description: Number of workers to use when running tests
   test-verbose:
     required: false
-    description: 'Output verbose test results as the tests run'
+    description: Output verbose test results as the tests run
   test-open-handles:
     required: false
-    description: 'Detect handles left open when tests run. Forces tests to run in sync.'
+    description: Detect handles left open when tests run. Forces tests to run in sync.
   browsers:
     required: false
-    description: 'Comma separated list of Browsers to execute tests against'
+    description: Comma separated list of Browsers to execute tests against
   browser-debug:
     required: false
-    description: 'Log the debug output of the playwright browser'
+    description: Log the debug output of the playwright browser
   browser-slow-mo:
     required: false
-    description: 'Speed of actions executed in the browser while executing tests'
-  browser-concurrent: 
+    description: Speed of actions executed in the browser while executing tests
+  browser-concurrent:
     required: false
-    description: 'Run the tests in each defined browser at the same time'
+    description: Run the tests in each defined browser at the same time
   browser-timeout:
     required: false
-    description: 'Amount of time for the browser to wait until it times out and the corresponding test fails'
+    description: Amount of time until a browser times out and the test is marked as fail
   artifacts-debug:
     required: false
-    description: 'Enable debug logging for all generated artifacts'
+    description: Enable debug logging for all generated artifacts
 
 outputs:
   result:
-    description: 'Result of the executed Goblet tests, one of `pass` or `fail`'
+    description: Result of the executed Goblet tests, one of `pass` or `fail`
   report-paths:
-    description: 'Paths to the html test reports for each browser that ran'
+    description: Paths to the html test reports for each browser that ran
   trace-paths:
-    description: 'Paths of the generated playwright traces when enabled'
+    description: Paths of the generated playwright traces when enabled
   video-paths:
-    description: 'Paths to the video recordings of executed tests when enabled'
-
+    description: Paths to the video recordings of executed tests when enabled
 runs:
-  using: 'docker'
-  image: 'docker://ghcr.io/gobletqa/goblet-tests-action:0.0.23'
+  using: docker
+  image: docker://ghcr.io/gobletqa/goblet-tests-action:0.0.23
   args:
     - ${{ inputs.test-context }} #1
     - ${{ inputs.git-token }} #2
