@@ -17,20 +17,20 @@ inputs:
     description: Alternative github repository that contains the tests to be run.
   alt-branch:
     required: false
-    description: Name of the branch to use for the alt repository.
+    description: Name of the branch to use for the alt repository
   alt-user:
     required: false
-    description: Github user name or organization with write access to the alt repository.
+    description: Github user name or organization with write access to the alt repository
   alt-email:
     required: false
-    description: Email of user with write access to the alt repository.
+    description: Email of user with write access to the alt repository
   alt-token:
     required: false
-    description: Github Token with write access to the alt repository.
+    description: Github Token with write access to the alt repository
   test-type:
     required: false
     default: bdd
-    description: Test type to run, one of "bdd", "waypoint", or "unit"
+    description: Test type to run, one of `bdd`, `waypoint`, or `unit`
   test-retry:
     required: false
     description: Number of times a failed test should be retried
@@ -39,13 +39,13 @@ inputs:
     description: Generate an html formatted test report for all executed tests
   test-tracing:
     required: false
-    description: Enable test tracing via playwright.
+    description: Enable test tracing via playwright
   test-record:
     required: false
-    description: Enable browser video recording via playwright.
+    description: Enable browser video recording via playwright
   test-screenshot:
     required: false
-    description: Enable browser snapshots on failed tests. Ignored if "test-tracing=true"
+    description: Enable browser snapshots on failed tests. Ignored if `test-tracing` input is `true`
   test-timeout:
     required: false
     description: Amount of time until a test times out and is marked as fail
@@ -63,7 +63,7 @@ inputs:
     description: Output verbose test results as the tests run
   test-open-handles:
     required: false
-    description: Detect handles left open when tests run. Forces tests to run in sync.
+    description: Detect handles left open when tests run. Forces tests to run in sync
   browsers:
     required: false
     description: Comma separated list of Browsers to execute tests against
