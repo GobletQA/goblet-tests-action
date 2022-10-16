@@ -30,14 +30,28 @@ const updatePackageVersion = async (version) => {
 }
 
 const updateActionImageTag = async (version) => {
-  const [proto, repo, tag] = actionYml.runs.image.split(`:`)
+  const [proto, repo] = actionYml.runs.image.split(`:`)
   actionYml.runs.image = `${proto}:${repo}:${version}`
-  const content = yaml.dump(actionYml, {
+  const [content, inputs] = yaml.dump(actionYml, {
     noRefs: true,
     lineWidth: -1,
   })
+    .split(`runs:`)
+    .join(`\nruns:`)
+    .split(`args:\n`)
   
-  writeFileSync(actionYmlLoc, `${content}\n`)
+  const data = inputs.split(`\n`).reduce((acc, line, idx) => {
+    if(!line.trim()) return acc
+
+    // Remove quotes that get added in parsing
+    const cleaned = line.replaceAll(`'`, ``)
+    // Add the input index comments back so they can be tracked
+    acc += `${cleaned} #${idx + 1}\n`
+
+    return acc
+  }, `${content}args:\n`)
+
+  writeFileSync(actionYmlLoc, `# action.yml\n${data}`)
 }
 
 const updateVersion = (oldVersion, newVersion) => {
