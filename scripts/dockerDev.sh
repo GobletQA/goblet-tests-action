@@ -136,6 +136,7 @@ docker run --rm -it \
   -e GIT_ALT_EMAIL="$GIT_EMAIL" \
   -e GIT_ALT_REPO="$GIT_ALT_REPO" \
   -e GIT_ALT_BRANCH="$GIT_ALT_BRANCH" \
+  -e GITHUB_OUTPUT=/dev/null \
   -e GITHUB_ACTIONS=true \
   -e GITHUB_HEAD_REF=main \
   -e GITHUB_ENV=/dev/null \

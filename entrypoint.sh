@@ -49,7 +49,7 @@ MOUNT_TEMP_DIR=".goblet-temp"
 exitError(){
   export GOBLET_TESTS_RESULT="fail"
 
-  echo "result=$GOBLET_TESTS_RESULT" >> $GITHUB_OUTPUT
+  echo "result=$GOBLET_TESTS_RESULT" 2>&1 | tee $GITHUB_OUTPUT
   logErr "Finished running tests for $GOBLET_TESTS_PATH"
   ensureArtifactsDir
   setActionOutputs
@@ -72,7 +72,7 @@ setOutput(){
   local VAL=$(jq -r -M "$JQ" "$GOBLET_TEMP_META_LOC" 2>/dev/null)
 
   if [ -z "$VAL" ]; then
-    echo "$NAME=" >> $GITHUB_OUTPUT
+    echo "$NAME=" 2>&1 | tee $GITHUB_OUTPUT
     return
   fi
 
@@ -93,7 +93,7 @@ setOutput(){
   VAL="${VAL//$'\n'/'%0A'}"
   VAL="${VAL//$'\r'/'%0D'}"
   # Multi-Line string convert to single-line with escaped paths
-  echo "$NAME=$VAL" >> $GITHUB_OUTPUT
+  echo "$NAME=$VAL" 2>&1 | tee $GITHUB_OUTPUT
 }
 
 
@@ -155,7 +155,7 @@ checkForSaveValue(){
 
   # If no value, or it's disabled then set empty and return
   else
-    echo "${2}=" >> $GITHUB_OUTPUT
+    echo "${2}=" 2>&1 | tee $GITHUB_OUTPUT
   fi
 
 }
@@ -250,8 +250,11 @@ runTests(){
     fi
 
     logMsg "Running Tests for $(logPurpleU $GOBLET_TESTS_PATH)"
-    node tasks/entry.js bdd run $TEST_RUN_ARGS
+    # node tasks/entry.js bdd run $TEST_RUN_ARGS
+    node tasks/runTask.js bdd run $TEST_RUN_ARGS
     TEST_EXIT_STATUS=$?
+
+    logMsg "Test Exist Status: $TEST_EXIT_STATUS"
 
     if [ ${TEST_EXIT_STATUS} -ne 0 ]; then
       export GOBLET_TESTS_RESULT="fail"
@@ -266,10 +269,10 @@ runTests(){
   else
     export GOBLET_TESTS_RESULT="fail"
     logErr "Test type $GOBLET_TEST_TYPE not yet supported"
-    echo "result=fail" >> $GITHUB_OUTPUT
-    echo "video-paths=" >> $GITHUB_OUTPUT
-    echo "trace-paths=" >> $GITHUB_OUTPUT
-    echo "report-paths=" >> $GITHUB_OUTPUT
+    echo "result=fail" 2>&1 | tee $GITHUB_OUTPUT
+    echo "video-paths=" 2>&1 | tee $GITHUB_OUTPUT
+    echo "trace-paths=" 2>&1 | tee $GITHUB_OUTPUT
+    echo "report-paths=" 2>&1 | tee $GITHUB_OUTPUT
     exit 1
   fi
 }
@@ -284,12 +287,12 @@ ensureArtifactsDir(){
     cp -r "$ARTIFACTS_DIR" "$MOUNT_WORK_DIR/$MOUNT_TEMP_DIR"
 
     # For alt-repo set artifacts path to the relative path of the copied-to dir
-    echo "artifacts-path=$MOUNT_TEMP_DIR" >> $GITHUB_OUTPUT
+    echo "artifacts-path=$MOUNT_TEMP_DIR" 2>&1 | tee $GITHUB_OUTPUT
   else
     # By default set artifacts path to the relative path of the $ARTIFACTS_DIR
     RELATIVE_DIR="${ARTIFACTS_DIR//$GITHUB_WORKSPACE\//}"
 
-    echo "artifacts-path=$RELATIVE_DIR" >> $GITHUB_OUTPUT
+    echo "artifacts-path=$RELATIVE_DIR" 2>&1 | tee $GITHUB_OUTPUT
   fi
 }
 
@@ -321,4 +324,4 @@ ensureArtifactsDir
 setActionOutputs
 
 # Set the final result state, which should be pass if we get to this point
-echo "result=$GOBLET_TESTS_RESULT" >> $GITHUB_OUTPUT
+echo "result=$GOBLET_TESTS_RESULT" 2>&1 | tee $GITHUB_OUTPUT

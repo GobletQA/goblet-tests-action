@@ -36,5 +36,5 @@ done
 
 
 logMsg "Building image $IMAGE_FULL"
-docker buildx build $BUILD_ARGS -t $IMAGE_FULL "."
+docker buildx build $BUILD_ARGS -t $IMAGE_FULL --squash "."
 logMsg "Finished Building image"

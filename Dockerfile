@@ -31,31 +31,38 @@ RUN <<EOF
   rm -rf repos/frontend
   rm -rf repos/kind
   rm -rf repos/monaco
+  rm -rf repos/sockr
   rm -rf repos/traceViewer
   rm -rf repos/vite
-  rm -rf repos/workflows
   mkdir -p temp
+  mkdir -p /github
+  mv /goblet/app/ /github/app/
 EOF
-COPY goblet-core/. /goblet/app/.
 
-FROM ghcr.io/gobletqa/goblet:develop as action-runner
+WORKDIR /github/app
+COPY goblet-core/. /github/app/.
+RUN yarn install
 
-# Copy over the cleaned up Goblet repo from the previous step
-COPY --from=action-installer /goblet/app /github/app
-RUN apt-get install jq -y --no-install-recommends && \
-    apt-get clean && \
-    cd /github/app && \
-    npx playwright install --with-deps
-
+FROM mcr.microsoft.com/playwright:v1.27.0-focal as action-runner
+COPY --from=action-installer /github/app /github/app
 # Symlink the parent folder of the github workspace to the repos folder
 # This ensures the correct folder locations exist for goblet
 # We must run Jest from a parent folder of both goblet and the github workspace
-RUN rm -rf /goblet && \
-    ln -s /github /goblet && \
-    rm -rf $HOME/.node_modules && \
-    ln -s /github/app/node_modules $HOME/.node_modules && \
-    ln -s /github/app/node_modules /github/node_modules
-
+RUN <<EOF
+  apt-get install jq -y --no-install-recommends
+  apt-get clean
+  apt-get autoclean
+  apt-get autoremove
+  rm -rf /var/lib/apt/lists/*
+  rm -rf /var/lib/apt/lists.d/*
+  rm -rf /goblet
+  ln -s /github /goblet
+  rm -rf $HOME/.node_modules
+  ln -s /github/app/node_modules $HOME/.node_modules
+  ln -s /github/app/node_modules /github/node_modules
+  cd /github/app
+  npx playwright install --with-deps
+EOF
 COPY . /goblet-action
 
 ENTRYPOINT ["/goblet-action/entrypoint.sh"]

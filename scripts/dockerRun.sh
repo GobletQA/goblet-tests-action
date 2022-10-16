@@ -124,6 +124,7 @@ logMsg "Runing dev container from $IMAGE_FULL"
 
 docker run --rm -it \
   --ipc=host \
+  -e GITHUB_OUTPUT=/dev/null \
   -e CI=true \
   -e LOCAL_DEV=1 \
   -e LOCAL_SIMULATE_ALT=$LOCAL_SIMULATE_ALT \
