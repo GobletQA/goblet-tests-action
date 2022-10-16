@@ -15,6 +15,7 @@
   "author": "Lance Tipton <lancetipton04@gmail.com>",
   "license": "MIT",
   "scripts": {
+    "bump": "node scripts/updateVersion.js",
     "db": "yarn docker:build",
     "dgp": "yarn docker:goblet:buildPush",
     "docker:goblet:buildPush": "/bin/bash scripts/dockerBuildPush.sh",
@@ -34,8 +35,7 @@
     "drw": "GOBLET_BROWSERS=webkit yarn docker:run",
     "drgc": "GOBLET_BROWSERS=chrome /bin/bash scripts/dockerRun.sh goblet",
     "doc:run": "yarn docker:run",
-    "docker:run": "/bin/bash scripts/dockerRun.sh",
-    "version": "node scripts/updateVersion.js"
+    "docker:run": "/bin/bash scripts/dockerRun.sh"
   },
   "dependencies": {},
   "devDependencies": {

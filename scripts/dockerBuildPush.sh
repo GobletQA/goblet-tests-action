@@ -9,7 +9,7 @@ source scripts/logger.sh
 # yarn doc build --push
 
 # Update version
-yarn version
+yarn bump
 
 # Then build goblet-action
 source scripts/dockerBuild.sh --push
