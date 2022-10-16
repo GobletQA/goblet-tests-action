@@ -42,7 +42,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     -s|--simulate)
       logMsg "Simulating alt-repo via mount"
-      export LOCAL_SIMULATE_ALT=1
+      export GOBLET_LOCAL_SIMULATE_ALT=1
       export HAS_WORK_MOUNT_REPO=1
       MOUNTS="$MOUNTS -v $(echo $HOME)/goblet/repos/test-action-repo:/github/$TEST_REPO_NAME"
       MOUNTS="$MOUNTS -v $(keg sgt path):/github/alt"
@@ -126,8 +126,8 @@ docker run --rm -it \
   --ipc=host \
   -e GITHUB_OUTPUT=/dev/null \
   -e CI=true \
-  -e LOCAL_DEV=1 \
-  -e LOCAL_SIMULATE_ALT=$LOCAL_SIMULATE_ALT \
+  -e GOBLET_LOCAL_DEV=1 \
+  -e GOBLET_LOCAL_SIMULATE_ALT=$GOBLET_LOCAL_SIMULATE_ALT \
   -e GOBLET_TOKEN=123456 \
   -e GIT_TOKEN=$GIT_TOKEN \
   -e GIT_ALT_TOKEN=$GIT_TOKEN \

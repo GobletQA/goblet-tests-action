@@ -49,11 +49,20 @@ MOUNT_TEMP_DIR=".goblet-temp"
 exitError(){
   export GOBLET_TESTS_RESULT="fail"
 
-  echo "result=$GOBLET_TESTS_RESULT" 2>&1 | tee $GITHUB_OUTPUT
+  setOutput "result" "$GOBLET_TESTS_RESULT"
   logErr "Finished running tests for $GOBLET_TESTS_PATH"
   ensureArtifactsDir
   setActionOutputs
   exit 1
+}
+
+# Writes the output to stdout and the $GITHUB_OUTPUT ENV
+setOutput() {
+  if [[ -z "${GOBLET_LOCAL_DEV}" ]]; then
+    echo "${1}=${2}" | tee -a "${GITHUB_OUTPUT}"
+  else
+    echo "::set-output name=${1}::${2}"
+  fi
 }
 
 # Finds the value for an ENV and sets it
@@ -66,13 +75,13 @@ getENVValue() {
 }
 
 # Pulls the value for an output, escapes it, then sets it as an output
-setOutput(){
+addArtifacts(){
   local NAME="${1}"
   local JQ="${2}"
   local VAL=$(jq -r -M "$JQ" "$GOBLET_TEMP_META_LOC" 2>/dev/null)
 
   if [ -z "$VAL" ]; then
-    echo "$NAME=" 2>&1 | tee $GITHUB_OUTPUT
+    setOutput "$NAME" ""
     return
   fi
 
@@ -93,7 +102,7 @@ setOutput(){
   VAL="${VAL//$'\n'/'%0A'}"
   VAL="${VAL//$'\r'/'%0D'}"
   # Multi-Line string convert to single-line with escaped paths
-  echo "$NAME=$VAL" 2>&1 | tee $GITHUB_OUTPUT
+  setOutput "$NAME" "$VAL"
 }
 
 
@@ -134,28 +143,27 @@ cloneAltRepo(){
 }
 
 # Helper to check if a generated file should exist, and if we should set it to an output
-checkForSaveValue(){
+checkForArtifacts(){
 
   local ENV_NAME="${1}"
   local ENV_VAL="${!ENV_NAME}"
 
   # If the env is set to always, then report should exist
   if [ "$ENV_VAL" == "always" ]; then
-    setOutput "${2}" "${3}"
+    addArtifacts "${2}" "${3}"
     logMsg "Test Artifacts found for ${2}"
 
   # If the tests failed, and the env is set to failed, true, or 1
   # Then a test report should exist
   elif [ "$GOBLET_TESTS_RESULT" == "fail" ]; then
     if [ "$ENV_VAL" == "failed" ] || [ "$ENV_VAL" == true ] || [ "$ENV_VAL" == 1 ]; then
-      setOutput "${2}" "${3}"
+      addArtifacts "${2}" "${3}"
       logMsg "Test Artifacts found for ${2} output"
-
     fi
 
   # If no value, or it's disabled then set empty and return
   else
-    echo "${2}=" 2>&1 | tee $GITHUB_OUTPUT
+    setOutput "${2}" ""
   fi
 
 }
@@ -210,7 +218,7 @@ setRunEnvs(){
 
 # ---- Step 2 - Synmlink the workspace folder to the repos folder
 setupWorkspace(){
-  if [ "$LOCAL_SIMULATE_ALT" ] && [ "$LOCAL_DEV" ]; then
+  if [ "$GOBLET_LOCAL_SIMULATE_ALT" ] && [ "$GOBLET_LOCAL_DEV" ]; then
     export GIT_ALT_REPO=github.com/local/simulate.git
     # Navigate into the repo so we can get the pull path from (pwd)
     cd $GOBLET_MOUNT_ROOT/$GIT_ALT_REPO_DIR
@@ -269,10 +277,10 @@ runTests(){
   else
     export GOBLET_TESTS_RESULT="fail"
     logErr "Test type $GOBLET_TEST_TYPE not yet supported"
-    echo "result=fail" 2>&1 | tee $GITHUB_OUTPUT
-    echo "video-paths=" 2>&1 | tee $GITHUB_OUTPUT
-    echo "trace-paths=" 2>&1 | tee $GITHUB_OUTPUT
-    echo "report-paths=" 2>&1 | tee $GITHUB_OUTPUT
+    setOutput "result" "fail"
+    setOutput "video-paths" ""
+    setOutput "trace-paths" ""
+    setOutput "report-paths" ""
     exit 1
   fi
 }
@@ -284,15 +292,13 @@ ensureArtifactsDir(){
 
   # If using an alt repo, copy over the artifacts dir to the workspace mounted volume
   if [ "$GIT_ALT_REPO" ]; then
-    cp -r "$ARTIFACTS_DIR" "$MOUNT_WORK_DIR/$MOUNT_TEMP_DIR"
-
     # For alt-repo set artifacts path to the relative path of the copied-to dir
-    echo "artifacts-path=$MOUNT_TEMP_DIR" 2>&1 | tee $GITHUB_OUTPUT
+    cp -r "$ARTIFACTS_DIR" "$MOUNT_WORK_DIR/$MOUNT_TEMP_DIR"
+    setOutput "artifacts-path" "$MOUNT_TEMP_DIR"
   else
     # By default set artifacts path to the relative path of the $ARTIFACTS_DIR
     RELATIVE_DIR="${ARTIFACTS_DIR//$GITHUB_WORKSPACE\//}"
-
-    echo "artifacts-path=$RELATIVE_DIR" 2>&1 | tee $GITHUB_OUTPUT
+    setOutput "artifacts-path" "$RELATIVE_DIR"
   fi
 }
 
@@ -300,17 +306,17 @@ ensureArtifactsDir(){
 setActionOutputs(){
 
   # Only set the reports paths, if test reports is turned on
-  checkForSaveValue "GOBLET_TEST_REPORT" \
+  checkForArtifacts "GOBLET_TEST_REPORT" \
     "report-paths" \
     ".latest.$GOBLET_TEST_TYPE.reports | to_entries | .[].value.path"
   
   # Only set the record paths, if video record is turned on
-  checkForSaveValue "GOBLET_TEST_VIDEO_RECORD" \
+  checkForArtifacts "GOBLET_TEST_VIDEO_RECORD" \
     "video-paths" \
     ".latest.$GOBLET_TEST_TYPE.recordings | to_entries | .[].value | to_entries | .[].value.path"
 
   # Only set the trace paths, if tracing record is turned on
-  checkForSaveValue "GOBLET_TEST_TRACING" \
+  checkForArtifacts "GOBLET_TEST_TRACING" \
     "trace-paths" \
     ".latest.$GOBLET_TEST_TYPE.traces | to_entries | .[].value | to_entries | .[].value.path"
 
@@ -324,4 +330,5 @@ ensureArtifactsDir
 setActionOutputs
 
 # Set the final result state, which should be pass if we get to this point
-echo "result=$GOBLET_TESTS_RESULT" 2>&1 | tee $GITHUB_OUTPUT
+setOutput "result" "$GOBLET_TESTS_RESULT"
+
