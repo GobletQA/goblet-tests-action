@@ -2,7 +2,6 @@ const path = require('path')
 const yaml = require('js-yaml')
 const semver = require('semver')
 const { readFileSync, writeFileSync } = require('fs')
-const { writeYml } = require('@keg-hub/parse-config')
 
 const actionYmlLoc = path.join(__dirname, `../action.yml`)
 const actionYml = yaml.safeLoad(readFileSync(actionYmlLoc).toString())
@@ -33,7 +32,12 @@ const updatePackageVersion = async (version) => {
 const updateActionImageTag = async (version) => {
   const [proto, repo, tag] = actionYml.runs.image.split(`:`)
   actionYml.runs.image = `${proto}:${repo}:${version}`
-  await writeYml(actionYmlLoc, actionYml)
+  const content = yaml.dump(actionYml, {
+    noRefs: true,
+    lineWidth: -1,
+  })
+  
+  writeFileSync(actionYmlLoc, `${content}\n`)
 }
 
 const updateVersion = (oldVersion, newVersion) => {
