@@ -258,15 +258,14 @@ runTests(){
     fi
 
     logMsg "Running Tests for $(logPurpleU $GOBLET_TESTS_PATH)"
-    # node tasks/entry.js bdd run $TEST_RUN_ARGS
-    node tasks/runTask.js bdd run $TEST_RUN_ARGS
+    node tasks/entry.js bdd run $TEST_RUN_ARGS
     TEST_EXIT_STATUS=$?
 
-    logMsg "Test Exist Status: $TEST_EXIT_STATUS"
+    logMsg "Test Exit Status: $TEST_EXIT_STATUS"
 
     if [ ${TEST_EXIT_STATUS} -ne 0 ]; then
       export GOBLET_TESTS_RESULT="fail"
-      logErr "($GOBLET_TESTS_RESULT): One of more of the executed tests failed"
+      logErr "($GOBLET_TESTS_RESULT): One or more of the executed tests failed"
     else
       export GOBLET_TESTS_RESULT="pass"
       logMsg "($GOBLET_TESTS_RESULT): All executed tests passed"

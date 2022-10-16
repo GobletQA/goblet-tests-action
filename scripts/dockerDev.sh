@@ -24,6 +24,8 @@ while [[ $# -gt 0 ]]; do
     -g|--goblet)
       logMsg "Mounting goblet repo"
       MOUNTS="$MOUNTS -v $(keg goblet path):/github/app"
+      # Ingnore mounting node_modules
+      MOUNTS="$MOUNTS -v /github/app/node_modules"
       shift
       ;;
     -m|--mount)
