@@ -86,11 +86,11 @@ outputs:
   result:
     description: 'Result of the executed Goblet tests, one of `pass` or `fail`'
   report-paths:
-    description: 'Paths to the generated html test reports for each browser that ran'
+    description: 'Paths to the html test reports for each browser that ran'
   trace-paths:
-    description: 'Paths of the generated playwright traces when trace is enabled'
+    description: 'Paths of the generated playwright traces when enabled'
   video-paths:
-    description: 'Paths to the video recordings of executed tests when video record is enabled'
+    description: 'Paths to the video recordings of executed tests when enabled'
 
 runs:
   using: 'docker'
