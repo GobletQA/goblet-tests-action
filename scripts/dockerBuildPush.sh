@@ -8,8 +8,8 @@ source scripts/logger.sh
 # yarn doc build --context bs --push
 # yarn doc build --push
 
-# TODO: update version
-# node scripts/updateVersion.js
+# Update version
+yarn version
 
 # Then build goblet-action
 source scripts/dockerBuild.sh --push

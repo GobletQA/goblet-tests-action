@@ -34,15 +34,18 @@
     "drw": "GOBLET_BROWSERS=webkit yarn docker:run",
     "drgc": "GOBLET_BROWSERS=chrome /bin/bash scripts/dockerRun.sh goblet",
     "doc:run": "yarn docker:run",
-    "docker:run": "/bin/bash scripts/dockerRun.sh"
+    "docker:run": "/bin/bash scripts/dockerRun.sh",
+    "version": "node scripts/updateVersion.js"
   },
   "dependencies": {},
   "devDependencies": {
     "@commitlint/cli": "17.1.2",
     "@commitlint/config-conventional": "17.1.0",
+    "@keg-hub/parse-config": "2.1.0",
     "commitizen": "4.2.5",
     "cz-conventional-changelog": "3.3.0",
-    "husky": "8.0.1"
+    "husky": "8.0.1",
+    "semver": "7.3.8"
   },
   "config": {
     "commitizen": {
