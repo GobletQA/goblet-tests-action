@@ -265,13 +265,11 @@ runTests(){
 
     if [ ${TEST_EXIT_STATUS} -ne 0 ]; then
       export GOBLET_TESTS_RESULT="fail"
-      logErr "($GOBLET_TESTS_RESULT): One or more of the executed tests failed"
+      logErr "❌ - One or more of the executed tests failed"
     else
       export GOBLET_TESTS_RESULT="pass"
-      logMsg "($GOBLET_TESTS_RESULT): All executed tests passed"
+      logMsg "👍 - All executed tests passed"
     fi
-
-    logMsg "Finished running tests for $GOBLET_TESTS_PATH"
 
   else
     export GOBLET_TESTS_RESULT="fail"
@@ -329,5 +327,5 @@ ensureArtifactsDir
 setActionOutputs
 
 # Set the final result state, which should be pass if we get to this point
+logMsg "Finished running tests for $GOBLET_TESTS_PATH"
 setOutput "result" "$GOBLET_TESTS_RESULT"
-

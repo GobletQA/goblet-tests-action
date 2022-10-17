@@ -24,6 +24,14 @@ while [[ $# -gt 0 ]]; do
       docker buildx use goblet
       shift
     ;;
+    -nc|--no-cache)
+      BUILD_ARGS="$BUILD_ARGS --no-cache"
+      shift
+    ;;
+    -pl|--pull)
+      BUILD_ARGS="$BUILD_ARGS --pull"
+      shift
+    ;;
     -t|--tag|--tags)
       BUILD_ARGS="$BUILD_ARGS -t $IMAGES_URI:$2"
       shift
