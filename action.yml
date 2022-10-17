@@ -116,7 +116,7 @@ runs:
     - ${{ inputs.test-workers }} #18
     - ${{ inputs.test-verbose }} #19
     - ${{ inputs.test-open-handles }} #20
-    - ${{ inputs.browser }} #21
+    - ${{ inputs.browsers }} #21
     - ${{ inputs.browser-debug }} #22
     - ${{ inputs.browser-slow-mo }} #23
     - ${{ inputs.browser-concurrent }} #24
