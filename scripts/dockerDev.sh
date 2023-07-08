@@ -21,9 +21,31 @@ GIT_EMAIL=$(git config user.email)
 
 while [[ $# -gt 0 ]]; do
   case $1 in
+    -b|--branch)
+      logMsg "Adding alt branch name - $2"
+      export GIT_ALT_BRANCH="$2"
+      shift
+      shift
+      ;;
+    -c|--chrome)
+      logMsg "Test with browser - chrome"
+      export GOBLET_BROWSERS="chrome"
+      shift
+      ;;
+    -e|--email)
+      logMsg "Setting alt git email - $2"
+      export GIT_EMAIL="$2"
+      shift
+      shift
+      ;;
+    -f|--firefox)
+      logMsg "Test with browser - firefox"
+      export GOBLET_BROWSERS="firefox"
+      shift
+      ;;
     -g|--goblet)
       logMsg "Mounting goblet repo"
-      MOUNTS="$MOUNTS -v $(keg goblet path):/github/app"
+      MOUNTS="$MOUNTS -v $(keg gob path):/github/app"
       # Ingnore mounting node_modules
       MOUNTS="$MOUNTS -v /github/app/node_modules"
       shift
@@ -32,7 +54,17 @@ while [[ $# -gt 0 ]]; do
       export HAS_WORK_MOUNT_REPO=1
       logMsg "Mounting test repo $1"
       MOUNTS="$MOUNTS -v $1:/github/$TEST_REPO_NAME"
-    ;;
+      ;;
+    -n|--no-mount)
+      export NO_MOUNTS=1
+      shift
+      ;;
+    -p|--report)
+      logMsg "Setting ENV \"GOBLET_TEST_REPORT\" to \"$2\""
+      export GOBLET_TEST_REPORT="$2"
+      shift
+      shift
+      ;;
     -r|--repo)
       export HAS_WORK_MOUNT_REPO=1
       logMsg "Adding alt repo url - $2"
@@ -45,12 +77,12 @@ while [[ $# -gt 0 ]]; do
       export GOBLET_LOCAL_SIMULATE_ALT=1
       export HAS_WORK_MOUNT_REPO=1
       MOUNTS="$MOUNTS -v $(echo $HOME)/goblet/repos/test-action-repo:/github/$TEST_REPO_NAME"
-      MOUNTS="$MOUNTS -v $(keg sgt path):/github/alt"
+      MOUNTS="$MOUNTS -v $(keg uvt path):/github/alt"
       shift
       ;;
-    -b|--branch)
-      logMsg "Adding alt branch name - $2"
-      export GIT_ALT_BRANCH="$2"
+    -t|--tracing)
+      logMsg "Setting ENV \"GOBLET_TEST_TRACING\" to \"$2\""
+      export GOBLET_TEST_TRACING="$2"
       shift
       shift
       ;;
@@ -60,42 +92,10 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
-    -e|--email)
-      logMsg "Setting alt git email - $2"
-      export GIT_EMAIL="$2"
-      shift
-      shift
-      ;;
-    -n|--no-mount)
-      export NO_MOUNTS=1
-      shift
-      ;;
-    -p|--report)
-      logMsg "Setting ENV \"GOBLET_TEST_REPORT\" to \"$2\""
-      export GOBLET_TEST_REPORT="$2"
-      shift
-      shift
-      ;;
-    -t|--tracing)
-      logMsg "Setting ENV \"GOBLET_TEST_TRACING\" to \"$2\""
-      export GOBLET_TEST_TRACING="$2"
-      shift
-      shift
-      ;;
     -v|--video)
       logMsg "Setting ENV \"GOBLET_TEST_VIDEO_RECORD\" to \"$2\""
       export GOBLET_TEST_VIDEO_RECORD="$2"
       shift
-      shift
-      ;;
-    -c|--chrome)
-      logMsg "Test with browser - chrome"
-      export GOBLET_BROWSERS="chrome"
-      shift
-      ;;
-    -f|--firefox)
-      logMsg "Test with browser - firefox"
-      export GOBLET_BROWSERS="firefox"
       shift
       ;;
     -w|--webkit)
@@ -117,7 +117,7 @@ done
 # If no mount repo was set, then pass in the default mount repo
 if [ -z "$HAS_WORK_MOUNT_REPO" ]; then
   logMsg "Mounting test repo to github/workspace"
-  MOUNTS="$MOUNTS -v $(keg sgt path):/github/$TEST_REPO_NAME"
+  MOUNTS="$MOUNTS -v $(keg uvt path):/github/$TEST_REPO_NAME"
 fi
 
 
@@ -155,6 +155,7 @@ docker run --rm -it \
   -e GITHUB_EVENT_NAME=workflow_dispatch \
   -e GITHUB_WORKFLOW=goblet-action-workflow \
   -e GITHUB_REF=refs/heads/run-goblet-action \
+  -e GB_GIT_MOUNTED_REMOTE=https://github.com/Use-Verb/use-verb-webapp-tests \
   -e GOBLET_BROWSERS=${GOBLET_BROWSERS:-all} \
   -e GOBLET_TEST_REPORT=${GOBLET_TEST_REPORT:-0} \
   -e GOBLET_TEST_TRACING=${GOBLET_TEST_TRACING:-0} \

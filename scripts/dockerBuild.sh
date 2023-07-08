@@ -10,13 +10,14 @@ IMAGE_FULL=$IMAGES_URI:$IMAGE_VERSION
 
 logMsg "Building image version $IMAGE_VERSION"
 
-BUILD_ARGS="--load"
+PLATFORM_ARGS="--load"
+BUILD_ARGS=""
 
 while [[ $# -gt 0 ]]; do
   case $1 in
     -p|--push)
       logMsg "Pushing image after build"
-      BUILD_ARGS="--platform linux/amd64,linux/arm64 --push"
+      PLATFORM_ARGS="--platform linux/amd64,linux/arm64 --push"
       shift
     ;;
     -l|--local)
@@ -46,5 +47,5 @@ done
 
 
 logMsg "Building image $IMAGE_FULL"
-docker buildx build $BUILD_ARGS -t $IMAGE_FULL --squash "."
+docker buildx build $BUILD_ARGS $PLATFORM_ARGS -t $IMAGE_FULL "."
 logMsg "Finished Building image"

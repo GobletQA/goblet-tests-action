@@ -47,7 +47,7 @@ while [[ $# -gt 0 ]]; do
       export GOBLET_LOCAL_SIMULATE_ALT=1
       export HAS_WORK_MOUNT_REPO=1
       MOUNTS="$MOUNTS -v $(echo $HOME)/goblet/repos/test-action-repo:/github/$TEST_REPO_NAME"
-      MOUNTS="$MOUNTS -v $(keg sgt path):/github/alt"
+      MOUNTS="$MOUNTS -v $(keg uvt path):/github/alt"
       shift
       ;;
     -b|--branch)
@@ -116,7 +116,7 @@ done
 # If no mount repo was set, then pass in the default mount repo
 if [ -z "$HAS_WORK_MOUNT_REPO" ]; then
   logMsg "Mounting test repo to github/workspace"
-  MOUNTS="$MOUNTS -v $(keg sgt path):/github/$TEST_REPO_NAME"
+  MOUNTS="$MOUNTS -v $(keg uvt path):/github/$TEST_REPO_NAME"
 fi
 
 # If mounts are disabled, set the variable to an empty string
@@ -126,11 +126,10 @@ logMsg "Runing dev container from $IMAGE_FULL"
 
 docker run --rm -it \
   --ipc=host \
-  -e GITHUB_OUTPUT=/dev/null \
-  -e CI=true \
   -e GOBLET_LOCAL_DEV=1 \
+  -e GITHUB_OUTPUT=/dev/null \
   -e GOBLET_LOCAL_SIMULATE_ALT=$GOBLET_LOCAL_SIMULATE_ALT \
-  -e GOBLET_TOKEN=123456 \
+  -e GOBLET_TOKEN=Goblet-Token \
   -e GIT_TOKEN=$GIT_TOKEN \
   -e GIT_ALT_TOKEN=$GIT_TOKEN \
   -e GIT_ALT_USER="$GIT_USER" \
@@ -159,7 +158,7 @@ docker run --rm -it \
   -e GOBLET_BROWSER_DEBUG=${GOBLET_BROWSER_DEBUG:-0} \
   -e GOBLET_TEST_VIDEO_RECORD=${GOBLET_TEST_VIDEO_RECORD:-0} \
   -e GOBLET_BROWSER_CONCURRENT=${GOBLET_BROWSER_CONCURRENT:-0} \
-  --name goblet-action \
+  --name goblet-run-action \
   --workdir $REPO_WORK_DIR \
   $MOUNTS \
   $IMAGE_FULL "${DOCKER_ARGS[*]}"

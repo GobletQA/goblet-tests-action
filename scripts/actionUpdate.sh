@@ -5,10 +5,10 @@ source scripts/logger.sh
 
 # Will update the version in the package.json and action.yaml
 # Will then build and push the docker image to github
-yarn dvp
+pnpm dvp
 
 # The get the update version from the package.json
-UPDATE_VERSION=$(yarn --silent echoVersion)
+UPDATE_VERSION=$(pnpm --silent echoVersion)
 
 logMsg "Commiting version $UPDATE_VERSION and pushing to github"
 GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
