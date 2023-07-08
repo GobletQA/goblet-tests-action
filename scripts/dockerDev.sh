@@ -5,7 +5,7 @@ source scripts/logger.sh
 
 IMAGE_NAME=$npm_package_displayName
 IMAGE_VERSION=$npm_package_version
-IMAGE_FULL=ghcr.io/gobletqa/$IMAGE_NAME:$IMAGE_VERSION
+IMAGE_FULL=ghcr.io/gobletqa/$IMAGE_NAME:latest
 
 TEST_REPO_NAME=workspace
 REPO_WORK_DIR=/github/workspace
@@ -131,7 +131,7 @@ docker run --rm -it \
   -e CI=true \
   -e GOBLET_LOCAL_DEV=1 \
   -e GOBLET_LOCAL_SIMULATE_ALT=$GOBLET_LOCAL_SIMULATE_ALT \
-  -e GOBLET_TOKEN=123456 \
+  -e GOBLET_TOKEN=$GOBLET_TOKEN \
   -e GIT_TOKEN=$GIT_TOKEN \
   -e GIT_ALT_TOKEN=$GIT_TOKEN \
   -e GIT_ALT_USER="$GIT_USER" \

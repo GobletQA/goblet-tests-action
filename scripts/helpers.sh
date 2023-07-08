@@ -13,8 +13,10 @@ exitError(){
 
 # Writes the output to stdout and the $GITHUB_OUTPUT ENV
 setOutput() {
-  if [[ -z "${GOBLET_LOCAL_DEV}" ]]; then
-    echo "${1}=${2}" | tee -a "${GITHUB_OUTPUT}"
+  if [ -z "${GOBLET_LOCAL_DEV}" ]; then
+    if [ "$GITHUB_ACTION" ]; then
+      echo "${1}=${2}" | tee -a "${GITHUB_OUTPUT}"
+    fi
   else
     echo "::set-output name=${1}::${2}"
   fi
