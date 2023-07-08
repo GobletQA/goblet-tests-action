@@ -24,4 +24,4 @@ docker run --rm -it \
   -e GOBLET_TOKEN=$GOBLET_TOKEN \
   -v $LOCAL_TESTS_DIR:$REMOTE_TESTS_DIR \
   --workdir $REMOTE_TESTS_DIR \
-  ghcr.io/gobletqa/goblet-tests-action:0.0.25 "${@}"
+  ghcr.io/gobletqa/goblet-tests-action:latest "${@}"
