@@ -1,3 +1,4 @@
+#!/bin/bash
 
 # Logs an error and exists the script
 # Ensures the artifacts and outputs are set
