@@ -10,7 +10,14 @@
 
 ### `git-token`
 * As ENV - `GOBLET_GIT_TOKEN` || `GIT_TOKEN`
+* **REQUIRED**
 * Github Auth Token or Personal Access Token (PAT)
+* **default** - `undefined`
+
+### `goblet-token`
+* As ENV - `GOBLET_TOKEN`
+* **REQUIRED**
+* Goblet Auth Token (GAT)
 * **default** - `undefined`
 
 ### `alt-repo`

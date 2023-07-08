@@ -128,8 +128,9 @@ cloneAltRepo(){
     git clone "https://$GIT_CLONE_TOKEN@$GIT_ALT_REPO" "$GIT_ALT_REPO_DIR"
   else
     git clone "https://$GIT_ALT_REPO" "$GIT_ALT_REPO_DIR"
-    export GB_GIT_MOUNTED_REMOTE="https://$GIT_ALT_REPO"
   fi
+
+  export GB_GIT_MOUNTED_REMOTE="https://$GIT_ALT_REPO"
 
   # Navigate into the repo so we can get the pull path from (pwd)
   cd ./$GIT_ALT_REPO_DIR
