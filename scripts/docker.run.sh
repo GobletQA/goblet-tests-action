@@ -14,7 +14,7 @@
 #   cd ./use-verb-webapp-tests
 # Run the script:
 #   GOBLET_TOKEN=<goblet-token> ./docker-run.sh
-#
+# 
 
 LOCAL_TESTS_DIR="$(pwd)"
 REMOTE_TESTS_DIR=/goblet/workspace

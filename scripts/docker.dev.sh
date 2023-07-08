@@ -12,9 +12,16 @@
 # Example
 # Navigate to the tests repo directory:
 #   cd ./use-verb-webapp-tests
-# Run the script:
+# 
+# Run the script
 #   GOBLET_TOKEN=<goblet-token> ./docker-dev.sh
-#
+# 
+# Run the all tests from inside the container
+#   /goblet-action/entrypoint.sh
+# 
+# Run the single test just in the chrome browser from inside the container
+#   GOBLET_BROWSERS=chrome /goblet-action/entrypoint.sh Login
+# 
 
 LOCAL_TESTS_DIR="$(pwd)"
 REMOTE_TESTS_DIR=/goblet/workspace
