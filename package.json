@@ -31,8 +31,6 @@
     "drf": "GOBLET_BROWSERS=firefox pnpm docker:run",
     "drw": "GOBLET_BROWSERS=webkit pnpm docker:run",
     "drgc": "GOBLET_BROWSERS=chrome /bin/bash scripts/dockerRun.sh goblet",
-    "ds": "pnpm docker:simple",
-    "docker:simple": "/bin/bash scripts/drunSimple.sh",
     "dvp": "pnpm bump && pnpm dbp",
     "doc:run": "pnpm docker:run",
     "docker:run": "/bin/bash scripts/dockerRun.sh",

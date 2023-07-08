@@ -1,6 +1,5 @@
 #!/bin/bash
 
-source $KEG_CLI_PATH/keg
 source scripts/logger.sh
 
 IMAGE_NAME=$npm_package_displayName
