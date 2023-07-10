@@ -5,14 +5,14 @@
 # Is expected to be run inside a docker container
 # Run Tests Examples:
 # * From Repos Root Directory on the Host Machine
-#   * `yarn dr` => Runs all tests
-#   * `GOBLET_BROWSERS=chrome yarn dr test.feature` => Runs test feature on chrome
+#   * `pnpm dr` => Runs all tests
+#   * `GOBLET_BROWSERS=chrome pnpm dr test.feature` => Runs test feature on chrome
 # * When attached to the running containers shell
 #   * `/goblet-action/entrypoint.sh`
 #   * `GOBLET_BROWSERS=chrome /goblet-action/entrypoint.sh test.feature`
 #
 # Only Chrome
-# GOBLET_BROWSERS=chrome /goblet-action/entrypoint.sh test.feature
+# GOBLET_BROWSERS=chrome /goblet-action/entrypoint.sh Tester.feature
 #
 # With Video
 # GOBLET_TEST_VIDEO_RECORD=1 GOBLET_BROWSERS=chrome /goblet-action/entrypoint.sh test.feature
@@ -27,6 +27,7 @@
 # Exit when any command fails
 set -Eeo pipefail
 source /goblet-action/scripts/logger.sh
+source /goblet-action/scripts/helpers.sh
 trap exitError ERR
 
 # Ensure devtools is not turned on
@@ -38,145 +39,29 @@ unset DEBUG
 export GOBLET_RUN_FROM_CI=1
 export GOBLET_HEADLESS=true
 export GIT_ALT_REPO_DIR=alt
-export GOBLET_MOUNT_ROOT=/github
 export GOBLET_ACT_REPO_LOCATION=/goblet-action
-export GOBLET_CONFIG_BASE="$GITHUB_WORKSPACE"
 export GOBLET_TEMP_META_LOC="/github/app/temp/testMeta.json"
 
 MOUNT_WORK_DIR=$(pwd)
 MOUNT_TEMP_DIR=".goblet-temp"
 
-exitError(){
-  export GOBLET_TESTS_RESULT="fail"
-
-  setOutput "result" "$GOBLET_TESTS_RESULT"
-  logErr "Finished running tests for $GOBLET_TESTS_PATH"
-  ensureArtifactsDir
-  setActionOutputs
-  exit 1
-}
-
-# Writes the output to stdout and the $GITHUB_OUTPUT ENV
-setOutput() {
-  if [[ -z "${GOBLET_LOCAL_DEV}" ]]; then
-    echo "${1}=${2}" | tee -a "${GITHUB_OUTPUT}"
-  else
-    echo "::set-output name=${1}::${2}"
-  fi
-}
-
-# Finds the value for an ENV and sets it
-getENVValue() {
-  local ENV_NAME="${1}"
-  local FOUND_VAL="${2:-$3}"
-  if [ "$FOUND_VAL" ]; then
-    eval "export $ENV_NAME=$FOUND_VAL"
-  fi
-}
-
-# Pulls the value for an output, escapes it, then sets it as an output
-addArtifacts(){
-  local NAME="${1}"
-  local JQ="${2}"
-  local VAL=$(jq -r -M "$JQ" "$GOBLET_TEMP_META_LOC" 2>/dev/null)
-
-  if [ -z "$VAL" ]; then
-    setOutput "$NAME" ""
-    return
-  fi
-
-  # Update the paths to just be relative paths to the workspace root directory
-  # If using an alt repo, rewrite the location to the mounted folder
-  if [ "$GIT_ALT_REPO" ]; then
-    VAL="${VAL//$ARTIFACTS_DIR/$MOUNT_TEMP_DIR}"
-  else
-    VAL="${VAL//$GITHUB_WORKSPACE\//}"
-  fi
-
-  # Log the found artifacts to be uploaded for reference pre-escaping
-  logMsg "Test Artifacts found for ${1} output"
-  echo "${VAL}"
-
-  # Escape the paths so all paths can be captured by the output
-  VAL="${VAL//'%'/'%25'}"
-  VAL="${VAL//$'\n'/'%0A'}"
-  VAL="${VAL//$'\r'/'%0D'}"
-  # Multi-Line string convert to single-line with escaped paths
-  setOutput "$NAME" "$VAL"
-}
-
-
-# Clones an alternitive repo locally
-cloneAltRepo(){
-  cd $GOBLET_MOUNT_ROOT
-
-    # Ensure the user is configured with git
-    # If git user is not set, use the current user from existing the git log
-    [ -z "$GIT_ALT_USER" ] && export GIT_ALT_USER="$(git log --format='%ae' HEAD^!)"
-    [ "$GIT_ALT_USER" ] && git config --global user.email "$GIT_ALT_USER"
-
-    # If git email not set, use the current email from existing the git log
-    [ -z "$GIT_ALT_EMAIL" ] && export GIT_ALT_EMAIL="$(git log --format='%an' HEAD^!)"
-    [ "$GIT_ALT_EMAIL" ] && git config --global user.name "$GIT_ALT_EMAIL"
-
-  # Clone the repo using the passed in token if it exists
-  local GIT_CLONE_TOKEN="${GIT_ALT_TOKEN:-$GOBLET_GIT_TOKEN}"
-
-  logMsg "Cloning alt repo \"https://$GIT_ALT_REPO\""
-  if [ "$GIT_CLONE_TOKEN" ]; then
-    git clone "https://$GIT_CLONE_TOKEN@$GIT_ALT_REPO" "$GIT_ALT_REPO_DIR"
-  else
-    git clone "https://$GIT_ALT_REPO" "$GIT_ALT_REPO_DIR"
-  fi
-
-  # Navigate into the repo so we can get the pull path from (pwd)
-  cd ./$GIT_ALT_REPO_DIR
-
-  # If using a diff branch from default, fetch then checkout from origin
-  if [ "$GIT_ALT_BRANCH" ]; then
-    git fetch origin
-    logMsg "Setting alt repo branch to \"$GIT_ALT_BRANCH\""
-    git checkout -b $GIT_ALT_BRANCH origin/$GIT_ALT_BRANCH
-  fi
-
-  export GOBLET_CONFIG_BASE="$(pwd)"
-}
-
-# Helper to check if a generated file should exist, and if we should set it to an output
-checkForArtifacts(){
-
-  local ENV_NAME="${1}"
-  local ENV_VAL="${!ENV_NAME}"
-
-  # If the env is set to always, then report should exist
-  if [ "$ENV_VAL" == "always" ]; then
-    addArtifacts "${2}" "${3}"
-    logMsg "Test Artifacts found for ${2}"
-
-  # If the tests failed, and the env is set to failed, true, or 1
-  # Then a test report should exist
-  elif [ "$GOBLET_TESTS_RESULT" == "fail" ]; then
-    if [ "$ENV_VAL" == "failed" ] || [ "$ENV_VAL" == true ] || [ "$ENV_VAL" == 1 ]; then
-      addArtifacts "${2}" "${3}"
-      logMsg "Test Artifacts found for ${2} output"
-    fi
-
-  # If no value, or it's disabled then set empty and return
-  else
-    setOutput "${2}" ""
-  fi
-
-}
 
 # ---- Step 0 - Set ENVs from inputs if they don't already exist
 # Goblet Action specific ENVs
 setRunEnvs(){
 
+  # If the CI env is not set, then set it to 1 by default
+  getENVValue "CI" "$CI" "1"
+  
+  # Ensure the GOBLET_CONFIG_BASE && GOBLET_MOUNT_ROOT envs are set
+  ensureConfigBase "$MOUNT_WORK_DIR"
+
   getENVValue "GOBLET_TESTS_PATH" "${1}" "$GOBLET_TESTS_PATH"
   getENVValue "GIT_TOKEN" "${2}" "$GIT_TOKEN"
   getENVValue "GOBLET_TOKEN" "${3}" "$GOBLET_TOKEN"
-  # TODO: Enable when goblet tokens are setup
-  # [ -z "$GOBLET_TOKEN" ] && Add some exit code here for missing token
+
+  # Ensure the Goblet Token is set
+  validateGobletToken
 
   # Alt Repo ENVs
   getENVValue "GIT_ALT_REPO" "${4}" "$GIT_ALT_REPO"
@@ -227,8 +112,10 @@ setupWorkspace(){
   # Check if we should clone down the alt repo and use it
   elif [ "$GIT_ALT_REPO" ]; then
     cloneAltRepo "$@"
-
   fi
+
+  # Ensure the git remote is set for latent
+  ensureMoutedRemoteEnv
 
   echo ""
   logMsg "Repo mount is $GOBLET_CONFIG_BASE"
@@ -241,10 +128,12 @@ runTests(){
   cd /github/app
 
   local TEST_RUN_ARGS="--env $NODE_ENV --base $GOBLET_CONFIG_BASE"
+
   [ -z "$GOBLET_TEST_TYPE" ] && export GOBLET_TEST_TYPE="${GOBLET_TEST_TYPE:-bdd}"
 
   if [ "$GOBLET_TEST_TYPE" == "bdd" ]; then
 
+    # If a tests path is not set, then use the base path to look for tests
     export GOBLET_TESTS_PATH="${GOBLET_TESTS_PATH:-$GOBLET_CONFIG_BASE}"
     TEST_RUN_ARGS="$TEST_RUN_ARGS --context $GOBLET_TESTS_PATH"
 
@@ -258,7 +147,10 @@ runTests(){
     fi
 
     logMsg "Running Tests for $(logPurpleU $GOBLET_TESTS_PATH)"
-    node tasks/entry.js bdd run $TEST_RUN_ARGS
+
+    # Example command
+    # cd ../app && node -r esbuild-register tasks/entry.ts bdd run --env test --base /github/workspace --context Tester.feature --browsers chrome
+    node -r esbuild-register tasks/entry.ts bdd run $TEST_RUN_ARGS
     TEST_EXIT_STATUS=$?
 
     logMsg "Test Exit Status: $TEST_EXIT_STATUS"

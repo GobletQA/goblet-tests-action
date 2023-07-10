@@ -3,5 +3,5 @@
 
 # Only run the prompt if no message is passed 
 if [ -z "$2" ]; then
-  exec < /dev/tty && yarn cz --hook || true
+  exec < /dev/tty && pnpm cz --hook || true
 fi

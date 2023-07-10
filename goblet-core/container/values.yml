@@ -28,3 +28,32 @@ env:
   GB_BE_COOKIE_HTTP_ONLY: true
   GB_BE_COOKIE_OVERWRITE: true
   GB_BE_COOKIE_SAME_SITE: None
+
+  GB_LOG_LEVEL: debug
+  GB_LOG_LABEL: Goblet
+  GB_LOG_DISABLED: false
+  GB_LOG_EXIT_ON_ERR: false
+  GB_LOG_PRETTY_PRINT: true
+  GB_LOG_HANDLE_EXCEPTION: true
+
+  GB_GOBLET_URL: https://www.gobletqa.com
+  GB_GIT_GLOBAL_IGNORE: /github/.gitignore
+  PW_DEBUG_FILE: /github/logs/pwlogs.log
+
+# ---- Goblet Action Shared ENVs ---- #
+# These ENVs should be overwritten by the github action
+  GOBLET_MOUNT_ROOT: /github/repos
+
+  GITLAB_CLIENT_ID: ""
+  GITLAB_CLIENT_SECRET: ""
+
+  GITLAB_API_URL: gitlab.com
+  GITLAB_AUTH_URL: https://gitlab.com
+  GITLAB_GRAPH_URL: https://gitlab.com/api/graphql
+
+  GITHUB_API_URL: api.github.com
+  GITHUB_GRAPH_URL: https://api.github.com/graphql
+
+  # --- WORKFLOW ENVs --- #
+  GB_GIT_REMOTE_REF: goblet-ref
+  GB_SECRETS_TAG_REF: goblet-do-not-delete

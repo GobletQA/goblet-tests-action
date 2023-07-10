@@ -9,9 +9,8 @@ inputs:
     required: true
     description: Github Token with write access to the repository
   goblet-token:
-    required: false
-    default: IGNORED
-    description: CI token from the goblet platform
+    required: true
+    description: Goblet Auth Token from the goblet platform
   alt-repo:
     required: false
     description: Alternative github repository that contains the tests to be run.
