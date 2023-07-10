@@ -36,7 +36,7 @@
     "docker:run": "/bin/bash scripts/dockerRun.sh",
     "echoVersion": "echo $npm_package_version",
     "up:deps":"pnpm dlx npm-check-updates -u && pnpm install",
-    "update": "/bin/bash scripts/actionUpdate.sh"
+    "up:act": "/bin/bash scripts/actionUpdate.sh"
   },
   "dependencies": {},
   "devDependencies": {
