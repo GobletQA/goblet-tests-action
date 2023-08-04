@@ -152,7 +152,7 @@ runTests(){
     # Example command
     # cd ../app && node -r esbuild-register tasks/entry.ts bdd run --env test --base /github/workspace --context Tester.feature --browsers chrome
     node -r esbuild-register tasks/entry.ts bdd run "$TEST_RUN_ARGS"
-    TEST_EXIT_STATUS=$?
+    export TEST_EXIT_STATUS=$?
 
 
     if [ ${TEST_EXIT_STATUS} -ne 0 ]; then
@@ -220,6 +220,11 @@ runTests "$@"
 ensureArtifactsDir
 setActionOutputs
 
-# Set the final result state, which should be pass if we get to this point
-logMsg "Finished running tests for $GOBLET_TESTS_PATH"
-setOutput "result" "$GOBLET_TESTS_RESULT"
+if [ ${TEST_EXIT_STATUS} -ne 0 ]; then
+  setOutput "result" "$GOBLET_TESTS_RESULT"
+  exit 1
+else
+  # Set the final result state, which should be pass if we get to this point
+  logMsg "Finished running tests for $GOBLET_TESTS_PATH"
+  setOutput "result" "$GOBLET_TESTS_RESULT"
+fi
