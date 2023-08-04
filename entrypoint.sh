@@ -25,10 +25,11 @@
 #
 
 # Exit when any command fails
-set -Eeo pipefail
+# set -Eeo pipefail
 source /goblet-action/scripts/logger.sh
 source /goblet-action/scripts/helpers.sh
 trap exitError ERR
+trap exitCtrlC INT
 
 # Ensure devtools is not turned on
 unset GOBLET_DEV_TOOLS
@@ -150,15 +151,16 @@ runTests(){
 
     # Example command
     # cd ../app && node -r esbuild-register tasks/entry.ts bdd run --env test --base /github/workspace --context Tester.feature --browsers chrome
-    node -r esbuild-register tasks/entry.ts bdd run $TEST_RUN_ARGS
+    node -r esbuild-register tasks/entry.ts bdd run "$TEST_RUN_ARGS"
     TEST_EXIT_STATUS=$?
 
-    logMsg "Test Exit Status: $TEST_EXIT_STATUS"
 
     if [ ${TEST_EXIT_STATUS} -ne 0 ]; then
       export GOBLET_TESTS_RESULT="fail"
+      logErr "Test Exit Code: $TEST_EXIT_STATUS"
       logErr "❌ - One or more of the executed tests failed"
     else
+      logMsg "Test Exit Code: $TEST_EXIT_STATUS"
       export GOBLET_TESTS_RESULT="pass"
       logMsg "👍 - All executed tests passed"
     fi

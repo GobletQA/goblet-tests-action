@@ -9,6 +9,19 @@ exitError(){
   logErr "Finished running tests for $GOBLET_TESTS_PATH"
   ensureArtifactsDir
   setActionOutputs
+  logErr "Test Exit Code: 1"
+  echo ""
+  exit 1
+}
+
+exitCtrlC(){
+  export GOBLET_TESTS_RESULT="fail"
+  setOutput "result" "$GOBLET_TESTS_RESULT"
+  logErr "User force quit test execution"
+  ensureArtifactsDir
+  setActionOutputs
+  logErr "Test Exit Code: 1"
+  echo ""
   exit 1
 }
 
