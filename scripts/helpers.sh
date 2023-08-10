@@ -98,20 +98,26 @@ addArtifacts(){
   setOutput "$NAME" "$VAL"
 }
 
+# Inspired by: https://gist.github.com/joshisa/297b0bc1ec0dcdda0d1625029711fa24
+# Referenced and tweaked from http://stackoverflow.com/questions/6174220/parse-url-in-shell-script#6174447
 cleanRepoUrl(){
-  local URL="$1"
+  url="$1"
 
-  # Parse the protocol from the alt repo url, so we can enforce https
-  local _PARSED_PROTO="$(echo $URL | sed -nr 's,^(.*://).*,\1,p')"
-  local _CLEANED_URL="$(echo ${$URL/$_PARSED_PROTO/})"
+  protocol=$(echo "$1" | grep "://" | sed -e's,^\(.*://\).*,\1,g')
+  url_no_protocol=$(echo "${1/$protocol/}")
+  protocol=$(echo "$protocol" | tr '[:upper:]' '[:lower:]')
 
-  local _PARSED_USER="$(echo $_PARSED_PROTO | sed -nr 's,^(.*@).*,\1,p')"
-  local _CLEANED_URL="$(echo ${$_CLEANED_URL/$_PARSED_USER/})"
+  userpass=$(echo "$url_no_protocol" | grep "@" | cut -d"/" -f1 | rev | cut -d"@" -f2- | rev)
+  hostport=$(echo "${url_no_protocol/$userpass@/}" | cut -d"/" -f1)
+  path=$(echo "$url_no_protocol" | grep "/" | cut -d"/" -f2-)
+  
+  # Remove the .git if it exists, does nothing if it does not
+  clean_path="$(dirname $path)/$(basename $path ".git")"
 
-  local _PARSED_PATH="$(echo $_CLEANED_URL | sed -nr 's,[^/:]*([/:].*),\1,p')"
-  local _PARSED_HOST="$(echo ${_CLEANED_URL/$_PARSED_PATH/})"
+  # Build the partial url, without the git
+  # Still works for cloning but also allows using as $ref in goblet.config
+  echo "$hostport/$clean_path"
 
-  echo "$_PARSED_HOST/$_PARSED_PATH"
 }
 
 # Clones an alternitive repo locally
