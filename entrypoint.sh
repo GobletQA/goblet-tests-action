@@ -61,9 +61,6 @@ setRunEnvs(){
   getENVValue "GIT_TOKEN" "${2}" "$GIT_TOKEN"
   getENVValue "GOBLET_TOKEN" "${3}" "$GOBLET_TOKEN"
 
-  # Ensure the Goblet Token is set
-  validateGobletToken
-
   # Alt Repo ENVs
   getENVValue "GIT_ALT_REPO" "${4}" "$GIT_ALT_REPO"
   getENVValue "GIT_ALT_BRANCH" "${5}" "$GIT_ALT_BRANCH"
@@ -115,11 +112,8 @@ setupWorkspace(){
     cloneAltRepo "$@"
   fi
 
-  # Ensure the git remote is set for latent
-  ensureMoutedRemoteEnv
-
   echo ""
-  logMsg "Repo mount is $GOBLET_CONFIG_BASE"
+  logMsg "Goblet config base is $GOBLET_CONFIG_BASE"
 }
 
 # ---- Step 4 - Run the tests

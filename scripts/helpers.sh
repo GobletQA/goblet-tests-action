@@ -45,29 +45,6 @@ getENVValue() {
   fi
 }
 
-# Logs an error and exists when the GOBLET_TOKEN env is missing
-missingGobletToken(){
-  logErr "A \"goblet-token\" is required to run this image."
-  exit 1
-}
-
-# Validate the goblet token and sets it for latent to access
-validateGobletToken(){
-  getENVValue "GOBLET_TOKEN" "$GOBLET_TOKEN" "$GB_LT_TOKEN_SECRET"
-  [ -z "$GOBLET_TOKEN" ] && missingGobletToken
-
-  getENVValue "GB_LT_TOKEN_SECRET" "$GB_LT_TOKEN_SECRET" "$GOBLET_TOKEN"
-}
-
-# Pulls the remote origin url using git
-# Used by latent repo for decrypting secrets
-ensureMoutedRemoteEnv(){
-  if [ -z "$GB_GIT_MOUNTED_REMOTE" ]; then
-    cd "$GOBLET_CONFIG_BASE"
-    export GB_GIT_MOUNTED_REMOTE="$(git config --get remote.origin.url)"
-  fi
-}
-
 # Gets goblet config base path and the parent directory
 # Sets both `GOBLET_CONFIG_BASE` and `GOBLET_MOUNT_ROOT` envs
 # Defaults to `/github/workspace` and `/github`
@@ -121,30 +98,48 @@ addArtifacts(){
   setOutput "$NAME" "$VAL"
 }
 
+cleanRepoUrl(){
+  local URL="$1"
+
+  # Parse the protocol from the alt repo url, so we can enforce https
+  local _PARSED_PROTO="$(echo $URL | sed -nr 's,^(.*://).*,\1,p')"
+  local _CLEANED_URL="$(echo ${$URL/$_PARSED_PROTO/})"
+
+  local _PARSED_USER="$(echo $_PARSED_PROTO | sed -nr 's,^(.*@).*,\1,p')"
+  local _CLEANED_URL="$(echo ${$_CLEANED_URL/$_PARSED_USER/})"
+
+  local _PARSED_PATH="$(echo $_CLEANED_URL | sed -nr 's,[^/:]*([/:].*),\1,p')"
+  local _PARSED_HOST="$(echo ${_CLEANED_URL/$_PARSED_PATH/})"
+
+  echo "$_PARSED_HOST/$_PARSED_PATH"
+}
+
 # Clones an alternitive repo locally
 cloneAltRepo(){
   cd $GOBLET_MOUNT_ROOT
 
-    # Ensure the user is configured with git
-    # If git user is not set, use the current user from existing the git log
-    [ -z "$GIT_ALT_USER" ] && export GIT_ALT_USER="$(git log --format='%ae' HEAD^!)"
-    [ "$GIT_ALT_USER" ] && git config --global user.email "$GIT_ALT_USER"
+  # Ensure the user is configured with git
+  # If git user is not set, use the current user from existing the git log
+  [ -z "$GIT_ALT_USER" ] && export GIT_ALT_USER="$(git log --format='%ae' HEAD^!)"
+  [ "$GIT_ALT_USER" ] && git config --global user.email "$GIT_ALT_USER"
 
-    # If git email not set, use the current email from existing the git log
-    [ -z "$GIT_ALT_EMAIL" ] && export GIT_ALT_EMAIL="$(git log --format='%an' HEAD^!)"
-    [ "$GIT_ALT_EMAIL" ] && git config --global user.name "$GIT_ALT_EMAIL"
+  # If git email not set, use the current email from existing the git log
+  [ -z "$GIT_ALT_EMAIL" ] && export GIT_ALT_EMAIL="$(git log --format='%an' HEAD^!)"
+  [ "$GIT_ALT_EMAIL" ] && git config --global user.name "$GIT_ALT_EMAIL"
 
   # Clone the repo using the passed in token if it exists
   local GIT_CLONE_TOKEN="${GIT_ALT_TOKEN:-$GOBLET_GIT_TOKEN}"
+  local GB_CLEANED_URL="$(cleanRepoUrl "$GIT_ALT_REPO")"
 
-  logMsg "Cloning alt repo \"https://$GIT_ALT_REPO\""
+  logMsg "Cloning alt repo \"https://$GB_CLEANED_URL\""
+
   if [ "$GIT_CLONE_TOKEN" ]; then
-    git clone "https://$GIT_CLONE_TOKEN@$GIT_ALT_REPO" "$GIT_ALT_REPO_DIR"
+    git clone "https://$GIT_CLONE_TOKEN@$GB_CLEANED_URL" "$GIT_ALT_REPO_DIR"
   else
-    git clone "https://$GIT_ALT_REPO" "$GIT_ALT_REPO_DIR"
+    git clone "https://$GB_CLEANED_URL" "$GIT_ALT_REPO_DIR"
   fi
 
-  export GB_GIT_MOUNTED_REMOTE="https://$GIT_ALT_REPO"
+  export GB_GIT_REPO_REMOTE="https://$GB_CLEANED_URL"
 
   # Navigate into the repo so we can get the pull path from (pwd)
   cd ./$GIT_ALT_REPO_DIR
