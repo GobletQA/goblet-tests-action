@@ -9,6 +9,19 @@ exitError(){
   logErr "Finished running tests for $GOBLET_TESTS_PATH"
   ensureArtifactsDir
   setActionOutputs
+  logErr "Test Exit Code: 1"
+  echo ""
+  exit 1
+}
+
+exitCtrlC(){
+  export GOBLET_TESTS_RESULT="fail"
+  setOutput "result" "$GOBLET_TESTS_RESULT"
+  logErr "User force quit test execution"
+  ensureArtifactsDir
+  setActionOutputs
+  logErr "Test Exit Code: 1"
+  echo ""
   exit 1
 }
 
@@ -29,29 +42,6 @@ getENVValue() {
   local FOUND_VAL="${2:-$3}"
   if [ "$FOUND_VAL" ]; then
     eval "export $ENV_NAME=$FOUND_VAL"
-  fi
-}
-
-# Logs an error and exists when the GOBLET_TOKEN env is missing
-missingGobletToken(){
-  logErr "A \"goblet-token\" is required to run this image."
-  exit 1
-}
-
-# Validate the goblet token and sets it for latent to access
-validateGobletToken(){
-  getENVValue "GOBLET_TOKEN" "$GOBLET_TOKEN" "$GB_LT_TOKEN_SECRET"
-  [ -z "$GOBLET_TOKEN" ] && missingGobletToken
-
-  getENVValue "GB_LT_TOKEN_SECRET" "$GB_LT_TOKEN_SECRET" "$GOBLET_TOKEN"
-}
-
-# Pulls the remote origin url using git
-# Used by latent repo for decrypting secrets
-ensureMoutedRemoteEnv(){
-  if [ -z "$GB_GIT_MOUNTED_REMOTE" ]; then
-    cd "$GOBLET_CONFIG_BASE"
-    export GB_GIT_MOUNTED_REMOTE="$(git config --get remote.origin.url)"
   fi
 }
 
@@ -108,30 +98,54 @@ addArtifacts(){
   setOutput "$NAME" "$VAL"
 }
 
+# Inspired by: https://gist.github.com/joshisa/297b0bc1ec0dcdda0d1625029711fa24
+# Referenced and tweaked from http://stackoverflow.com/questions/6174220/parse-url-in-shell-script#6174447
+cleanRepoUrl(){
+  url="$1"
+
+  protocol=$(echo "$1" | grep "://" | sed -e's,^\(.*://\).*,\1,g')
+  url_no_protocol=$(echo "${1/$protocol/}")
+  protocol=$(echo "$protocol" | tr '[:upper:]' '[:lower:]')
+
+  userpass=$(echo "$url_no_protocol" | grep "@" | cut -d"/" -f1 | rev | cut -d"@" -f2- | rev)
+  hostport=$(echo "${url_no_protocol/$userpass@/}" | cut -d"/" -f1)
+  path=$(echo "$url_no_protocol" | grep "/" | cut -d"/" -f2-)
+  
+  # Remove the .git if it exists, does nothing if it does not
+  clean_path="$(dirname $path)/$(basename $path ".git")"
+
+  # Build the partial url, without the git
+  # Still works for cloning but also allows using as $ref in goblet.config
+  echo "$hostport/$clean_path"
+
+}
+
 # Clones an alternitive repo locally
 cloneAltRepo(){
   cd $GOBLET_MOUNT_ROOT
 
-    # Ensure the user is configured with git
-    # If git user is not set, use the current user from existing the git log
-    [ -z "$GIT_ALT_USER" ] && export GIT_ALT_USER="$(git log --format='%ae' HEAD^!)"
-    [ "$GIT_ALT_USER" ] && git config --global user.email "$GIT_ALT_USER"
+  # Ensure the user is configured with git
+  # If git user is not set, use the current user from existing the git log
+  [ -z "$GIT_ALT_USER" ] && export GIT_ALT_USER="$(git log --format='%ae' HEAD^!)"
+  [ "$GIT_ALT_USER" ] && git config --global user.email "$GIT_ALT_USER"
 
-    # If git email not set, use the current email from existing the git log
-    [ -z "$GIT_ALT_EMAIL" ] && export GIT_ALT_EMAIL="$(git log --format='%an' HEAD^!)"
-    [ "$GIT_ALT_EMAIL" ] && git config --global user.name "$GIT_ALT_EMAIL"
+  # If git email not set, use the current email from existing the git log
+  [ -z "$GIT_ALT_EMAIL" ] && export GIT_ALT_EMAIL="$(git log --format='%an' HEAD^!)"
+  [ "$GIT_ALT_EMAIL" ] && git config --global user.name "$GIT_ALT_EMAIL"
 
   # Clone the repo using the passed in token if it exists
   local GIT_CLONE_TOKEN="${GIT_ALT_TOKEN:-$GOBLET_GIT_TOKEN}"
+  local GB_CLEANED_URL="$(cleanRepoUrl "$GIT_ALT_REPO")"
 
-  logMsg "Cloning alt repo \"https://$GIT_ALT_REPO\""
+  logMsg "Cloning alt repo \"https://$GB_CLEANED_URL\""
+
   if [ "$GIT_CLONE_TOKEN" ]; then
-    git clone "https://$GIT_CLONE_TOKEN@$GIT_ALT_REPO" "$GIT_ALT_REPO_DIR"
+    git clone "https://$GIT_CLONE_TOKEN@$GB_CLEANED_URL" "$GIT_ALT_REPO_DIR"
   else
-    git clone "https://$GIT_ALT_REPO" "$GIT_ALT_REPO_DIR"
+    git clone "https://$GB_CLEANED_URL" "$GIT_ALT_REPO_DIR"
   fi
 
-  export GB_GIT_MOUNTED_REMOTE="https://$GIT_ALT_REPO"
+  export GB_GIT_REPO_REMOTE="https://$GB_CLEANED_URL"
 
   # Navigate into the repo so we can get the pull path from (pwd)
   cd ./$GIT_ALT_REPO_DIR

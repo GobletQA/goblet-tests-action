@@ -25,10 +25,11 @@
 #
 
 # Exit when any command fails
-set -Eeo pipefail
+# set -Eeo pipefail
 source /goblet-action/scripts/logger.sh
 source /goblet-action/scripts/helpers.sh
 trap exitError ERR
+trap exitCtrlC INT
 
 # Ensure devtools is not turned on
 unset GOBLET_DEV_TOOLS
@@ -59,9 +60,6 @@ setRunEnvs(){
   getENVValue "GOBLET_TESTS_PATH" "${1}" "$GOBLET_TESTS_PATH"
   getENVValue "GIT_TOKEN" "${2}" "$GIT_TOKEN"
   getENVValue "GOBLET_TOKEN" "${3}" "$GOBLET_TOKEN"
-
-  # Ensure the Goblet Token is set
-  validateGobletToken
 
   # Alt Repo ENVs
   getENVValue "GIT_ALT_REPO" "${4}" "$GIT_ALT_REPO"
@@ -114,11 +112,8 @@ setupWorkspace(){
     cloneAltRepo "$@"
   fi
 
-  # Ensure the git remote is set for latent
-  ensureMoutedRemoteEnv
-
   echo ""
-  logMsg "Repo mount is $GOBLET_CONFIG_BASE"
+  logMsg "Goblet config base is $GOBLET_CONFIG_BASE"
 }
 
 # ---- Step 4 - Run the tests
@@ -150,15 +145,16 @@ runTests(){
 
     # Example command
     # cd ../app && node -r esbuild-register tasks/entry.ts bdd run --env test --base /github/workspace --context Tester.feature --browsers chrome
-    node -r esbuild-register tasks/entry.ts bdd run $TEST_RUN_ARGS
-    TEST_EXIT_STATUS=$?
+    node -r esbuild-register tasks/entry.ts bdd run "$TEST_RUN_ARGS"
+    export TEST_EXIT_STATUS=$?
 
-    logMsg "Test Exit Status: $TEST_EXIT_STATUS"
 
     if [ ${TEST_EXIT_STATUS} -ne 0 ]; then
       export GOBLET_TESTS_RESULT="fail"
+      logErr "Test Exit Code: $TEST_EXIT_STATUS"
       logErr "❌ - One or more of the executed tests failed"
     else
+      logMsg "Test Exit Code: $TEST_EXIT_STATUS"
       export GOBLET_TESTS_RESULT="pass"
       logMsg "👍 - All executed tests passed"
     fi
@@ -218,6 +214,11 @@ runTests "$@"
 ensureArtifactsDir
 setActionOutputs
 
-# Set the final result state, which should be pass if we get to this point
-logMsg "Finished running tests for $GOBLET_TESTS_PATH"
-setOutput "result" "$GOBLET_TESTS_RESULT"
+if [ ${TEST_EXIT_STATUS} -ne 0 ]; then
+  setOutput "result" "$GOBLET_TESTS_RESULT"
+  exit 1
+else
+  # Set the final result state, which should be pass if we get to this point
+  logMsg "Finished running tests for $GOBLET_TESTS_PATH"
+  setOutput "result" "$GOBLET_TESTS_RESULT"
+fi

@@ -42,7 +42,7 @@ env:
 
 # ---- Goblet Action Shared ENVs ---- #
 # These ENVs should be overwritten by the github action
-  GOBLET_MOUNT_ROOT: /github/repos
+  GOBLET_MOUNT_ROOT: /github
 
   GITLAB_CLIENT_ID: ""
   GITLAB_CLIENT_SECRET: ""

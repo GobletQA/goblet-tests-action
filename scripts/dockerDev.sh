@@ -155,7 +155,7 @@ docker run --rm -it \
   -e GITHUB_EVENT_NAME=workflow_dispatch \
   -e GITHUB_WORKFLOW=goblet-action-workflow \
   -e GITHUB_REF=refs/heads/run-goblet-action \
-  -e GB_GIT_MOUNTED_REMOTE=https://github.com/Use-Verb/use-verb-webapp-tests \
+  -e GB_GIT_REPO_REMOTE=$GB_GIT_REPO_REMOTE \
   -e GOBLET_BROWSERS=${GOBLET_BROWSERS:-all} \
   -e GOBLET_TEST_REPORT=${GOBLET_TEST_REPORT:-0} \
   -e GOBLET_TEST_TRACING=${GOBLET_TEST_TRACING:-0} \

@@ -1,7 +1,7 @@
 {
   "name": "@gobletqa/goblet-tests-action",
   "displayName": "goblet-tests-action",
-  "version": "0.0.26",
+  "version": "0.0.27-alpha-1",
   "description": "Execute goblet tests in a Github action",
   "repository": {
     "type": "git",
@@ -35,6 +35,7 @@
     "doc:run": "pnpm docker:run",
     "docker:run": "/bin/bash scripts/dockerRun.sh",
     "echoVersion": "echo $npm_package_version",
+    "test:shell": "/bin/bash scripts/shell.test.sh",
     "up:deps":"pnpm dlx npm-check-updates -u && pnpm install",
     "up:act": "/bin/bash scripts/actionUpdate.sh"
   },
