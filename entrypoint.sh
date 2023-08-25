@@ -90,7 +90,9 @@ setRunEnvs(){
   getENVValue "GOBLET_BROWSER_TIMEOUT" "${25}" "$GOBLET_BROWSER_TIMEOUT"
 
   getENVValue "GOBLET_ARTIFACTS_DEBUG" "${26}" "$GOBLET_ARTIFACTS_DEBUG"
-  
+
+  getENVValue "GOBLET_FEATURE_TAGS" "${27}" "$GOBLET_FEATURE_TAGS"
+
   # Goblet App specific ENVs
   [ -z "$NODE_ENV" ] && export NODE_ENV=test
   [ -z "$GOBLET_APP_URL" ] && export GOBLET_APP_URL="$APP_URL"
@@ -109,7 +111,7 @@ setupWorkspace(){
 
   # Check if we should clone down the alt repo and use it
   elif [ "$GIT_ALT_REPO" ]; then
-    cloneAltRepo "$@"
+    cloneAltRepo
   fi
 
   echo ""
@@ -142,6 +144,11 @@ runTests(){
     fi
 
     logMsg "Running Tests for $(logPurpleU $GOBLET_TESTS_PATH)"
+
+    # If arguments were passed in, then forward them to the command
+    if [ "$1" ]; then
+      TEST_RUN_ARGS="$TEST_RUN_ARGS $@"
+    fi
 
     # Example command
     # cd ../app && node -r esbuild-register tasks/entry.ts bdd run --env test --base /github/workspace --context Tester.feature --browsers chrome
@@ -207,10 +214,14 @@ setActionOutputs(){
 
 }
 
-# Kick off the test run...
-setRunEnvs "$@"
+# If running as a github actions pass in the inputs
+# Otherwise check for ENVs, and pass the inputs to the runTests command
+[ "$GITHUB_ACTIONS" ] && setRunEnvs "$@" || setRunEnvs
+
 setupWorkspace "$@"
-runTests "$@"
+
+[ "$GITHUB_ACTIONS" ] && runTests || runTests "$@"
+
 ensureArtifactsDir
 setActionOutputs
 

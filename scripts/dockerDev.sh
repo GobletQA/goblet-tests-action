@@ -10,6 +10,7 @@ IMAGE_FULL=ghcr.io/gobletqa/$IMAGE_NAME:latest
 TEST_REPO_NAME=workspace
 REPO_WORK_DIR=/github/workspace
 MOUNTS="-v $(pwd):/goblet-action"
+GITHUB_ACTION=""
 
 GIT_TOKEN=$(keg key print)
 
@@ -103,6 +104,12 @@ while [[ $# -gt 0 ]]; do
       export GOBLET_BROWSERS="webkit"
       shift
       ;;
+    -a|--action)
+      logMsg "Running as Github Action"
+      GITHUB_ACTION="-e GITHUB_OUTPUT=/dev/null -e GITHUB_ACTIONS=true -e GITHUB_HEAD_REF=main -e GITHUB_ENV=/dev/null -e GITHUB_PATH=/dev/null -e GITHUB_REF_TYPE=branch -e GITHUB_ACTOR=joe-goblet -e GITHUB_JOB=goblet-test-action -e GITHUB_ACTION=__goblet-action -e GITHUB_REPOSITORY_OWNER=goblet -e GITHUB_WORKSPACE=$REPO_WORK_DIR -e GITHUB_BASE_REF=local-dev-branch -e GITHUB_REF_NAME=run-goblet-action -e GITHUB_REPOSITORY=$TEST_REPO_NAME -e GITHUB_EVENT_NAME=workflow_dispatch -e GITHUB_WORKFLOW=goblet-action-workflow -e GITHUB_REF=refs/heads/run-goblet-action"
+      
+      shift
+      ;;
     -*|--*)
       logErr "Unknown option $1"
       shift
@@ -138,23 +145,6 @@ docker run --rm -it \
   -e GIT_ALT_EMAIL="$GIT_EMAIL" \
   -e GIT_ALT_REPO="$GIT_ALT_REPO" \
   -e GIT_ALT_BRANCH="$GIT_ALT_BRANCH" \
-  -e GITHUB_OUTPUT=/dev/null \
-  -e GITHUB_ACTIONS=true \
-  -e GITHUB_HEAD_REF=main \
-  -e GITHUB_ENV=/dev/null \
-  -e GITHUB_PATH=/dev/null \
-  -e GITHUB_REF_TYPE=branch \
-  -e GITHUB_ACTOR=joe-goblet \
-  -e GITHUB_JOB=goblet-test-action \
-  -e GITHUB_ACTION=__goblet-action \
-  -e GITHUB_REPOSITORY_OWNER=goblet \
-  -e GITHUB_WORKSPACE=$REPO_WORK_DIR \
-  -e GITHUB_BASE_REF=local-dev-branch \
-  -e GITHUB_REF_NAME=run-goblet-action \
-  -e GITHUB_REPOSITORY=$TEST_REPO_NAME \
-  -e GITHUB_EVENT_NAME=workflow_dispatch \
-  -e GITHUB_WORKFLOW=goblet-action-workflow \
-  -e GITHUB_REF=refs/heads/run-goblet-action \
   -e GB_GIT_REPO_REMOTE=$GB_GIT_REPO_REMOTE \
   -e GOBLET_BROWSERS=${GOBLET_BROWSERS:-all} \
   -e GOBLET_TEST_REPORT=${GOBLET_TEST_REPORT:-0} \
@@ -162,6 +152,7 @@ docker run --rm -it \
   -e GOBLET_BROWSER_DEBUG=${GOBLET_BROWSER_DEBUG:-0} \
   -e GOBLET_TEST_VIDEO_RECORD=${GOBLET_TEST_VIDEO_RECORD:-0} \
   -e GOBLET_BROWSER_CONCURRENT=${GOBLET_BROWSER_CONCURRENT:-0} \
+  $GITHUB_ACTION \
   --name goblet-action \
   --entrypoint /bin/bash \
   --workdir $REPO_WORK_DIR \
