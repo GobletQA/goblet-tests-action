@@ -118,6 +118,13 @@ setupWorkspace(){
   logMsg "Goblet config base is $GOBLET_CONFIG_BASE"
 }
 
+logRunArguments(){
+  # TODO: either split by argument, or disable and print arguments from bdd-run task in goblet
+  logMsg "Running Tests with:"
+  logPurpleU "  $TEST_RUN_ARGS"
+  echo ""
+}
+
 # ---- Step 4 - Run the tests
 runTests(){
   # Goblet test run specific ENVs - customizable
@@ -132,7 +139,10 @@ runTests(){
 
     # If a tests path is not set, then use the base path to look for tests
     export GOBLET_TESTS_PATH="${GOBLET_TESTS_PATH:-$GOBLET_CONFIG_BASE}"
-    TEST_RUN_ARGS="$TEST_RUN_ARGS --context $GOBLET_TESTS_PATH"
+    
+    # For github action, arguments are passed via ENVs, so use the GOBLET_TESTS_PATH env for the context
+    # For docker image, assume the context is passed as an argument, (i.e. --context my-test)
+    [ "$GITHUB_ACTIONS" ] && TEST_RUN_ARGS="$TEST_RUN_ARGS --context $GOBLET_TESTS_PATH"
 
     # Add special handling for setting browsers option to auto set ---allBrowsers when not set
     if [ -z "$GOBLET_BROWSERS" ]; then
@@ -143,15 +153,16 @@ runTests(){
       TEST_RUN_ARGS="$TEST_RUN_ARGS --browsers $GOBLET_BROWSERS"
     fi
 
-    logMsg "Running Tests for $(logPurpleU $GOBLET_TESTS_PATH)"
 
     # If arguments were passed in, then forward them to the command
     if [ "$1" ]; then
       TEST_RUN_ARGS="$TEST_RUN_ARGS $@"
     fi
 
-    # Example command
-    # cd ../app && node -r esbuild-register tasks/entry.ts bdd run --env test --base /github/workspace --context Tester.feature --browsers chrome
+    # logRunArguments "$TEST_RUN_ARGS"
+
+    # # Example command
+    # # cd ../app && node -r esbuild-register tasks/entry.ts bdd run --env test --base /github/workspace --context Tester.feature --browsers chrome
     node -r esbuild-register tasks/entry.ts bdd run "$TEST_RUN_ARGS"
     export TEST_EXIT_STATUS=$?
 
