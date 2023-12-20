@@ -161,8 +161,12 @@ runTests(){
 
     # logRunArguments "$TEST_RUN_ARGS"
 
-    # # Example command
-    # # cd ../app && node -r esbuild-register tasks/entry.ts bdd run --env test --base /github/workspace --context Tester.feature --browsers chrome
+    # Example commands
+    # cd ../app
+    # node -r esbuild-register tasks/entry.ts bdd run --env test --base /github/workspace --context Tester.feature --browsers chrome
+    # node -r esbuild-register tasks/goblet.ts bdd run --env test --base /github/workspace --context Log-In --browsers chrome
+    # node -r esbuild-register tasks/goblet.ts bdd run --env test --base /github/workspace --tags @whitelist
+    
     node -r esbuild-register tasks/goblet.ts bdd run "$TEST_RUN_ARGS"
     export TEST_EXIT_STATUS=$?
 
