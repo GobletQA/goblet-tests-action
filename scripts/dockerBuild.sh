@@ -17,6 +17,8 @@ while [[ $# -gt 0 ]]; do
     -p|--push)
       logMsg "Pushing image after build"
       PLATFORM_ARGS="--platform linux/amd64,linux/arm64 --push"
+      docker buildx create --name goblet &> /dev/null
+      docker buildx use goblet
       shift
     ;;
     -l|--local)
