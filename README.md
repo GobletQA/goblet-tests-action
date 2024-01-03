@@ -128,9 +128,9 @@
 * Output verbose test results as the tests run
 * **default** - `false`
 
-### `test-open-handles`
-* As ENV - `GOBLET_TEST_OPEN_HANDLES`
-* Detect handles left open when tests run, **AND** forces tests to run in sync.
+### `test-bail`
+* As ENV - `GOBLET_TEST_BAIL`
+* Stop running tests after a specified amount of tests fail
 * **default** - `false`
 
 ### `browsers`

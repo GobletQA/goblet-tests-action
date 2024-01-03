@@ -60,9 +60,9 @@ inputs:
   test-verbose:
     required: false
     description: Output verbose test results as the tests run
-  test-open-handles:
+  test-bail:
     required: false
-    description: Detect handles left open when tests run. Forces tests to run in sync
+    description: Stop running tests after a specified amount of tests fail
   browsers:
     required: false
     description: Comma separated list of Browsers to execute tests against
@@ -114,7 +114,7 @@ runs:
     - ${{ inputs.test-colors }} #17
     - ${{ inputs.test-workers }} #18
     - ${{ inputs.test-verbose }} #19
-    - ${{ inputs.test-open-handles }} #20
+    - ${{ inputs.test-bail }} #20
     - ${{ inputs.browsers }} #21
     - ${{ inputs.browser-debug }} #22
     - ${{ inputs.browser-slow-mo }} #23
