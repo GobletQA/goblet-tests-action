@@ -29,7 +29,7 @@ inputs:
   test-type:
     required: false
     default: bdd
-    description: 'Test type to run, one of `bdd`, `waypoint`, or `unit`'
+    description: Test type to run, one of `bdd`, `waypoint`, or `unit`
   test-retry:
     required: false
     description: Number of times a failed test should be retried
@@ -60,9 +60,9 @@ inputs:
   test-verbose:
     required: false
     description: Output verbose test results as the tests run
-  test-open-handles:
+  test-bail:
     required: false
-    description: Detect handles left open when tests run. Forces tests to run in sync
+    description: Stop running tests after a specified amount of tests fail
   browsers:
     required: false
     description: Comma separated list of Browsers to execute tests against
@@ -81,9 +81,18 @@ inputs:
   artifacts-debug:
     required: false
     description: Enable debug logging for all generated artifacts
+  feature-tags:
+    required: false
+    description: Comma separated list of feature tags which determine which features are executed
+  html-combine:
+    required: false
+    description: Combine html reports into a single file
+  reuse-context:
+    required: false
+    description: Reuse the same browser context for each test
 outputs:
   result:
-    description: 'Result of the executed Goblet tests, one of `pass` or `fail`'
+    description: Result of the executed Goblet tests, one of `pass` or `fail`
   report-paths:
     description: Paths to the html test reports for each browser that ran
   trace-paths:
@@ -93,7 +102,7 @@ outputs:
 
 runs:
   using: docker
-  image: 'docker://ghcr.io/gobletqa/goblet-tests-action:0.0.26'
+  image: docker://ghcr.io/gobletqa/goblet-tests-action:0.0.27
   args:
     - ${{ inputs.test-context }} #1
     - ${{ inputs.git-token }} #2
@@ -114,10 +123,12 @@ runs:
     - ${{ inputs.test-colors }} #17
     - ${{ inputs.test-workers }} #18
     - ${{ inputs.test-verbose }} #19
-    - ${{ inputs.test-open-handles }} #20
+    - ${{ inputs.test-bail }} #20
     - ${{ inputs.browsers }} #21
-    - ${{ inputs.browser-debug }} #22
-    - ${{ inputs.browser-slow-mo }} #23
-    - ${{ inputs.browser-concurrent }} #24
-    - ${{ inputs.browser-timeout }} #25
-    - ${{ inputs.artifacts-debug }} #26
+    - ${{ inputs.browser-slow-mo }} #22
+    - ${{ inputs.browser-concurrent }} #23
+    - ${{ inputs.browser-timeout }} #24
+    - ${{ inputs.artifacts-debug }} #25
+    - ${{ inputs.feature-tags }} #26
+    - ${{ inputs.html-combine }} #27
+    - ${{ inputs.reuse-context }} #28
