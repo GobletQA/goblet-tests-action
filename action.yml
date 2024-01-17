@@ -29,7 +29,7 @@ inputs:
   test-type:
     required: false
     default: bdd
-    description: 'Test type to run, one of `bdd`, `waypoint`, or `unit`'
+    description: Test type to run, one of `bdd`, `waypoint`, or `unit`
   test-retry:
     required: false
     description: Number of times a failed test should be retried
@@ -90,10 +90,9 @@ inputs:
   reuse-context:
     required: false
     description: Reuse the same browser context for each test
-
 outputs:
   result:
-    description: 'Result of the executed Goblet tests, one of `pass` or `fail`'
+    description: Result of the executed Goblet tests, one of `pass` or `fail`
   report-paths:
     description: Paths to the html test reports for each browser that ran
   trace-paths:
@@ -103,7 +102,7 @@ outputs:
 
 runs:
   using: docker
-  image: 'docker://ghcr.io/gobletqa/goblet-tests-action:0.0.26'
+  image: docker://ghcr.io/gobletqa/goblet-tests-action:0.0.27
   args:
     - ${{ inputs.test-context }} #1
     - ${{ inputs.git-token }} #2
