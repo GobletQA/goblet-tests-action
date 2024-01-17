@@ -81,6 +81,16 @@ inputs:
   artifacts-debug:
     required: false
     description: Enable debug logging for all generated artifacts
+  feature-tags:
+    required: false
+    description: Comma separated list of feature tags which determine which features are executed
+  html-combine:
+    required: false
+    description: Combine html reports into a single file
+  reuse-context:
+    required: false
+    description: Reuse the same browser context for each test
+
 outputs:
   result:
     description: 'Result of the executed Goblet tests, one of `pass` or `fail`'
@@ -116,8 +126,10 @@ runs:
     - ${{ inputs.test-verbose }} #19
     - ${{ inputs.test-bail }} #20
     - ${{ inputs.browsers }} #21
-    - ${{ inputs.browser-debug }} #22
-    - ${{ inputs.browser-slow-mo }} #23
-    - ${{ inputs.browser-concurrent }} #24
-    - ${{ inputs.browser-timeout }} #25
-    - ${{ inputs.artifacts-debug }} #26
+    - ${{ inputs.browser-slow-mo }} #22
+    - ${{ inputs.browser-concurrent }} #23
+    - ${{ inputs.browser-timeout }} #24
+    - ${{ inputs.artifacts-debug }} #25
+    - ${{ inputs.feature-tags }} #26
+    - ${{ inputs.html-combine }} #27
+    - ${{ inputs.reuse-context }} #28
