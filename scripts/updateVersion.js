@@ -4,7 +4,7 @@ const semver = require('semver')
 const { readFileSync, writeFileSync } = require('fs')
 
 const actionYmlLoc = path.join(__dirname, `../action.yml`)
-const actionYml = yaml.safeLoad(readFileSync(actionYmlLoc).toString())
+const actionYml = yaml.load(readFileSync(actionYmlLoc).toString())
 
 const packConfLoc = path.join(__dirname, `../package.json`)
 const packConf = require(packConfLoc)
